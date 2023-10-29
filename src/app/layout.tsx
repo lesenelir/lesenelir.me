@@ -1,6 +1,6 @@
 import React from 'react'
-import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 
 import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
@@ -25,7 +25,7 @@ export default function RootLayout(props: IProps) {
       <body suppressHydrationWarning={true} className={'bg-gray-100 min-h-screen font-sans'}>
         <div className={'max-w-screen-md my-20 mx-auto px-6 max-md:px-4'}>
           {/* Header */}
-          <header className={'pb-4 mb-8'}>
+          <header className={'mb-12'}>
             <h1 className={'text-3xl font-comic text-black dark:text-white'}>
               <HeaderClient/>
             </h1>
@@ -46,13 +46,14 @@ export default function RootLayout(props: IProps) {
           </header>
 
           {/* Content */}
-          <article className="mb-8 text-textLight dark:text-textDark">
+          <article className="mb-12 text-textLight dark:text-textDark">
             {children}
           </article>
 
           <Divide/>
 
           {/* Footer */}
+          {/* Margin takes the larger value, so use padding. mb-12 + pt-4 */}
           <footer className="pt-4">
             <Footer/>
           </footer>
