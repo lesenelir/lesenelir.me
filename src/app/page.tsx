@@ -1,12 +1,7 @@
-import Hello from '@/components/Hello'
-import TTPage from '@/components/TT'
-
-export default function Home() {
+export default function HomePage() {
   return (
     <>
-      <TTPage>
-        <Hello/>
-      </TTPage>
+      home page
     </>
   )
 }

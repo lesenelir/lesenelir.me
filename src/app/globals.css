@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.header-li {
+  @apply opacity-70;
+  @apply hover:text-black hover:opacity-90;
+  @apply dark:hover:text-white dark:hover:opacity-90;
+}
+
