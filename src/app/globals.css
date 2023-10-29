@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.header-ul {
+  @apply flex flex-row justify-end gap-4 text-sm text-navbarLight underline underline-offset-1 dark:text-navbarDark;
+}
+
 .header-li {
   @apply opacity-70;
   @apply hover:text-black hover:opacity-90;
