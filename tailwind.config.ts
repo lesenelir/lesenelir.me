@@ -13,7 +13,7 @@ const config: Config = {
         'icon': ['iconfont', 'sans-serif'],
       },
       colors: {
-        // navbar right side
+        // navbar right side and footer RSS icon
         navbarLight: '#374151',
         navbarDark: '#E5E7EB',
         // main text color
