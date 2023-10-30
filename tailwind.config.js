@@ -33,7 +33,7 @@ const config = {
               textDecorationColor: theme('colors.navbarLight'),
               textDecorationThickness: '1px',
               textUnderlineOffset: '2px',
-              // transition: 'all 200ms ease-in',
+              transition: 'all 100ms ease-in',
 
               '&:hover': {
                 color: theme('colors.navbarLight'),

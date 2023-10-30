@@ -23,7 +23,10 @@ export default function RootLayout(props: IProps) {
 
   return (
     <html lang='en' suppressHydrationWarning={true}>
-      <body suppressHydrationWarning={true} className={'bg-gray-50 min-h-screen font-sans dark:bg-bgDark'}>
+      <body
+        suppressHydrationWarning={true}
+        className={'bg-gray-50 min-h-screen font-sans dark:bg-bgDark transition-all duration-300 ease-in'}
+      >
         <Provider>
           <div className={'max-w-screen-sm mx-auto md:py-20 max-md:py-20 max-md:px-4'}>
             {/* Header */}

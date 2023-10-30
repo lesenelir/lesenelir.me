@@ -9,21 +9,21 @@
 
 .header-li {
   @apply opacity-80;
-  /*@apply transition duration-200 ease-in;*/
+  @apply transition duration-100 ease-in;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
 .footer-left {
   @apply underline underline-offset-1 opacity-80 dark:opacity-80;
-  /*@apply transition duration-200 ease-in;*/
+  @apply transition duration-100 ease-in;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
 .footer-right {
   @apply opacity-80 underline underline-offset-1 cursor-pointer;
-  /*@apply transition duration-200 ease-in;*/
+  @apply transition duration-100 ease-in;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
