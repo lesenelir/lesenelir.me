@@ -15,7 +15,7 @@ export default function ThemeChange() {
 
   return (
     <div onClick={handlerTheme}>
-      theme
+      Theme
     </div>
   )
 }

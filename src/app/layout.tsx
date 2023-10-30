@@ -25,7 +25,7 @@ export default function RootLayout(props: IProps) {
     <html lang='en' suppressHydrationWarning={true}>
       <body suppressHydrationWarning={true} className={'bg-gray-50 min-h-screen font-sans dark:bg-bgDark'}>
         <Provider>
-          <div className={'max-w-screen-sm my-20 mx-auto max-md:my-10 max-md:px-4'}>
+          <div className={'max-w-screen-sm mx-auto md:py-20 max-md:py-20 max-md:px-4'}>
             {/* Header */}
             <header className={'mb-12'}>
               <h1 className={'text-3xl font-comic text-black dark:text-white max-md:text-xl'}>
