@@ -1,4 +1,4 @@
-import ThemeChange from '@/components/client/ThemeChange'
+import ThemeChange from '@/components/theme/ThemeChange'
 
 export default function Footer() {
   return (

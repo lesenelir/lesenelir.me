@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
-import Provider from '@/components/client/Provider'
+import Provider from '@/components/theme/Provider'
 import HeaderClient from '@/components/client/HeaderClient'
 
 import './globals.css'
