@@ -29,5 +29,9 @@ export default function HeaderClient() {
     )
   }
 
-  return null
+  return (
+    <>
+      404
+    </>
+  )
 }
