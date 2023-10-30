@@ -1,7 +1,9 @@
+import ThemeChange from '@/components/client/ThemeChange'
+
 export default function Footer() {
   return (
-    <div className={'flex flex-row justify-between'}>
-      <p className={'text-sm text-navbarLight opacity-80'}>
+    <div className={'flex flex-row justify-between text-sm max-md:text-xs'}>
+      <p className={'text-navbarLight dark:text-navbarDark'}>
         <a
           href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
           rel='noreferrer'
@@ -9,16 +11,16 @@ export default function Footer() {
           className={'footer-left'}>
           CC BY-NC-SA 4.0
         </a>
-        {' '} 2023-PRESENT © Lesenelir Zhou
+        {' '} 2023-PRESENT © Lesenelir
       </p>
 
-      <div className={'flex flex-row gap-4 text-sm text-navbarLight cursor-pointer'}>
-        <p className={'footer-right'}>
-          Theme
-        </p>
-        <p className={'footer-right'}>
+      <div className={'flex flex-row gap-4 text-navbarLight cursor-pointer dark:text-navbarDark'}>
+        <div className={'footer-right'}>
+          <ThemeChange/>
+        </div>
+        <div className={'footer-right'}>
           RSS
-        </p>
+        </div>
       </div>
     </div>
   )

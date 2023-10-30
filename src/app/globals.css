@@ -3,24 +3,25 @@
 @tailwind utilities;
 
 .header-ul {
-  @apply flex flex-row justify-end gap-4 text-sm text-navbarLight underline underline-offset-1 dark:text-navbarDark;
+  @apply flex flex-row justify-end gap-4 text-sm text-navbarLight underline underline-offset-1;
+  @apply dark:text-navbarDark;
 }
 
 .header-li {
   @apply opacity-80;
-  @apply transition-all duration-300 ease-in;
+  @apply transition duration-200 ease-in-out;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
 .footer-left {
-  @apply border-solid border-b-[1px] border-b-borderUnderline border-opacity-30 dark:border-opacity-100;
-  @apply transition-all duration-300 ease-in;
-  @apply hover:border-opacity-60 dark:hover:border-opacity-100;
+  @apply underline underline-offset-1 opacity-80 dark:opacity-80 hover:opacity-100 dark:hover:opacity-100;
+  @apply transition-opacity duration-300 ease-in;
 }
 
 .footer-right {
   @apply opacity-80 underline underline-offset-1;
-  @apply transition-all duration-300 ease-in;
+  @apply transition-opacity duration-200 ease-in;
   @apply hover:text-black hover:opacity-90;
+  @apply dark:hover:text-white dark:hover:opacity-90;
 }
