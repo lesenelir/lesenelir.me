@@ -1,13 +1,11 @@
-import Home from './content /pages/home.mdx'
+import Home from './content /pages/Home.mdx'
 
 export default function HomePage() {
   return (
     <>
-      home page
-      <article className={'prose lg:prose-xl'}>
-
+      <article className="prose max-md:prose-sm dark:prose-invert">
+        <Home/>
       </article>
-      <Home/>
     </>
   )
 }
