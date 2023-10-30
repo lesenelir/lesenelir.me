@@ -11,10 +11,10 @@ export default function Footer() {
           className={'footer-left'}>
           CC BY-NC-SA 4.0
         </a>
-        {' '} 2023-PRESENT © Lesenelir
+        <span className={'opacity-80'}>{' '} 2023-PRESENT © Lesenelir</span>
       </p>
 
-      <div className={'flex flex-row gap-4 text-navbarLight cursor-pointer dark:text-navbarDark'}>
+      <div className={'flex flex-row gap-4 text-navbarLight dark:text-navbarDark'}>
         <div className={'footer-right'}>
           <ThemeChange/>
         </div>
