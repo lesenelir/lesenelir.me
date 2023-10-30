@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 export default function HeaderClient() {
   const pathname = usePathname()
 
+  console.log(pathname)
+
   if (pathname === '/') {
     return (
       <>Lesenelir Zhou</>
@@ -14,6 +16,13 @@ export default function HeaderClient() {
   if (pathname === '/posts') {
     return (
       <>Posts</>
+    )
+  }
+
+  if (pathname.startsWith('/posts/')) {
+    // TODO
+    return (
+      <>Posts22</>
     )
   }
 
