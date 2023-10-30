@@ -19,7 +19,7 @@ const config: Config = {
         navbarLight: '#374151',
         navbarDark: '#E5E7EB',
         // main text color
-        textLight: '#555555',
+        textLight: '#313233',
         textDark: '#BBBBBB',
         // border line
         borderUnderline: '#7D7D7D'
