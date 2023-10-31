@@ -18,12 +18,12 @@ export default function OtherLists() {
   return (
     <>
       {
-        otherData.map(item => (
+        otherData.map((item, index) => (
           <a
             key={item.name}
             href={item.href}
             target='_blank'
-            className={'flex md:flex-row max-md:flex-col justify-between py-2 border-b border-gray-300 antialiased cursor-pointer no-underline dark:border-gray-500'}
+            className={`projects-li ${index === otherData.length - 1 ? '' : 'border-b border-gray-300 dark:border-gray-500'}`}
           >
             <span>{item.name}</span>
             <span className={'text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.description}</span>

@@ -31,3 +31,8 @@
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
+
+.projects-li {
+  @apply flex md:flex-row max-md:flex-col justify-between;
+  @apply py-2 antialiased cursor-pointer no-underline;
+}
