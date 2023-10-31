@@ -33,7 +33,10 @@ const config = {
               textDecorationColor: theme('colors.navbarLight'),
               textDecorationThickness: '1px',
               textUnderlineOffset: '2px',
-              transition: 'all 100ms ease-in',
+
+              transitionProperty: theme('transitionProperty.transition'),
+              transitionDuration: theme('transitionDuration.100'),
+              transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
 
               '&:hover': {
                 color: theme('colors.navbarLight'),
@@ -47,6 +50,10 @@ const config = {
             a: {
               color: '#ffffff',
               textDecorationColor: theme('colors.navbarDark'),
+
+              transitionProperty: theme('transitionProperty.transition'),
+              transitionDuration: theme('transitionDuration.100'),
+              transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
 
               '&:hover': {
                 color: theme('colors.navbarDark'),
