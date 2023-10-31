@@ -37,7 +37,7 @@ const config = {
 
               '&:hover': {
                 color: theme('colors.navbarLight'),
-                opacity: 0.8,
+                opacity: 0.7,
               }
             }
           }
@@ -50,7 +50,7 @@ const config = {
 
               '&:hover': {
                 color: theme('colors.navbarDark'),
-                opacity: 0.8,
+                opacity: 0.7,
               }
             }
           }

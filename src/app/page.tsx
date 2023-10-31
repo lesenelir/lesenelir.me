@@ -3,7 +3,7 @@ import Home from './content /pages/Home.mdx'
 export default function HomePage() {
   return (
     <>
-      <article className="prose max-md:prose-sm dark:prose-invert">
+      <article className="text-justify prose max-md:prose-base dark:prose-invert">
         <Home/>
       </article>
     </>
