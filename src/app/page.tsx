@@ -1,4 +1,4 @@
-import Home from './content /pages/Home.mdx'
+import Home from '@/app/content/pages/home.mdx'
 
 export default function HomePage() {
   return (

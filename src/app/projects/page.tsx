@@ -1,4 +1,4 @@
-import Projects from '../content /pages/projects.mdx'
+import Projects from '@/app/content/pages/projects.mdx'
 
 export default function ProjectPage() {
   return (
