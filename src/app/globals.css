@@ -4,6 +4,7 @@
 
 .header-ul {
   @apply flex flex-row justify-end gap-4 text-sm text-navbarLight;
+  @apply mt-6;
   @apply dark:text-navbarDark;
 }
 

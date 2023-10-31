@@ -30,7 +30,7 @@ export default function RootLayout(props: IProps) {
         <Provider>
           <div className={'max-w-screen-sm mx-auto md:py-20 max-md:py-20 max-md:px-4'}>
             {/* Header */}
-            <header className={'mb-12'}>
+            <header className={'mb-10'}>
               <h1 className={'text-3xl font-comic text-black dark:text-white max-md:text-2xl'}>
                 <HeaderClient/>
               </h1>
