@@ -32,6 +32,13 @@
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
+.footer-a {
+  @apply text-navbarLight dark:text-navbarDark;
+  @apply underline decoration-1 underline-offset-2 cursor-pointer;
+  @apply transition duration-100 ease-in;
+  @apply hover:text-black dark:hover:text-white;
+}
+
 .projects-li {
   @apply flex md:flex-row max-md:flex-col justify-between;
   @apply py-2 antialiased cursor-pointer no-underline;
