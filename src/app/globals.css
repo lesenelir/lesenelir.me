@@ -42,4 +42,5 @@
 .projects-li {
   @apply flex md:flex-row max-md:flex-col justify-between;
   @apply py-2 antialiased cursor-pointer no-underline;
+  @apply transition duration-100 ease-in;
 }
