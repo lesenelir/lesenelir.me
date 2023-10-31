@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/react'
 
 import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
@@ -52,6 +53,9 @@ export default function RootLayout(props: IProps) {
               <Footer/>
             </footer>
           </div>
+
+          {/* Analytics */}
+          <Analytics />
         </Provider>
       </body>
     </html>
