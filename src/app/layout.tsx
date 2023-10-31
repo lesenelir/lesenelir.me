@@ -1,11 +1,11 @@
 import React from 'react'
-import Link from 'next/link'
 import type { Metadata } from 'next'
 
 import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
+import NavbarList from '@/components/header/NavbarList'
 import Provider from '@/components/theme/Provider'
-import HeaderClient from '@/components/client/HeaderClient'
+import HeaderClient from '@/components/header/HeaderClient'
 
 import './globals.css'
 
@@ -35,18 +35,7 @@ export default function RootLayout(props: IProps) {
                 <HeaderClient/>
               </h1>
               <ul className={'header-ul max-md:text-xs'}>
-                <li className={'header-li'}>
-                  <Link href={'/'}>Home</Link>
-                </li>
-                <li className={'header-li'}>
-                  <Link href={'/posts'}>Posts</Link>
-                </li>
-                <li className={'header-li'}>
-                  <Link href={'/projects'}>Projects</Link>
-                </li>
-                <li className={'header-li'}>
-                  <Link href={'/photos'}>Photos</Link>
-                </li>
+                <NavbarList/>
               </ul>
             </header>
 

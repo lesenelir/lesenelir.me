@@ -3,13 +3,17 @@
 @tailwind utilities;
 
 .header-ul {
-  @apply flex flex-row justify-end gap-4 text-sm text-navbarLight underline underline-offset-1;
+  @apply flex flex-row justify-end gap-4 text-sm text-navbarLight;
   @apply dark:text-navbarDark;
 }
 
 .header-li {
   @apply opacity-80;
   @apply transition duration-100 ease-in;
+}
+
+.header-li-active {
+  @apply underline underline-offset-1;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }

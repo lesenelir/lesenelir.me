@@ -20,7 +20,7 @@ export default function HeaderClient() {
   }
 
   if (pathname.startsWith('/posts/')) {
-    // TODO
+    // TODO: specific post title
     return (
       <>Posts22</>
     )
