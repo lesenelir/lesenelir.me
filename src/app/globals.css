@@ -57,4 +57,12 @@
   @apply prose-blockquote:not-italic prose-blockquote:font-light;
   @apply prose-blockquote:text-navbarLight dark:prose-blockquote:text-navbarDark;
   @apply prose-blockquote:opacity-90 dark:prose-blockquote:opacity-90;
+  /* strong */
+  @apply prose-strong:opacity-90;
+}
+
+/* delete blockquote */
+.custom-typography blockquote p:first-of-type::before,
+.custom-typography blockquote p:last-of-type::after {
+  content: '';
 }
