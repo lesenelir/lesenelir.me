@@ -10,17 +10,17 @@ export const postData: IPosts[] = [
   {
     name: '地球村',
     href: '/posts/earth-village',
-    date: 'Oct 9, 2023 ⋅ 06min'
+    date: 'Oct 9, 2023 ⋅ 06 min'
   },
   {
     name: '我所理解的递归',
     href: '/posts/recursion',
-    date: 'Dec 22, 2022 ⋅ 22min'
+    date: 'Dec 22, 2022 ⋅ 22 min'
   },
   {
     name: '时间已经停止',
     href: '/posts/time-stop',
-    date: 'Nov 18, 2022 ⋅ 10min'
+    date: 'Nov 18, 2022 ⋅ 10 min'
   }
 ]
 

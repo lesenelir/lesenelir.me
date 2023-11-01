@@ -52,6 +52,14 @@
   @apply transition duration-100 ease-in;
 }
 
+.cd-container {
+  @apply cursor-pointer;
+  @apply text-navbarLight dark:text-navbarDark opacity-80 dark:opacity-80;
+  @apply transition duration-100 ease-in;
+  @apply hover:text-black hover:opacity-90;
+  @apply dark:hover:text-white dark:hover:opacity-90;
+}
+
 .custom-typography {
   /* blockquote */
   @apply prose-blockquote:not-italic prose-blockquote:font-light;
