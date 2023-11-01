@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { postData } from '@/app/content/data/PostLists'
 
 export default function HeaderClient() {
   const pathname = usePathname()
@@ -18,9 +19,13 @@ export default function HeaderClient() {
   }
 
   if (pathname.startsWith('/posts/')) {
-    // TODO: specific post title
+    const data = postData.filter(item => item.href === pathname)[0]
+
     return (
-      <>Posts22</>
+      <>
+        <p>{data.name}</p>
+        <p className={'text-xs text-textLight opacity-70 mt-2 dark:text-textDark'}>{data.date}</p>
+      </>
     )
   }
 
