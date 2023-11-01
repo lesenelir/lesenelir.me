@@ -26,7 +26,7 @@ const config = {
         DEFAULT: {
           css: {
             a: {
-              color: '#000000',
+              color: theme('colors.navbarLight'),
               fontSize: theme('fontSize.base'),
               fontWeight: 'normal',
               textDecoration: 'underline',
@@ -39,8 +39,7 @@ const config = {
               transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
 
               '&:hover': {
-                color: theme('colors.navbarLight'),
-                opacity: 0.7,
+                color: '#000',
               }
             }
           }
@@ -48,7 +47,7 @@ const config = {
         invert: {
           css: {
             a: {
-              color: '#ffffff',
+              color: theme('colors.navbarDark'),
               textDecorationColor: theme('colors.navbarDark'),
 
               transitionProperty: theme('transitionProperty.transition'),
@@ -56,8 +55,7 @@ const config = {
               transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
 
               '&:hover': {
-                color: theme('colors.navbarDark'),
-                opacity: 0.7,
+                color: '#ffffff',
               }
             }
           }
