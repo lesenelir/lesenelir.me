@@ -45,3 +45,9 @@
   @apply py-2 antialiased cursor-pointer no-underline;
   @apply transition duration-100 ease-in;
 }
+
+.posts-li {
+  @apply flex justify-between;
+  @apply py-1 antialiased cursor-pointer no-underline;
+  @apply transition duration-100 ease-in;
+}
