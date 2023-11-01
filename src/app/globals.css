@@ -51,3 +51,10 @@
   @apply py-1 antialiased cursor-pointer no-underline;
   @apply transition duration-100 ease-in;
 }
+
+.custom-typography {
+  /* blockquote */
+  @apply prose-blockquote:not-italic prose-blockquote:font-light;
+  @apply prose-blockquote:text-navbarLight dark:prose-blockquote:text-navbarDark;
+  @apply prose-blockquote:opacity-90 dark:prose-blockquote:opacity-90;
+}
