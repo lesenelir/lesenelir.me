@@ -61,10 +61,10 @@
 }
 
 .back-span {
-  @apply decoration-1;
+  @apply decoration-1 opacity-90 dark:opacity-90;
   @apply cursor-pointer underline underline-offset-2;
   @apply transition duration-100 ease-in;
-  @apply hover:text-black dark:hover:text-white;
+  @apply hover:text-black hover:opacity-100 dark:hover:text-white dark:hover:opacity-100;
 }
 
 .custom-typography {

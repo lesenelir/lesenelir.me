@@ -28,7 +28,7 @@ export default function HeaderClient() {
         <p>{data.name}</p>
         <div className={'flex flex-row justify-between'}>
           <span className={'text-base text-textLight opacity-50 mt-2 dark:text-textDark'}>{data.date}</span>
-          <span className={'text-base text-textLight opacity-70 mt-2 dark:text-textDark'}><Back/></span>
+          <span className={'text-base text-textLight mt-2 dark:text-textDark'}><Back/></span>
         </div>
       </div>
     )

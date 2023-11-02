@@ -12,7 +12,7 @@ const config = {
       },
       colors: {
         // background color
-        bgDark: '#1D1F24',
+        bgDark: '#030712',
         // navbar right side and footer RSS icon
         navbarLight: '#374151',
         navbarDark: '#E5E7EB',
