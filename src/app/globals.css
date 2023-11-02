@@ -60,6 +60,13 @@
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
+.back-span {
+  @apply decoration-1;
+  @apply cursor-pointer underline underline-offset-2;
+  @apply transition duration-100 ease-in;
+  @apply hover:text-black dark:hover:text-white;
+}
+
 .custom-typography {
   /* blockquote */
   @apply prose-blockquote:not-italic prose-blockquote:font-light;

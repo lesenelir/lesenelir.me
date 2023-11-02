@@ -12,7 +12,7 @@ export const postData: IPosts[] = [
     name: '地球村',
     href: '/posts/earth-village',
     file: '2023-10-09-earth-village',
-    date: 'Oct 9, 2023 ⋅ 06 min'
+    date: 'Oct 09, 2023 ⋅ 08 min'
   },
   {
     name: '我所理解的递归',

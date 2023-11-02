@@ -1,6 +1,8 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+
+import Back from '@/components/utils/Back'
 import { postData } from '@/app/content/data/PostLists'
 
 export default function HeaderClient() {
@@ -22,10 +24,13 @@ export default function HeaderClient() {
     const data = postData.filter(item => item.href === pathname)[0]
 
     return (
-      <>
+      <div className={'-mb-8'}>
         <p>{data.name}</p>
-        <p className={'text-xs text-textLight opacity-70 mt-2 dark:text-textDark'}>{data.date}</p>
-      </>
+        <div className={'flex flex-row justify-between'}>
+          <span className={'text-base text-textLight opacity-50 mt-2 dark:text-textDark'}>{data.date}</span>
+          <span className={'text-base text-textLight opacity-70 mt-2 dark:text-textDark'}><Back/></span>
+        </div>
+      </div>
     )
   }
 

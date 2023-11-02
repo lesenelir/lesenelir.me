@@ -25,6 +25,10 @@ export const headerList: {name: string, path: string}[] = [
 export default function NavbarList() {
   const pathname = usePathname()
 
+  if (pathname.includes('/posts/')) {
+    return null
+  }
+
   return (
     <>
       {
