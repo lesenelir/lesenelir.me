@@ -4,9 +4,10 @@ import { Analytics } from '@vercel/analytics/react'
 
 import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
-import NavbarList from '@/components/header/NavbarList'
 import Provider from '@/components/theme/Provider'
+import NavbarList from '@/components/header/NavbarList'
 import HeaderClient from '@/components/header/HeaderClient'
+import MotionWrapper from '@/components/utils/motionWrapper'
 
 import './globals.css'
 
@@ -42,7 +43,9 @@ export default function RootLayout(props: IProps) {
 
             {/* Content */}
             <article className="mb-12">
-              {children}
+              <MotionWrapper>
+                {children}
+              </MotionWrapper>
             </article>
 
             <Divide/>
