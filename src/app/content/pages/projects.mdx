@@ -1,12 +1,13 @@
 import ProjectLists from '@/app/content/data/ProjectLists'
 import OtherLists from '@/app/content/data/OtherLists'
+import Link from 'next/link'
 
 Here are some of the projects I have built, including various applications and packages.
 Additionally, there are some repositories that I created for learning purposes.
 
 <div id={'projects'} className={'mb-3 group'}>
-  <a href={'#projects'} className={'font-mono font-semibold no-underline text-black dark:text-white'}>Projects:{' '}</a>
-  <a href={'#projects'} className={'font-mono font-semibold no-underline text-navbarLight opacity-0 dark:text-navbarDark group-hover:opacity-60'}>#</a>
+  <Link href={'#projects'} className={'font-mono font-semibold no-underline text-black opacity-80 dark:text-white group-hover:opacity-100'}>Projects:{' '}</Link>
+  <Link href={'#projects'} className={'font-mono font-semibold no-underline text-navbarLight opacity-0 dark:text-navbarDark group-hover:opacity-60'}>#</Link>
 </div>
 
 <ProjectLists/>
@@ -14,8 +15,8 @@ Additionally, there are some repositories that I created for learning purposes.
 <p></p>
 
 <div id={'others'} className={'mb-3 group'}>
-  <a href={'#others'} className={'font-mono font-semibold no-underline text-black dark:text-white'}>Others:{' '}</a>
-  <a href={'#others'} className={'font-mono font-semibold no-underline text-navbarLight opacity-0 dark:text-navbarDark group-hover:opacity-60'}>#</a>
+  <Link href={'#others'} className={'font-mono font-semibold no-underline text-black opacity-80 dark:text-white group-hover:opacity-100'}>Others:{' '}</Link>
+  <Link href={'#others'} className={'font-mono font-semibold no-underline text-navbarLight opacity-0 dark:text-navbarDark group-hover:opacity-60'}>#</Link>
 </div>
 
 <OtherLists/>
