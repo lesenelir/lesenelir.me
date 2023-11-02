@@ -41,9 +41,9 @@ export default function NavbarList() {
               pathname === item.path ? (
                 <p>{item.name}</p>
               ) : (
-                <Link href={item.path}>
+                <a href={item.path}>
                   {item.name}
-                </Link>
+                </a>
               )
             }
           </li>

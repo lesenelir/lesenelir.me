@@ -21,7 +21,7 @@ export const postData: IPosts[] = [
     date: 'Dec 22, 2022 ⋅ 22 min'
   },
   {
-    name: '时间已经停止',
+    name: '时间已经停止，剩下就是慢慢变老',
     href: '/posts/time-stop',
     file: '2022-11-18-time-stop',
     date: 'Nov 18, 2022 ⋅ 10 min'
