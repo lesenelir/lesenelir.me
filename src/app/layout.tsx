@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react'
 
 import Footer from '@/components/ui/Footer'
+import Mask from '@/components/header/Mask'
 import Divide from '@/components/utils/Divide'
 import Provider from '@/components/theme/Provider'
 import NavbarList from '@/components/header/NavbarList'
@@ -30,6 +31,7 @@ export default function RootLayout(props: IProps) {
         className={'bg-gray-50 min-h-screen font-sans dark:bg-bgDark transition-all duration-300 ease-in'}
       >
         <Provider>
+          <Mask/>
           <div className={'max-w-screen-sm mx-auto md:py-20 max-md:py-20 max-md:px-4'}>
             {/* Header */}
             <header className={'mb-10'}>
