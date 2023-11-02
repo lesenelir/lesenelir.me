@@ -33,7 +33,7 @@ export default function NavbarList() {
     <>
       {
         headerList.map(item => (
-          <li
+          <span
             key={item.name}
             className={`header-li ${pathname === item.path ? '' : 'header-li-unActive'}`}
           >
@@ -46,7 +46,7 @@ export default function NavbarList() {
                 </Link>
               )
             }
-          </li>
+          </span>
         ))
       }
     </>
