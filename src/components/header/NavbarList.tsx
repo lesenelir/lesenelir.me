@@ -35,7 +35,7 @@ export default function NavbarList() {
         headerList.map(item => (
           <li
             key={item.name}
-            className={`header-li ${pathname === item.path ? '' : 'header-li-active'}`}
+            className={`header-li ${pathname === item.path ? '' : 'header-li-unActive'}`}
           >
             {
               pathname === item.path ? (

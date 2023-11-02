@@ -13,14 +13,14 @@
   @apply transition duration-100 ease-in;
 }
 
-.header-li-active {
+.header-li-unActive {
   @apply underline underline-offset-1;
   @apply hover:text-black hover:opacity-90;
   @apply dark:hover:text-white dark:hover:opacity-90;
 }
 
 .header-mask {
-  @apply fixed top-0 left-0 w-full h-24 bg-gradient-to-b;
+  @apply fixed top-0 left-0 w-full h-16 bg-gradient-to-b;
   @apply from-gray-50 to-transparent dark:from-bgDark dark:to-transparent;
   @apply transition-all duration-300 ease-out;
 }
