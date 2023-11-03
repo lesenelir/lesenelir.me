@@ -33,20 +33,23 @@ export default function NavbarList() {
     <>
       {
         headerList.map(item => (
-          <li
-            key={item.name}
-            className={`header-li ${pathname === item.path ? '' : 'header-li-unActive'}`}
-          >
-            {
-              pathname === item.path ? (
-                <p>{item.name}</p>
-              ) : (
-                <Link prefetch={false} href={item.path}>
-                  {item.name}
-                </Link>
-              )
-            }
-          </li>
+          // <li
+          //   key={item.name}
+          //   className={`header-li ${pathname === item.path ? '' : 'header-li-unActive'}`}
+          // >
+          //   {
+          //     pathname === item.path ? (
+          //       <p>{item.name}</p>
+          //     ) : (
+          //       <Link prefetch={false} href={item.path}>
+          //         {item.name}
+          //       </Link>
+          //     )
+          //   }
+          // </li>
+          <Link key={item.name} href={item.path}>
+            {item.name}
+          </Link>
         ))
       }
     </>
