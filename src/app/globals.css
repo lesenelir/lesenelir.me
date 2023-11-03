@@ -53,9 +53,17 @@
 }
 
 .posts-li {
-  @apply flex justify-between;
+  @apply flex justify-between gap-12;
   @apply py-1 antialiased cursor-pointer no-underline;
   @apply transition duration-100 ease-in;
+}
+
+.posts-name {
+  @apply flex-grow; /* name occupies all available space, pushing the date to the right */
+}
+
+.posts-date {
+  @apply whitespace-nowrap; /* Prevent date wrapping. */
 }
 
 .cd-container {

@@ -38,8 +38,8 @@ export default function PostLists() {
             href={item.href}
             className={`posts-li`}
           >
-            <span>{item.name}</span>
-            <span className={'text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.date}</span>
+            <span className={'posts-name'}>{item.name}</span>
+            <span className={'posts-date text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.date}</span>
           </Link>
         ))
       }
