@@ -1,3 +1,7 @@
+import Image from 'next/image'
+
+import RecursionImage from '../images/resursion-1.png'
+
 今年当我开始专注于编码的时候，递归这种程序设计一直是我比较头疼的问题。一来若说它简单，代码层面来看确实很简单；但若说它很难，从思维层面模拟整个代码执行过程又是一件相对而言比较困难的事情。所以很多人包括我在内，也很难彻底的领悟递归这种程序设计。
 
 今天写这篇博文不是说，我现在可以非常流畅的将递归运用到我的程序设计当中，而是分享一些我所理解的递归。
@@ -184,7 +188,13 @@ fib(5)
 
 上述斐波那契数列代码，利用递归树遍历过程如下：
 
-![recursion image](/images/resursion-1.png)
+[//]: # (![recursion image]&#40;/images/resursion-1.png&#41;)
+
+<Image
+  src={RecursionImage}
+  alt={'recursion'}
+  placeholder={'blur'}
+/>
 
 
 > 如上图所示:
