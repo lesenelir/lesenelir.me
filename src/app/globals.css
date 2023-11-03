@@ -120,3 +120,7 @@
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
+/* Select Mouse */
+::selection {
+  background-color: rgba(226,232,240, 0.4);
+}
