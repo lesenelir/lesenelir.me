@@ -1,8 +1,11 @@
-const withMDX = require('@next/mdx')({
+import nextMDX from '@next/mdx'
+import rehypeHighlight from 'rehype-highlight'
+
+const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: [],
-    rehypePlugins: [],
+    rehypePlugins: [rehypeHighlight],
   }
 })
 
@@ -14,4 +17,4 @@ const nextConfig = {
   reactStrictMode: true
 }
 
-module.exports = withMDX(nextConfig)
+export default withMDX(nextConfig)

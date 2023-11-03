@@ -17,7 +17,8 @@ export default function NavbarServerComponent(props: IProps) {
           isActive ? (
             <p>{item.name}</p>
           ) : (
-            <Link prefetch={false} href={item.path}>
+            // [Bug]: Not working width Link component
+            <Link href={item.path}>
               <p>{item.name}</p>
             </Link>
           )

@@ -3,8 +3,15 @@ const config = {
     "./src/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   darkMode: ['class', '[data-theme="dark"]'],
-  safelist: [],
+  safelist: [
+    {
+      pattern: /hljs+/,
+    }
+  ],
   theme: {
+    hljs: {
+      theme: 'nord'
+    },
     extend: {
       fontFamily: {
         'comic': ['Comic Sans MS', 'sans-serif'],
@@ -41,6 +48,17 @@ const config = {
               '&:hover': {
                 color: '#000',
               }
+            },
+            pre: {
+              backgroundColor: theme('colors.gray.50'),
+            },
+            '.hljs-params, .hljs-variable': {
+              color: `${theme('colors.gray.700')} !important`,
+            },
+            'pre code': {
+              borderRadius: '4px',
+              color: `${theme('colors.gray.700')} !important`,
+              backgroundColor: `${theme('colors.gray.100')} !important`,
             }
           }
         },
@@ -57,13 +75,27 @@ const config = {
               '&:hover': {
                 color: '#ffffff',
               }
+            },
+            pre: {
+              backgroundColor: theme('colors.bgDark'),
+            },
+            '.hljs-params, .hljs-variable': {
+              color: `${theme('colors.gray.200')} !important`,
+            },
+            'pre code': {
+              borderRadius: '4px',
+              color: `${theme('colors.gray.200')} !important`,
+              backgroundColor: `${theme('colors.bgDark')} !important`,
             }
           }
         }
       })
     }
   },
-  plugins: [require('@tailwindcss/typography')]
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('tailwind-highlightjs'),
+  ]
 }
 
 export default config
