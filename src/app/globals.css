@@ -95,3 +95,28 @@
 .custom-typography blockquote p:last-of-type::after {
   content: '';
 }
+
+
+/* Customize the scrollbar style */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;  /* The width of the scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;  /* the scrollbar track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(55, 65, 81, 0.6);  /* the scrollbar thumb */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);  /* the scrollbar thumb when hover */
+}
+
+/* Polyfill */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+

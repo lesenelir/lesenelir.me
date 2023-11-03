@@ -28,7 +28,7 @@ export default function RootLayout(props: IProps) {
     <html lang='en' suppressHydrationWarning={true}>
       <body
         suppressHydrationWarning={true}
-        className={'bg-gray-50 min-h-screen font-sans dark:bg-bgDark transition-all duration-300 ease-in'}
+        className={'custom-scrollbar bg-gray-50 min-h-screen font-sans dark:bg-bgDark transition-all duration-300 ease-in'}
       >
         <Provider>
           <Mask/>
