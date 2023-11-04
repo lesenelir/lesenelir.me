@@ -26,7 +26,9 @@ export default function Footer() {
             <ThemeChange/>
           </div>
           <div className={'footer-right'}>
-            RSS
+            <a href={'/feed.xml'} target={'_blank'}>
+              RSS
+            </a>
           </div>
         </div>
       </div>
