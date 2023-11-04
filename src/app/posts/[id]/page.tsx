@@ -1,5 +1,12 @@
-import PageComponent from '@/app/posts/[id]/page-component'
+import { Metadata } from 'next'
+
 import Cd from '@/components/utils/Cd'
+import PageComponent from '@/app/posts/[id]/page-component'
+
+export const metadata: Metadata = {
+  title: '',
+  description: '',
+}
 
 export default function page() {
   return (

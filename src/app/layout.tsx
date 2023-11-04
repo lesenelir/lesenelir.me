@@ -1,5 +1,4 @@
 import React from 'react'
-import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react'
 
 import Footer from '@/components/ui/Footer'
@@ -11,11 +10,6 @@ import HeaderClient from '@/components/header/HeaderClient'
 import MotionWrapper from '@/components/utils/motionWrapper'
 
 import './globals.css'
-
-export const metadata: Metadata = {
-  title: 'Lesenelir 3000',
-  description: 'Lesenelir Zhou personal website',
-}
 
 interface IProps {
   children: React.ReactNode

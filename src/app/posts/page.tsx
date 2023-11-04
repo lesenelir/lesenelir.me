@@ -1,4 +1,11 @@
+import { Metadata } from 'next'
+
 import Posts from '@/app/content/pages/posts.mdx'
+
+export const metadata: Metadata = {
+  title: 'Lesenelir Posts',
+  description: 'Lesenelir Zhou Posts Page',
+}
 
 export default function PostPage() {
   return (

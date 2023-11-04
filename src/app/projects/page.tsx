@@ -1,4 +1,11 @@
+import { Metadata } from 'next'
+
 import Projects from '@/app/content/pages/projects.mdx'
+
+export const metadata: Metadata = {
+  title: 'Lesenelir Projects',
+  description: 'Lesenelir Zhou Projects Page',
+}
 
 export default function ProjectPage() {
   return (
