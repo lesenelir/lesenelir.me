@@ -9,7 +9,21 @@ export default function Footer() {
         <a href={'https://mirror.xyz/lesenelir.eth'} target={'_blank'} className={'footer-a'}>Mirror</a>
         <a href={'mailto:hi@lesenelir.me'} target={'_blank'} className={'footer-a'}>hi@lesenelir.me</a>
       </div>
-      <div className={'flex flex-row justify-between text-sm max-md:text-xs'}>
+
+      <div className={'md:flex md:flex-row justify-between text-sm'}>
+        {/* Theme and RSS */}
+        <div className={'text-navbarLight flex flex-row gap-4 dark:text-navbarDark max-md:mb-4'}>
+          <div className={'footer-a'}>
+            <ThemeChange/>
+          </div>
+          <div className={'footer-a'}>
+            <a href={'/feed.xml'} target={'_blank'}>
+              RSS
+            </a>
+          </div>
+        </div>
+
+        {/* License */}
         <p className={'text-navbarLight dark:text-navbarDark'}>
           <a
             href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
@@ -20,17 +34,6 @@ export default function Footer() {
           </a>
           <span className={'opacity-80'}>{' '} 2023-PRESENT © Lesenelir</span>
         </p>
-
-        <div className={'flex flex-row gap-4 text-navbarLight dark:text-navbarDark'}>
-          <div className={'footer-right'}>
-            <ThemeChange/>
-          </div>
-          <div className={'footer-right'}>
-            <a href={'/feed.xml'} target={'_blank'}>
-              RSS
-            </a>
-          </div>
-        </div>
       </div>
     </>
   )
