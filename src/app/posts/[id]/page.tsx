@@ -1,11 +1,19 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 
 import Cd from '@/components/utils/Cd'
 import PageComponent from '@/app/posts/[id]/page-component'
+import { postData } from '@/app/content/data/PostLists'
 
-export const metadata: Metadata = {
-  title: '',
-  description: '',
+type Props = {
+  params: { id: string }
+}
+
+export const generateMetadata = ({ params }: Props): Metadata => {
+  const title = postData.filter(item => item.href === `/posts/${params.id}`)[0].name
+
+  return {
+    title
+  }
 }
 
 export default function page() {

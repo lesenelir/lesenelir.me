@@ -1,5 +1,6 @@
+import type { Metadata } from 'next'
+
 import Home from '@/app/content/pages/home.mdx'
-import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Lesenelir Zhou',
