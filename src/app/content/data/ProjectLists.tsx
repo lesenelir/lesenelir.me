@@ -7,7 +7,7 @@ export interface IProject {
 export const projectData: IProject[] = [
   {
     name: 'AILab',
-    href: 'https://ailab.uz/',
+    href: 'https://github.com/lesenelir/AILab',
     description: 'Production Practices of GPT'
   },
   {
