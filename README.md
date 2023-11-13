@@ -1,4 +1,4 @@
-# Lesenelir.cc
+# Lesenelir.me
 
 My portfolio blog website was built with Next.js App Router. 
 
