@@ -1,6 +1,7 @@
 import React from 'react'
 import { Analytics } from '@vercel/analytics/react'
 
+import Favicon from '/public/favicon.ico'
 import Footer from '@/components/ui/Footer'
 import Mask from '@/components/header/Mask'
 import Divide from '@/components/utils/Divide'
@@ -13,6 +14,10 @@ import './globals.css'
 
 interface IProps {
   children: React.ReactNode
+}
+
+export const metadata = {
+  icons: [{ rel: 'icon', url: Favicon.src }]
 }
 
 export default function RootLayout(props: IProps) {
