@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
+
 import { postData } from '@/app/content/data/PostLists'
 
 export default function PageComponent() {
@@ -14,5 +15,9 @@ export default function PageComponent() {
     loading: () => <p>Loading...</p>
   })
 
-  return <Content />
+  return (
+    <>
+      <Content />
+    </>
+  )
 }
