@@ -20,8 +20,8 @@
 }
 
 .header-mask {
-  @apply fixed top-0 left-0 w-full h-20;
-  @apply bg-gradient-to-b from-gray-50 dark:from-bgDark h-16 z-10;
+  @apply sticky top-0 left-0 w-full h-20;
+  @apply bg-gradient-to-b from-gray-50 dark:from-bgDark to-transparent h-16 z-10 ;
 }
 
 .footer-left {

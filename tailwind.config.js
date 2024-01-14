@@ -3,15 +3,7 @@ const config = {
     "./src/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   darkMode: ['class', '[data-theme="dark"]'],
-  safelist: [
-    {
-      pattern: /hljs+/,
-    }
-  ],
   theme: {
-    hljs: {
-      theme: 'nord'
-    },
     extend: {
       fontFamily: {
         'comic': ['Comic Sans MS', 'sans-serif'],
@@ -50,7 +42,7 @@ const config = {
               }
             },
             pre: {
-              backgroundColor: theme('colors.gray.50'),
+              backgroundColor: `${theme('colors.gray.100')} !important`,
             },
             '.hljs-params, .hljs-variable': {
               color: `${theme('colors.gray.700')} !important`,
@@ -77,7 +69,7 @@ const config = {
               }
             },
             pre: {
-              backgroundColor: theme('colors.bgDark'),
+              backgroundColor: `${theme('colors.bgDark')} !important`,
             },
             '.hljs-params, .hljs-variable': {
               color: `${theme('colors.gray.200')} !important`,
@@ -94,7 +86,6 @@ const config = {
   },
   plugins: [
     require('@tailwindcss/typography'),
-    require('tailwind-highlightjs'),
   ]
 }
 
