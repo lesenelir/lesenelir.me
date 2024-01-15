@@ -1,16 +1,16 @@
 import React from 'react'
 import { Analytics } from '@vercel/analytics/react'
 
+import './globals.css'
 import Favicon from '/public/favicon.ico'
-import Footer from '@/components/ui/Footer'
+
 import Mask from '@/components/header/Mask'
+import Footer from '@/components/ui/Footer'
 import Divide from '@/components/utils/Divide'
 import Provider from '@/components/theme/Provider'
 import NavbarList from '@/components/header/NavbarList'
 import HeaderClient from '@/components/header/HeaderClient'
 import MotionWrapper from '@/components/utils/motionWrapper'
-
-import './globals.css'
 
 interface IProps {
   children: React.ReactNode

@@ -1,6 +1,6 @@
 // import Link from 'next/link'
 
-import type { THeaderList } from '@/components/header/NavbarList'
+import { THeaderList } from '@/components/header/NavbarList'
 
 interface IProps {
   item: THeaderList

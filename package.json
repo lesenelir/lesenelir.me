@@ -1,42 +1,22 @@
 {
-  "name": "lesenelir.me",
-  "version": "0.1.0",
+  "name": "@lesenelir/personal",
+  "version": "0.0.0",
+  "description": "lesenelir's profile website and basic configuration for my personal projects",
   "private": true,
+  "type": "module",
+  "packageManager": "pnpm@8.6.12",
+  "engines": {
+    "node": ">=16.9.0"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build:website": "pnpm --filter @lesenelir/website build",
+    "dev:website": "pnpm --filter @lesenelir/website dev"
   },
-  "dependencies": {
-    "@mdx-js/loader": "^3.0.0",
-    "@mdx-js/react": "^3.0.0",
-    "@next/mdx": "^14.0.0",
-    "@vercel/analytics": "^1.1.1",
-    "framer-motion": "^10.16.4",
-    "highlight.js": "^10.7.2",
-    "next": "13.5.6",
-    "next-themes": "^0.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-syntax-highlighter": "^15.5.0",
-    "rehype-highlight": "^7.0.0",
-    "rss": "^1.2.2",
-    "sharp": "^0.32.6"
-  },
-  "devDependencies": {
-    "@tailwindcss/typography": "^0.5.10",
-    "@types/mdx": "^2.0.9",
-    "@types/node": "^20.8.8",
-    "@types/react": "^18.2.31",
-    "@types/react-dom": "^18.2.14",
-    "@types/react-syntax-highlighter": "^15.5.11",
-    "@types/rss": "^0.0.31",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.52.0",
-    "eslint-config-next": "13.5.6",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.2.2"
-  }
+  "keywords": [
+    "lesenelir",
+    "website",
+    "ui"
+  ],
+  "author": "lesenelir <hi@lesenelir.me>",
+  "license": "MIT"
 }

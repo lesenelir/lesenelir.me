@@ -17,7 +17,7 @@ export default function PageComponent() {
 
   return (
     <>
-      <Content />
+      <Content/>
     </>
   )
 }

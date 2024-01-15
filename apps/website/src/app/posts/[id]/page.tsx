@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 import Cd from '@/components/utils/Cd'
-import PageComponent from '@/app/posts/[id]/page-component'
 import { postData } from '@/app/content/data/PostLists'
+import PageComponent from '@/app/posts/[id]/page-component'
 
 type Props = {
   params: { id: string }
