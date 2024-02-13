@@ -1,8 +1,9 @@
-import Image from 'next/image'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
-import RecursionImage from '../images/resursion-1.png'
+import ImageInMDX from '../../../components/utils/ImageInMDX'
+import RecursionLightImage from '../images/2022-12-22/recursion.png'
+import RecursionDarkImage from '../images/2022-12-22/recursion-dark.png'
 
 今年当我开始专注于编码的时候，递归这种程序设计一直是我比较头疼的问题。一来若说它简单，代码层面来看确实很简单；但若说它很难，从思维层面模拟整个代码执行过程又是一件相对而言比较困难的事情。所以很多人包括我在内，也很难彻底的领悟递归这种程序设计。
 
@@ -50,9 +51,9 @@ main()
 `}
 </SyntaxHighlighter>
 
-要理解递归，首先得从函数调用栈开始说起。如上述代码块，当一个函数调用后，就会将函数压入函数调用栈中。
+要理解递归，首先得从函数调用栈开始说起。如上述代码所示，当一个函数调用后，就会将函数压入函数调用栈中。
 
-例如，main 函数执行，则将 main 函数压入函数调用栈中；main 函数执行函数 A，则此时把 A 函数压入函数调用栈，并执行 A 函数的内容，即打印 'A Start' 并执行函数 B；
+具体来说，main 函数执行，则将 main 函数压入函数调用栈中；main 函数执行函数 A，则此时把 A 函数压入函数调用栈，并执行 A 函数的内容，即打印 'A Start' 并执行函数 B；
 
 此时把由于调用了新的函数 B，需要把函数 B 压入函数调用栈中，并执行 B 函数的内容，即打印 'B Start' 并执行函数 C；
 
@@ -74,7 +75,7 @@ main()
 
 由此我们可以得到两个论点：
 
-- 由函数调用栈可以得出：函数的每一次调用都会将函数存入函数调用栈；函数调用结束 pop
+- 由函数调用栈可以得出：函数的每一次调用都会将函数存入函数调用栈；函数调用结束则执行 pop 操作
 
 - 由递归概念可以得出：函数自己调用自己的过程
 
@@ -82,12 +83,12 @@ main()
 
 >递归是把自身函数存入函数调用栈中，且当自身函数调用结束后，将自身的函数 pop 出函数调用栈。
 
-由于递归的整个过程中，**函数调用栈都是存放的同一个但不同参数的函数，所以我们也把递归函数调用栈也称之为「递归调用栈」**。
+由于递归的整个过程中，**函数调用栈都是存放的同一个但不同参数的函数，所以我们也把「递归函数调用栈」也称之为「递归调用栈」**。
 
 下面我结合一个具体案例来解释递归。思考一个正向和逆向打印数组元素的案例：
 
 <SyntaxHighlighter language="javascript" style={nord}>
-  {`const arr = [0, 1, 2],
+{`const arr = [0, 1, 2],
       len = arr.length
 
 // 正向打印数组元素
@@ -107,7 +108,7 @@ for (let i = len - 1; i >= 0; i--) {
 递归代码如下：
 
 <SyntaxHighlighter language="javascript" style={nord}>
-  {`const arr = [0, 1, 2],
+{`const arr = [0, 1, 2],
       len = arr.length
 
 function traversal(arr, i) {
@@ -145,7 +146,7 @@ arr[ 0 ] =  0
 
 进入函数此时 `i === 3 && i === len`，此时 i 的值和 len 的值相等，进入 if 语句块，但此时 if 语句块中只有一句 return，这是什么意思呢？答案已在「函数调用栈」章节中给出：
 
-**return 就是结束当前调用的函数，将当前函数 pop 出递归调用栈。**
+> return 就是结束当前调用的函数，将当前函数 pop 出递归调用栈。
 
 具体来说此处将 `traversal(arr, 3)` 语句弹出递归调用栈，并返回至上一层函数 `traversal(arr, 2)` 调用位置处继续执行 `traversal(arr, 2)` 函数，打印出：`arr[2] = 2`；
 
@@ -189,27 +190,40 @@ fib(5)
 
 当我们执行 `fib(5)` 时，由于参数 `n !== 1 || n !== 2` 执行 `return fib(n-1) + fib(n-2)` 语句。但此时我们的递归调用栈到底是放 fib(4) 还是 fib(3) 呢，即先执行 fib(4) 还是 fib(3)？
 
-答案是：先执行 fib(4)，先将 fib(4) 函数压入递归调用栈中；等 fib(4) 函数「归」回来后，执行 fib(3)。
+答案是：先执行 fib(4)，先将 fib(4) 函数压入递归调用栈中；等 fib(4) 函数「归」回来后，执行 fib(3)。请注意：这里是会等 fib(4) 函数全部执行完毕后再执行 fib(3) 函数。
 
-**所以当遇到递归函数调用自己两次及以上的的时候，单单用递归栈难以跟踪模拟整个过程，所以我们需要利用递归树来解决。**
+**所以当遇到递归函数调用自己两次及以上的的时候，只用递归栈难以跟踪模拟整个过程，所以我们需要利用递归树来解决。**
 
 上述斐波那契数列代码，利用递归树遍历过程如下：
 
-[//]: # (![recursion image]&#40;/images/resursion-1.png&#41;)
+[//]: # (<Image)
 
-<Image
-  src={RecursionImage}
-  alt={'recursion'}
-  placeholder={'blur'}
+[//]: # (  src={RecursionLightImage})
+
+[//]: # (  alt={'recursion'})
+
+[//]: # (  placeholder={'blur'})
+
+[//]: # (/>)
+
+<ImageInMDX
+  dark={{
+    src: RecursionDarkImage,
+    alt: 'image in dark mode'
+  }}
+  light={{
+    src: RecursionLightImage,
+    alt: 'image in light mode'
+  }}
 />
 
 
 > 如上图所示:
 >
 > - 每一个节点代表一个函数，红色的箭头线代表函数执行的先后顺序
-> - 叶子结点代表可以进入递归终止条件语句的函数
-> - 向下的箭头代表“递”的过程，进入节点
-> - 向上的箭头代表“归”的过程，离开节点
+> - 叶子结点代表可以进入递归条件终止语句的函数
+> - 向下的箭头代表「递」的过程，进入节点
+> - 向上的箭头代表「归」的过程，离开节点
 
 fib(5) 函数执行首先去调用 fib(4) 函数，fib(4) 执行调用 fib(3) 函数，fib(3) 执行调用 fib(2) 函数，**fib(2) 函数执行完毕后向上后退至上一层 fib(3) 函数调用的语句，去执行 fib(1) 函数，等 fib(1) 函数执行完毕返回至 fib(3) 函数，此时 fib(3) 节点才完全执行完毕。依次往复，直至最顶层结点 fib(5)。**
 
