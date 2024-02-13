@@ -11,7 +11,7 @@ export default function Provider(props: IProps) {
   const {children} = props
 
   return (
-    <ThemeProvider>
+    <ThemeProvider enableSystem={true} defaultTheme={'system'}>
       {children}
     </ThemeProvider>
   )
