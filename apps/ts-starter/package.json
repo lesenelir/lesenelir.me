@@ -6,13 +6,6 @@
   "packageManager": "pnpm@8.6.12",
   "description": "lesenelir's ts starter",
   "author": "lesenelir <hi@lesenelir.me>",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "exports": {
-    "require": "./dist/index.js",
-    "import": "./dist/index.mjs"
-  },
-  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/lesenelir/[project-name]"
@@ -26,12 +19,27 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build-fast": "tsup src/index.ts --format cjs,esm",
-    "build": "pnpm run build-fast -- --dts-resolve"
+    "build": "bunchee src/index.ts",
+    "dev": "bunchee -w"
   },
   "devDependencies": {
     "@types/node": "^20.8.8",
-    "tsup": "^8.0.2",
+    "bunchee": "^4.4.8",
     "typescript": "^5.2.2"
+  },
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/es/index.d.ts",
+        "default": "./dist/es/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
   }
 }
