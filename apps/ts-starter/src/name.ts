@@ -1,3 +1,3 @@
 export function sayName(name: string): string {
-  return `hello ${name}`
+  return `Hello ${name}`
 }
