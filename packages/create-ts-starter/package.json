@@ -1,6 +1,7 @@
 {
-  "name": "create-ts-starter",
+  "name": "@lesenelir/ts-starter",
   "version": "1.0.0",
+  "type": "module",
   "description": "Lesenelir ts start template",
   "repository": {
     "type": "git",
@@ -12,10 +13,20 @@
   "author": "lesenelir <hi@lesenelir.me>",
   "license": "MIT",
   "scripts": {
-    "template": "cp -r ../../apps/ts-starter template"
+    "build": "bunchee src/index.ts",
+    "dev": "bunchee src/index.ts -w",
+    "template": "cp -r ../../apps/ts-starter template",
+    "@lesenelir/ts-starter": "node dist/bin/index.js"
   },
   "devDependencies": {
     "bunchee": "^4.4.8",
     "typescript": "^5.2.2"
+  },
+  "files": [
+    "template",
+    "dist"
+  ],
+  "bin": {
+    "@lesenelir/ts-starter": "./dist/bin/index.js"
   }
 }
