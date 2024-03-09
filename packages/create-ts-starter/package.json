@@ -1,0 +1,21 @@
+{
+  "name": "create-ts-starter",
+  "version": "1.0.0",
+  "description": "Lesenelir ts start template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lesenelir/lesenelir.me/packages/create-ts-starter"
+  },
+  "keywords": [
+    "ts project template"
+  ],
+  "author": "lesenelir <hi@lesenelir.me>",
+  "license": "MIT",
+  "scripts": {
+    "template": "cp -r ../../apps/ts-starter template"
+  },
+  "devDependencies": {
+    "bunchee": "^4.4.8",
+    "typescript": "^5.2.2"
+  }
+}

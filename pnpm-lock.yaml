@@ -108,6 +108,15 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
+  packages/create-ts-starter:
+    devDependencies:
+      bunchee:
+        specifier: ^4.4.8
+        version: 4.4.8(typescript@5.2.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
+
   packages/ts-starter:
     devDependencies:
       '@types/node':
