@@ -21,6 +21,7 @@
   "scripts": {
     "build": "bunchee src/index.ts",
     "dev": "bunchee src/index.ts -w",
+    "start": "node dist/es/index.js",
     "test": "vitest",
     "test:ci": "vitest run"
   },
