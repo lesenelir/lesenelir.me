@@ -1,3 +1,3 @@
-import { sayName } from './name'
+import { sayName } from '@/name'
 
 console.log(sayName('lesenelir'))
