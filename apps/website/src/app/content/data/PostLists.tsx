@@ -15,6 +15,12 @@ export const postData: IPosts[] = [
     date: 'Oct 09, 2023 ⋅ 08 min'
   },
   {
+    name: '强制类型语言',
+    href: '/posts/typescript',
+    file: '2023-08-22-typescript',
+    date: 'Aug 22, 2023 ⋅ 15 min'
+  },
+  {
     name: '我所理解的递归',
     href: '/posts/recursion',
     file: '2022-12-22-recursion',
