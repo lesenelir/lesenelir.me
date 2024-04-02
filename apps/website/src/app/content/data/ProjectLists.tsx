@@ -1,3 +1,5 @@
+import { clsx } from 'clsx'
+
 export interface IProject {
   name: string
   href: string
@@ -6,7 +8,7 @@ export interface IProject {
 
 export const projectData: IProject[] = [
   {
-    name: 'AISpace',
+    name: 'AI Space',
     href: 'https://github.com/lesenelir/ai-space',
     description: 'Production Practices of GPT'
   },
@@ -77,7 +79,12 @@ export default function ProjectLists() {
             key={item.name}
             href={item.href}
             target='_blank'
-            className={`projects-li ${index === projectData.length - 1 ? '' : 'border-b border-gray-300 dark:border-gray-500'}`}
+            className={clsx(
+              'projects-li',
+              'font-normal text-[#374151] hover:text-black',
+              'dark:text-[#D1D5DB] dark:hover:text-white',
+              index === projectData.length - 1 ? '' : 'border-b border-gray-300 dark:border-gray-500'
+            )}
           >
             <span>{item.name}</span>
             <span className={'text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.description}</span>

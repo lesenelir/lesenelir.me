@@ -25,20 +25,20 @@ const config = {
         DEFAULT: {
           css: {
             a: {
-              color: theme('colors.navbarLight'),
+              color: theme('colors.black'),
               fontSize: theme('fontSize.base'),
-              fontWeight: 'normal',
+              // fontWeight: 'normal',
               textDecoration: 'underline',
-              textDecorationColor: theme('colors.navbarLight'),
+              textDecorationColor: theme('colors.gray.300'),
               textDecorationThickness: '1px',
-              textUnderlineOffset: '2px',
+              textUnderlineOffset: '4px',
 
               transitionProperty: theme('transitionProperty.transition'),
-              transitionDuration: theme('transitionDuration.100'),
-              transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
+              transitionDuration: theme('transitionDuration.300'),
+              transitionTimingFunction: theme('transitionTimingFunction.ease-in-out'),
 
               '&:hover': {
-                color: '#000',
+                textDecorationColor: '#000',
               }
             },
             pre: {
@@ -57,15 +57,16 @@ const config = {
         invert: {
           css: {
             a: {
-              color: theme('colors.navbarDark'),
-              textDecorationColor: theme('colors.navbarDark'),
+              color: theme('colors.white'),
+              textDecorationColor: theme('colors.zinc.600'),
+              textUnderlineOffset: '4px',
 
               transitionProperty: theme('transitionProperty.transition'),
-              transitionDuration: theme('transitionDuration.100'),
-              transitionTimingFunction: theme('transitionTimingFunction.ease-in'),
+              transitionDuration: theme('transitionDuration.300'),
+              transitionTimingFunction: theme('transitionTimingFunction.ease-in-out'),
 
               '&:hover': {
-                color: '#ffffff',
+                textDecorationColor: '#ffffff',
               }
             },
             pre: {

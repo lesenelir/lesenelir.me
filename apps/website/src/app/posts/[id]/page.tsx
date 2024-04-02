@@ -1,3 +1,4 @@
+import { clsx } from 'clsx'
 import type { Metadata } from 'next'
 
 import Cd from '@/components/utils/Cd'
@@ -19,7 +20,13 @@ export const generateMetadata = ({ params }: Props): Metadata => {
 export default function page() {
   return (
     <>
-      <article className="mb-12 custom-typography text-justify prose max-md:prose-stone dark:prose-invert">
+      <article
+        className={clsx(
+          'mb-12 custom-typography text-justify',
+          'text-[#374151] dark:text-zinc-400',
+          'prose max-md:prose-stone dark:prose-invert'
+        )}
+      >
         <PageComponent/>
       </article>
 

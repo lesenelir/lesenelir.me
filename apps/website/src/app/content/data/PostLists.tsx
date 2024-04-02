@@ -1,3 +1,4 @@
+import { clsx } from 'clsx'
 import Link from 'next/link'
 
 interface IPosts {
@@ -48,7 +49,10 @@ export default function PostLists() {
           <Link
             key={item.name}
             href={item.href}
-            className={`posts-li`}
+            className={clsx(
+              'posts-li font-normal text-[#374151] hover:text-black',
+              'dark:text-[#D1D5DB] dark:hover:text-white',
+            )}
           >
             <span className={'posts-name'}>{item.name}</span>
             <span className={'posts-date text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.date}</span>
