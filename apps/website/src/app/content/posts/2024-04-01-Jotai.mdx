@@ -679,10 +679,14 @@ Jotai 作者 [Daishi Kato](https://github.com/dai-shi) 在 [You Might Not Need R
 
 > atomWithCache is something I wanted when I created jotai/query.
 
-作者最初是想让 Jotai 在 core 代码外可以做一个 data fetching 的功能，但是用户们希望 Jotai 能够集成 React Query 的全部功能，所以就演变出 Jotai Query。
-这其中最重要的一个功能就是为了去做数据的缓存，所以作者又实现了 Jotai Cache。这样当 `userIdAtom` 的值从 2 变为 1 后，`userCacheAtom` 的值不会重新请求，而是直接从缓存中获取。
+作者最初是想让 Jotai 在 core 代码外可以做一个 data fetching 的功能，所以实现了 `jotai/query` 的方案。
+但社区用户们希望 Jotai 能够集成 React Query 的全部功能，所以就演变出了 `jotai-tanstack-query`。
+但在第二个引言中，作者提到了 `atomWithCache` 是他最初创建 `jotai/query` 时想要的功能。
+我猜想，作者在实现完 atom 参数函数是异步可以做数据请求后，又想做一个数据请求方案，这个方案主要是能够缓存异步函数的结果，这样就可以将 Jotai 和数据请求彻底结合起来。
+但作者的初衷其实就是为了将 async 函数的结果缓存，这样就可以起到将一些数据请求结果缓存的功效，所以后续就又有了 `atomWithCache`。
+这样当 `userIdAtom` 的值从 2 变为 1 后，`userCacheAtom` 不会重新发起一个新的请求，而是直接从缓存中获取值。
 
-这样就存在了两种和 Jotai 结合的数据请求方案：Jotai Query 和 Jotai Cache with Atom。
+这样就存在了两种 Jotai 的数据请求方案：Jotai Query 和 Jotai Cache with Atom。
 
 ---
 
