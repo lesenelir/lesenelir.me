@@ -13,7 +13,7 @@ export const postData: IPosts[] = [
     name: 'Jotai 理念与实践',
     href: '/posts/jotai',
     file: '2024-04-01-Jotai',
-    date: 'Apr 01, 2024 ⋅ 20 min'
+    date: 'Apr 01, 2024 ⋅ 30 min'
   },
   {
     name: '地球村',
