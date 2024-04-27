@@ -10,6 +10,12 @@ interface IPosts {
 
 export const postData: IPosts[] = [
   {
+    name: 'Go 与 TS 语法差异',
+    href: '/posts/go-ts',
+    file: '2024-05-03-Go-TS',
+    date: 'May 03, 2024 ⋅ 15 min'
+  },
+  {
     name: 'Jotai 理念与实践',
     href: '/posts/jotai',
     file: '2024-04-01-Jotai',
@@ -50,12 +56,26 @@ export default function PostLists() {
             key={item.name}
             href={item.href}
             className={clsx(
-              'posts-li font-normal text-[#374151] hover:text-black',
-              'dark:text-[#D1D5DB] dark:hover:text-white',
+              'flex justify-between gap-8 py-1 antialiased cursor-pointer no-underline',
+              'font-normal text-[#374151] hover:text-black',
+              'group',
             )}
           >
-            <span className={'posts-name'}>{item.name}</span>
-            <span className={'posts-date text-sm text-navbarLight md:leading-7 dark:text-navbarDark'}>{item.date}</span>
+            <span
+              className={clsx(
+              'dark:text-[#D1D5DB] dark:group-hover:text-white'
+              )}
+            >
+              {item.name}
+            </span>
+            <span
+              className={clsx(
+                'w-fit text-sm text-navbarLight whitespace-nowrap md:leading-7',
+                'dark:text-[#D1D5DB] dark:group-hover:text-white'
+              )}
+            >
+              {item.date}
+            </span>
           </Link>
         ))
       }
