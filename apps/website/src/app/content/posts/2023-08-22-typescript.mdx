@@ -254,6 +254,20 @@ type AsyncResult = Promisify<string | number> // Promise<string> | Promise<numbe
 
 - 很多包含联合类型的工具类型中都有分布式条件类型的理论
 
+如何阻止 TypeScript 进行分布式条件类型的处理呢？可以使用包装类型进行处理，例如用 `[]` 来包裹联合类型，从而阻止分布式条件类型的处理。具体例子如下：
+
+<SyntaxHighlighter language="typescript" style={nord}>
+  {`type Naked<T> = T extends boolean ? "Y" : "N"
+
+type Wrapped<T> = [T] extends [boolean] ? "Y" : "N"
+
+type Res1 = Naked<number | boolean> // "N" | "Y"
+
+type Res2 = Wrapped<number | boolean> // "N"
+
+`}
+</SyntaxHighlighter>
+
 ---
 
 ### 8. 类
