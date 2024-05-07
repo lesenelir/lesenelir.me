@@ -1,0 +1,749 @@
+
+前几天在看 Golang 的基础语法，给我的感觉 Golang 语法写起来不是很顺手，于是就把 Golang 的基础语法和自己熟悉的 TypeScript
+一起来进行比对，从而加深对 Golang 的学习。所以这篇文章并不是对比两者语言的优劣，而是我个人的 Golang 学习总结。
+
+在进行对比前，需要知道 Golang 有入口函数，即 `main` 函数。
+所以在写 Golang 代码时，需要有一个 `main` 函数，而且 `main` 函数必须在 `package main` 下定义，并且在 Golang 中 `main` 函数是自调用的函数。
+
+
+---
+### 1. 终端指令
+
+1.1 项目初始化：
+- Golang 项目初始化：`go mod init <项目名>`
+- TypeScript 项目初始化：`pnpm init`
+
+初始化项目后，Golang 会生成一个 `go.mod` 文件，类似于 node 下 `package.json`。
+
+1.2 安装包：
+- Golang 安装包：`go get <包名>`
+- TypeScript 安装包：`pnpm install <包名>`
+
+1.3 编译与运行：
+- Golang 运行：`go run <文件名>`
+- Golang 编译：`go build <文件名>`
+- TypeScript 运行：`ts-node <文件名>`
+- TypeScript 编译：`tsc <文件名>`
+
+需要注意的是，Golang 编译后会生成一个可执行的二进制文件，而 TypeScript 编译后会进行 transform 生成一个 JavaScript 文件。
+
+
+---
+### 2. 项目管理和包管理
+
+Golang 的项目管理是通过 `go mod` 来管理的，而 TypeScript 的包管理是通过 `npm` / `pnpm` 来管理的。
+这里我用到了「项目管理」和「包管理」两个概念，这两个在 Golang 中是不同的概念。
+Golang 中可以定义多个包，而对于 TypeScript 来说，一个 `package.json` 就是一个包。
+
+```
+// Golang 中的项目结构
+/my-golang-app
+  /cmd
+    cmd.go           // package cmd
+  /utils
+    safe_content.go  // package utils
+    convert.go       // package utils
+  main.go            // package main
+  go.mod
+
+
+// convert.go 代码：
+import (
+  "fmt"
+  "my-golang-app/cmd" // 项目名/包名
+)
+
+cmd.Cmd() // 使用
+```
+
+所以在 TypeScript 中常说的包管理，在 Golang 中是项目管理；而 Golang 中的包管理概念是 TypeScript 项目中所缺乏的，TypeScript 中只有模块的概念。
+
+对于 Golang 项目而言，`package` 包，如果需要对外暴露方法给其他包使用，需要将方法名**首字母大写**，否则只能在当前包中使用。
+即公开方法名用大写字母开头，私有方法名用小写字母开头。
+
+而在 TypeScript 项目中，如果将方法在别的 .ts模块 中使用，则需要 `export` 导出，否则只能在当前模块中使用。
+对于一个 TypeScript 类库而言，如果需要对外暴露方法给其他包（其他 node 项目）使用，需要在 `package.json` 中的 `exports` 字段中进行配置。
+
+
+---
+### 3. 类型系统
+
+Golang 和 TypeScript 都是静态类型语言，在类型系统上有一些相似之处，也有一些不同之处。
+
+首先介绍 Golang 中的类型系统：
+
+- 基本类型
+  - 布尔类型：`bool`
+  - 数值类型：
+    - 整数类型：`int`、`int8`、`int16`、`int32`、`int64`、`uint`、`uint8`、`uint16`、`uint32`、`uint64`、`byte`、`rune`
+    - 浮点数类型：`float32`、`float64`
+  - 字符串类型：`string`
+- 复合类型
+  - 数据（固定长度）：`[3]int`
+  - 切片（动态长度）：`[]int`
+  - 指针：`*int`
+  - 通道：`chan int`
+  - 字典：`map[string]int`
+  - 接口：`interface { }`
+  - 函数：`func (a int, b int) int`
+  - 结构体：`struct { name string age int }`
+
+TypeScript 中的类型系统：
+- 基本类型
+  - 布尔类型：`boolean`
+  - 数值类型：`number`
+  - 字符串类型：`string`
+  - 任意类型：`any`
+  - 空类型：`void`
+  - null never 和 undefined：`null`、`never`、`undefined`
+- 复合类型
+  - 元组（固定长度）：`[string, number]`
+  - 数组（动态长度）：`number[]`
+  - 字典： `map<string, number>`
+  - 接口：`interface { }`
+  - 函数：`(a: number, b: number) => number`
+
+
+上述的类型系统，我可能没有完全列举完。可能看出，Golang 的类型相较于 TypeScript 来说，更加的精细，
+比如 Golang 中的数值类型有很多，而 TypeScript 中只有 `number` 类型；Golang 中有浮点数类型，而 TypeScript 中没有。
+
+这里着重介绍一下 Golang 中的数值类型:
+
+<table>
+  <thead>
+  <tr>
+    <th>类型名</th>
+    <th>字节数</th>
+    <th>二进制存储位数</th>
+    <th>取值范围</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>int8</td>
+    <td>1</td>
+    <td>8</td>
+    <td>-2^7 ~ 2^7-1 (-128 ~ 127)</td>
+  </tr>
+  <tr>
+    <td>int16</td>
+    <td>2</td>
+    <td>16</td>
+    <td>-2^15 ~ 2^15-1 (-32768 ~ 32767)</td>
+  </tr>
+  <tr>
+    <td>int32</td>
+    <td>4</td>
+    <td>32</td>
+    <td>-2^31 ~ 2^31-1 (-2147483648 ~ 2147483647)</td>
+  </tr>
+  <tr>
+    <td>int64</td>
+    <td>8</td>
+    <td>64</td>
+    <td>-2^63 ~ 2^63-1</td>
+  </tr>
+  <tr>
+    <td>float32</td>
+    <td>4</td>
+    <td>32</td>
+    <td>😅</td>
+  </tr>
+  <tr>
+    <td>float64</td>
+    <td>8</td>
+    <td>64</td>
+    <td>😅</td>
+  </tr>
+  </tbody>
+</table>
+
+**数值类型的特殊情况：**
+
+有两个特殊的数值类型：`byte` 和 `rune`，这两个虽然都是数值类型，但是用来存储字符的。`byte` 类型实际上是 `uint8` 类型别名，`rune` 类型实际上是 `int32` 类型别名，
+即 `type byte = uint8` 和 `type rune = int32`。
+
+byte 类型其实是 ASCII 码，范围是 0 ~ 255，byte 存储的是字符的 ASCII 码。
+rune 类型是 Unicode 码（万维码），包含了所有的字符。
+
+```
+var a byte = 'a' <=> var b byte = 97  // 97
+var c rune = '喵' // 21941
+```
+
+**字符串类型：**
+
+Golang 中是严格区分字符和字符串的，字符用单引号包裹，字符串用双引号包裹。
+对于字符类型，本质是一个数值类型，只不过使用 `byte` 或 `rune` 类型来存储。
+但是在 TypeScript 中，字符和字符串没有严格的区分，都是 `string` 类型。
+
+Golang 中有 `len()` 方法可以获取字符串的字节长度，而 TypeScript 中有 `length` 属性可以获取字符串的字符长度。
+
+```
+// golang
+a := "hello"
+len(a) // 5
+
+// ts
+const a: string = "hello"
+a.length // 5
+```
+
+但需要注意的是，`len()` 方法只是获取字符串的字节长度，而不是字符长度。
+这在字符串包含中文的时候需要格外注意，因为一个汉字在 Golang 中是占 3 个字节。
+
+```
+s := "你好"
+len(s) // 6
+
+slice := []rune(s) // [20320 22909]  转 rune 切片，每个元素都是 Unicode 码
+len(slice) // 2
+```
+
+
+---
+### 4. 变量声明
+
+Golang 中的声明变量的方式有以下几种方式：
+
+```
+var a int = 10
+var b = 10
+c := 10
+
+var (
+  d int = 10
+  e = "hello"
+)
+```
+
+TypeScript 中声明变量的方式：
+
+```
+const a: number = 10
+let b = 10
+```
+
+Golang 中声明的变量方式有显示声明、类型推断声明、短变量声明。 其中短变量声明必须在 func 中进行声明，在全局无法进行短变量声明。
+
+Golang 和 TypeScript 中都有类型推断机制，所以当你没有进行显示类型声明时，编译器会自动推断出变量的类型。
+这也是 Golang 和 TypeScript 相较于 C、C++、Java 等语言的一个区别。如果用类型作为关键字来声明变量，就没有类型推断的空间。
+
+
+---
+### 5. 控制流
+
+Golang 和 TypeScript 中的控制流基本一致，都有 `if`、`for`、`switch`、`break`、`continue`、`return` 等关键字。
+但是 Golang 中的 `if`、`for`、`switch` 语句有一些特殊的地方，它们的条件判断都没有括号。
+
+Golang 中 `if` 语句，可以在条件判断前声明一个变量，这个变量的作用域只在 `if` 语句中。
+
+```
+if a := 10; a > 5 {
+  fmt.Println(a)
+}
+```
+
+Golang 中 `switch` 语句中的 `case` 不需要 `break`，因为 Golang 中 switch 默认不会进行穿透，如果需要穿透，可以使用 `fallthrough` 关键字。
+
+Golang 中没有 `while` 关键字，只有 `for` 关键字，可以使用 `for` 语句来模拟 `while` 语句😅。
+
+```
+// while 循环
+a := 0
+
+for a < 10 {
+  fmt.Println(a)
+  a++
+}
+
+// while(true) 循环
+b := 0
+for {
+  if j >= 5 {
+    break
+  }
+  fmt.Println(b)
+  b++
+}
+```
+
+for range 循环和 TypeScript 中的 for...of 循环类似，可以遍历数组、切片、字典等。
+
+```
+// golang
+arr := []int{1, 2, 3, 4, 5}
+
+for index, element := range arr {
+  fmt.Println(index, element)
+}
+
+// typescript
+const arr: number[] = [1, 2, 3, 4, 5]
+
+for (const element of arr) {
+  console.log(element)
+}
+```
+
+
+---
+### 6. 字符串标准库方法
+
+Golang 和 TypeScript 在标准库的调用方式上有显著的不同。由于 JavaScript 会有一个标准的内置对象，很多方法都是写在原型对象上，
+所以 TypeScript 一般都是通过 `实例.方法名()` 的方式来调用方法，而 Golang 一般都是通过 `包名.方法名(实例, ...参数)` 的方式来调用方法。
+
+这里以字符串方法为例：
+
+```
+// 1. 检索字符串是否包含子串
+// ts
+const str: string = "hello world"
+const r: boolean = str.includes("hello") // true
+
+// golang
+str := "hello world"
+r := strings.Contains(str, "hello") // true
+
+// 2. 字符串的分割
+// ts
+const arr: string[] = str.split(" ") // ["hello", "world"]
+
+// golang
+arr := strings.Split(str, " ") // ["hello", "world"]
+
+// 3. 切片 join 为字符串
+// ts
+const str: string = arr.join(" ") // "hello world"
+
+// golang
+str := strings.Join(arr, " ") // "hello world"
+
+// 4. 子字符串第一次出现的下标
+// ts
+const index: number = str.indexOf("wo") // 6
+
+// golang
+index := strings.Index(str, "wo") // 6
+```
+
+这里列举了一些常见的字符串处理方法，可以看到 Golang 和 TypeScript 在调用方法上会有一些不同，但是很多方法的功能是一样的。
+
+
+---
+### 7. 数组与元祖
+
+Golang 中的数组是固定长度的，它类似于 TypeScript 中的元祖的概念。TypeScript 中的数组是动态长度的，它类似于 Golang 中的切片的概念。
+
+Golang 中数组的特点：
+- 固定长度
+- 数组各元素类型一致
+
+TypeScript 由于只是在编译的时候进行类型检查，编译 transform 为 javascript 文件，在运行时是没有类型校验的。
+所以 TypeScript 中的元祖或数组的元素类型可以不一致，这是最大的区别。
+
+```
+// ts 元祖
+const tuple: [string, number] = ["hello", 10]  // 类型：[string, number]
+
+// golang 数组
+arr1 := [3]int{1, 2, 3}  // 类型：[3]int
+```
+
+Golang 中的数组是值类型，只要数组的长度和元素类型一致，那么这两个 Golang 数组就是相等的。
+在 TypeScript 中，不管是元祖还是数组都是引用类型，只有引用地址相同，才是相等的，
+所以一般来说单纯的比较两个数组或元祖，是无法得到相等的结果。
+
+由于 Golang 数组的长度在编译的时候就固定的，这使得数组可以直接存储在栈上，而不需要在堆上进行分配内存。
+由于栈上的内存分配和回收通常比堆更快，这对于性能敏感的应用程序来说是一个优势。
+
+
+---
+### 8. 切片与数组
+
+Golang 中的切片对应 TypeScript 中的数组概念，它们都是非常核心的数据结构，主要用于存放有序的数据。
+Golang 中的切片是一个引用类型，它是对底层数组的一个引用，包含了指向底层数组的第一个元素的地址指针、len 当前切片长度和 cap 容量（切片最大长度）。
+
+```
+type slice struct {
+  array unsafe.Pointer // 连续空间的起始地址  &slice[0]
+  len   int            // 连续空间的长度
+  cap   int            // 连续空间的容量
+}
+```
+
+Golang 中切片的特点：
+- 动态大小，长度和容量不固定
+- 切片中元素类型一致
+- 切片是引用类型，切片背后有一个底层数组，切片通过指向数组的指针来访问数组元素
+
+
+切片有两种声明方式，一种是通过切片字面量的方式，一种是通过 `make` 内置函数来创建切片。具体代码如下：
+```
+// 切片的声明方式
+slice1 := []int{1, 2, 3}
+
+slice2 := make([]string, 3) // 长度和容量都是 3
+slice2[0] = "hello"
+slice2[1] = "world"
+slice2[2] = "!"
+
+// panic: runtime error: index out of range [3] with length 3
+slice2[3] = "error" // 超出容量，会报错；可以通过 append 来添加元素，实现扩容
+```
+
+切片相关操作有：访问、截取、追加、删除、拷贝等操作。具体代码如下：
+```
+slice := []int{1, 2, 3, 4, 5}
+
+// 1. 访问
+fmt.Println(slice[0]) // 1
+
+// 2. 截取
+fmt.Println(slice[1:3]) // [2, 3]
+fmt.Println(slice[:3]) // [1, 2, 3] 省略起始索引，默认从 0 开始
+fmt.Println(slice[3:]) // [4, 5] 省略结束索引，默认到最后一个元素
+fmt.Println(slice[:]) // [1, 2, 3, 4, 5] 省略起始和结束索引，表示整个切片
+
+// 3.追加
+slice = append(slice, 6, 7, 8) // [1, 2, 3, 4, 5, 6, 7, 8]
+temp := []int{9, 10, 11}
+// 省略参数，将一个切片追加到另一个切片（扩展符）
+slice = append(slice, temp[1:]...) // [1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
+
+// 4. 删除
+// 删除第一个元素
+slice = slice[1:] // [2, 3, 4, 5, 6, 7, 8, 10, 11]
+// 删除最后一个元素
+slice = slice[:len(slice)-1] // [2, 3, 4, 5, 6, 7, 8, 10]
+// 删除中间元素，比如删除第 3 个元素，index 为 2 的元素
+slice = append(slice[:2], slice[3:]...) // [2, 3, 5, 6, 7, 8, 10]
+
+// 5. 拷贝
+src := []int{1, 2, 3, 4}
+dst := make([]int, 3)
+// 只拷贝两个切片最小的内容，返回拷贝的元素个数
+num := copy(dst, src) // [1, 2, 3] 3
+```
+有几个需要关注的点：
+- 对于切片的截取操作，Golang 不支持负数索引的，而 TypeScript 中的 `slice` 是支持负数索引的。
+- Golang 中也有扩展符号，但是是通过 `切片...` 来实现的，而 TypeScript 中是通过 `...数组` 来实现的。
+- Golang 需要用 `append` 追加操作和截取操作来实现删除元素的操作。删除下标是 i 的元素，具体的删除公式为 `newSlice = append(slice[:i], slice[i+1:]...)`
+- 切片的拷贝操作，Golang 中是通过 `copy(dst, src)` 内置函数来实现的，且只会拷贝两个切片**最小**的那部分内容；而 TypeScript 中是通过 `[...arr]` 方法来实现的。
+
+Golang 中的切片只有 `append` 和 `copy` 内置方法，而 TypeScript 有丰富操作数组的方法。
+虽然在 Golang 中很多方法都可以通过 append 和 copy 来实现，但个人觉得这样操作会显得很繁琐，不知道为什么官方不推出相关的方法 😅。
+
+切片还有一个重要的特点，当切片的容量满的时候会进行自动扩容，重新开辟一个连续的内存空间，将原有空间的元素全部拷贝到新的空间中。
+如果不是重新开辟一个新的内存空间，而是在原有的内存空间后追加元素有可能之后的内存空间已经有值，导致了切片的内存空间不连续，而这是我们不期望的，减少了内存碎片的情况。
+由于是重新开辟一个新的内存空间，所以切片指向底层数组的第一个元素的地址会改变。
+
+扩容的规则：如果切片的容量小于 1024 个元素，则新切片的 cap 是原来切片的 2 倍；如果切片的容量大于 1024 个元素，
+则新切片的 cap 会增加 25%，以平衡内存使用和复制成本。
+
+
+---
+### 9. Map
+
+Golang 中的 map 和 TypeScript 中的 map 一样，都是无序列表集合，都用来存储键值对的数据结构。Golang 中的 map 和 TypeScript 中的 map 都是引用类型。
+但它们有很多的不同，具体表现如下：
+- Golang 中遍历 map 是无序的，每次遍历的顺序都是不一样的；而 TypeScript 中遍历 map 是有序的，遍历的顺序和插入的顺序一致。
+- Golang 中的 key 不能是 slice、map、func 类型，而 TypeScript 中的 key 可以是任意类型。
+- Golang 中的 map 存在零值：未初始化的 map 的值是 nil；而 TypeScript 中的 map 是一个对象，没有零值的概念。
+
+Golang 中的 map 声明方式：
+
+```
+// map 的声明方式
+m1 := map[string]int{"a": 1, "b": 2, "c": 3}
+
+m2 := map[string]interface{}{
+  "name": "hello",
+  "age": 10,
+  "isMan": true,
+}
+
+m3 := make(map[string]string, 3) // cap 3
+
+var m4 map[string]int  // nil map
+```
+
+Golang 中 map 的操作：增、删、改、查、遍历等操作。具体代码如下：
+
+```
+m := map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}
+
+// 1. 增
+m["e"] = 5 // {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}
+
+// 2. 删
+delete(m, "e") // {"a": 1, "b": 2, "c": 3, "d": 4}
+
+// 3. 改
+m["a"] = 10 // {"a": 10, "b": 2, "c": 3, "d": 4}
+
+// 4. 查 （返回 element，ok 存在标识）
+v, ok := m["a"] // 10, true
+
+// 5. 遍历
+for k, v := range m {
+  fmt.Println(k, v)
+}
+
+// -------------------------------------------------
+// 相对于 TypeScript 中的 map 操作
+const map = new Map<unknown, unknown>()
+
+const arrKey = [1, 2, 3]
+const fnKey = () => console.log('key')
+const objKey = { name: 'lesenelir' }
+
+map.set(arrKey, 'arr')
+map.set(fnKey, 'fn')
+map.set(objKey, 'obj')
+
+map.get(arrKey) // arr
+
+map.delete(arrKey)
+
+for (const [key, value] of map) {
+  console.log(key, value)
+}
+
+for (const key of map.keys()) {
+  console.log(key)
+}
+
+for (const value of map.values()) {
+  console.log(value)
+}
+
+for (const [key, value] of map.entries()) {
+  console.log(key, value)
+}
+```
+
+Golang 中的 map 是引用类型，它是对底层哈希表的引用，所以 map 作为函数参数传递时，传递的是引用地址。
+当在函数内部修改 map 的值时，会影响到源数据的值。
+
+```
+func change(temp map[string]int) {
+  temp["one"] = 100
+}
+
+func main() {
+  m := map[string]int {
+    "one": 1,
+    "two": 2,
+  }
+  change(m)
+  fmt.Println(m) // {"one": 100, "two": 2}
+}
+```
+
+Golang 中的引用类型主要有：
+- slice
+- map
+- channel: 通道用于在不同的 go 协程之间安全传递数据，通道本身是引用传递，因此一个协程中对通道的操作可以影响到其他协程中的通道。
+- interface
+- function
+
+
+---
+### 10. 零值和undefined
+
+Golang 中的零值代表变量被初始化但没有赋值，编译器自动赋予的默认值即称之为零值。
+
+Golang 中的零值：
+- 数值类型：0
+- 布尔类型：false
+- 字符串类型：空字符串 ""
+- 指针、切片、字典、通道、函数、接口：nil
+
+对应 TypeScript 也有一个变量初始化但没有赋值的情况，这个变量的值是 `undefined`。
+
+nil 的一些作用：
+- 处理错误信息：Golang 中错误是一个接口类型，需要函数返回错误信息，如果没有错误信息，就返回 nil。所以当 nil 作为返回值时，表示没有错误😅。
+- 安全性：避免运行时的空指针异常
+- 保证初始化：根据 nil 判断引用类型的变量是否被初始化
+
+
+---
+### 11. 自定义类型和类型别名
+
+Golang 中的自定义类型和类型别名是两个不同的概念，它们的区别在于是否在类型系统中创建一个新的类型。
+
+自定义类型：
+
+```
+type MyInt int
+var a int = 1
+var b MyInt = 1
+a == b // 无法比较，编译错误
+
+type celsius float64
+```
+
+自定义类型是通过一个已有的类型创建一个新的类型，新类型可以更好的来描述信息。这个新的类型和原有的类型是不同的，
+不能直接进行比较和赋值，并不会和原始类型隐式相互转换。
+比如上述 a 变量和 b 变量是无法进行比较的，因为它们是不同的类型。
+
+类型别名：
+
+```
+type MyInt = int
+var a int = 1
+var b MyInt = 1
+a == b // 可以比较，返回 true
+```
+
+Golang 中的类型别名只是给一个类型起一个别名，起到了一个语义化的作用,它们是相同的类型，可以相互赋值和比较。
+
+在 TypeScript 中，没有自定义类型的概念，但是有类型别名的概念。但 TypeScript 中的类型别名比 Golang 中的类型别名更加灵活，
+它可以是基础类型、联合类型、交叉类型、元组、数组、对象等类型的别名等等。
+而且 TypeScript 中的类型别名也是为了创建一个新的类型，这在一些复杂的类型定义时非常有用，比如类型体操。
+
+```
+// ts 中的类型别名 or 创建一个新的类型
+type MyString = string
+type MyType = string | number
+type MyTuple = [string, number]
+type User = {
+  name: string
+  age: number
+}
+type MyType<T> = T extends string ? string : number
+type MyType = (string | number | boolean) & string
+```
+
+以上就是部分 TypeScript 中的类型别名，只要明确 TypeScript 中的 type 关键字本质都是用来创建一个新类型的。这里就不再赘述了。
+
+
+---
+### 12. 函数
+
+Golang 中的函数和 TypeScript 中的函数在概念上来说都是一样的，尤其是包括一些纯函数、回调函数、闭包、闭包保持、作用域链等概念，
+这些在 Golang 和 TypeScript 中都是一样的，这里有不再赘述。接下来讲一些 Golang 和 TypeScript 函数的一些使用上的不同之处。
+
+Golang 中的函数可以有多个返回值，而 TypeScript 中的函数只能有一个返回值，如果在 TypeScript 中需要返回多个值，通常用对象来实现。
+
+```
+// go
+func getRes(args ...int) (int, []int) {
+  sum := 0
+
+  for _, v := range args {
+    sum += v
+  }
+
+  return sum, args
+}
+
+func getRes(args ...int) (sum int, res []int) {
+  for _, v := range args {
+    sum += v
+  }
+
+  res = args
+
+  return sum, res
+}
+
+
+// typescript
+function getRes(...args: number[]): Record<string, number | number[]> {
+  let sum = 0
+
+  for (const v of args) {
+    sum += v
+  }
+
+  return { sum, args }
+}
+```
+
+上述代码主要介绍了 Golang 中的多返回值函数、具名多返回值函数和可变参数函数的写法。
+可以看到 Golang 中的可变参数中的 `...` 是作用于类型上 `...int`，
+而 TypeScript 中的 `...` 是作用于变量上 `...args`，在函数调用的时候用来接收多个实参，并将其作为数组。
+
+```
+func main() {
+  // 函数内部无法进行具名函数的声明
+  // func fn() {} // syntax error: unexpected func, expecting name
+
+  // 函数内部可以进行匿名函数的声明，通过函数表达式来接收
+  fn := func() {
+    fmt.Println("hello")
+  }
+}
+```
+在 Golang 中也存在闭包的概念，所以也可以在函数内部去定义一个函数，但需要注意的是，
+函数内部是不能在进行具名函数的声明，但可以通过一个函数表达式来接收一个匿名函数。
+
+
+---
+### 13. 方法
+
+方法和函数很相似，都是用于封装代码执行逻辑的结构，但方法是与特定类型关联的函数，而函数不依赖于特定的类型。
+方法的声明和函数的声明很相似，只是在方法的声明中多了一个接收者。
+这意味着方法是在给定类型的实例上调用的，这个类型就是该方法的接收者。
+
+有一种说法是：方法为类型添加行为。这意味着方法是在给定类型的实例上调用的，这个类型就是该方法的接收者，最终的调用方式：`自定义类型实例变量.方法()`。
+
+Golang 中的方法：
+
+```
+type MyFloat float64
+
+// 给自定义类型提供方法
+func (f MyFloat) Abs() MyFloat {
+	if f < 0 {
+		return -f
+	}
+	return f
+}
+
+func main() {
+	f := MyFloat(-10) // 强制类型转换
+	println(f.Abs())
+}
+```
+
+Golang 中的方法使得类型有自己的行为，从而增加类型的表达能力，即该类型的实例变量都可以调用这个方法，更加集成。
+
+对于 TypeScript 中的方法，它是通过对象的属性来定义的，所以 TypeScript 中的方法是对象的属性，而 Golang 中的方法是类型的方法。
+
+
+---
+### 14. 结构体和对象
+
+[//]: # (结构体是通过自定义类型来定义的。)
+
+
+---
+### 15. 接口
+
+
+---
+### 15. 泛型
+
+
+---
+### 16. 指针
+
+
+
+
+【 writing ... 】
+
+
+
+
+
+
+
+
+
+
+
+
