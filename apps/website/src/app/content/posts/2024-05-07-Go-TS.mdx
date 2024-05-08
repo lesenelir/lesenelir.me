@@ -546,7 +546,20 @@ Golang 中的引用类型主要有：
 - map
 - channel: 通道用于在不同的 go 协程之间安全传递数据，通道本身是引用传递，因此一个协程中对通道的操作可以影响到其他协程中的通道。
 - interface
-- function
+- func
+
+特别注意：**结构体和数组是值类型**；对于上述的引用类型默认值都是 nil。
+
+此处还要明白两个概念，一个是值传递和引用传递。这两个概念可以理解为 TypeScript 项目中的深拷贝和浅拷贝。
+
+值传递：传递给函数的是实参的拷贝，所以在函数中进行更新的时候，不会修改源数据。
+
+引用传递：传递给函数的是实参的引用地址（但肯定不是将地址传递啦，因为函数形参的类型肯定不是指针类型，
+这里说地址是为了表明都是同一个堆内存实例的引用🥹），所以在函数中进行更新的时候，会修改源数据。
+
+对于 struct 和 array 是值类型，同时也是值传递，所以在函数中进行更新的时候，不会修改源数据（对于结构体需要格外注意）。
+对于 slice、map、channel、interface、func 是引用类型，同时也是引用传递，所以在函数中进行更新的时候，会修改源数据。
+这也解释了为什么上述的 map 传递给函数后会修改源数据的原因。
 
 
 ---
@@ -569,7 +582,7 @@ nil 的一些作用：
 
 
 ---
-### 11. 自定义类型和类型别名
+### 11. <a id="11-custom-type"></a>自定义类型和类型别名
 
 Golang 中的自定义类型和类型别名是两个不同的概念，它们的区别在于是否在类型系统中创建一个新的类型。
 
@@ -682,7 +695,7 @@ func main() {
 
 
 ---
-### 13. 方法
+### 13. <a id="13-method"></a>方法
 
 方法和函数很相似，都是用于封装代码执行逻辑的结构，但方法是与特定类型关联的函数，而函数不依赖于特定的类型。
 方法的声明和函数的声明很相似，只是在方法的声明中多了一个接收者。
@@ -715,35 +728,334 @@ Golang 中的方法使得类型有自己的行为，从而增加类型的表达�
 
 
 ---
-### 14. 结构体和对象
+### 14. <a id="14-struct"></a>结构体和对象
 
-[//]: # (结构体是通过自定义类型来定义的。)
+Golang 中的结构体和 TypeScript 中的对象很类似。对于一个物体如果有很多的属性，如果用很多变量来定义显得很烦琐，
+所以在 TypeScript 中有对象这种数据结构；而 Golang 中是没有对象这个概念的，它是通过结构体来定义的。
+结构体是一种复合类型，可以封装多个基本数据类型合成一个单一的类型。
+
+结构体是通过 [11-自定义类型](#11-custom-type) 来定义的。所以，**结构体本质是一种类型**，可以作为变量的类型，也可以作为函数的参数和返回值。
+
+```
+// 结构体定义
+type structName struct {
+  // 字段名 字段类型
+  name string
+  age int
+  // ....
+}
+
+// 结构体本质是一种新的类型
+var variable structName
+
+// 访问修改属性
+variable.name = "lesenelir"
+variable.age = 18
+```
+
+上述是结构体的定义，这个和上文提到的自定义类型和相似，其中 `struct { ... }` 中代表了一种类型。
+这种表述类似于 `type A int` 只不过把 int 换成了一个结构体。
+对于 struct 类型的变量，通常说是一个结构体变量，但我喜欢把他理解为一个实例后的对象，可以通过 `.` 来访问和修改对象的属性。
+struct 会开辟一个连续的空间。
+
+```
+type User struct {
+  id       int
+  username string
+  password int
+  email    string
+}
+
+user1 := User{ // 实例化对象
+  id: 1,
+  username: "lesenelir",
+  password: 123456,
+}
+
+user1.password = 654321 // 修改对象属性
+
+userMap := map[int]User {
+  1: user1,
+  2: {
+    id: 2,
+    username: "user2",
+    password: 123456,
+  },
+}
+
+user3Address := new(User) // 返回一个指向 User 类型的指针
+user3Address.id = 3
+user3Address.username = "user3"
+user3Address.password = 123456
+fmt.Println(&user3Address)
+fmt.Println(*user3Address)
+```
+
+上述代码使用 new 关键字也是创建一个对象，但是它返回的是这个对象的指针（变量地址）。
+虽然返回的是对象的指针，但还是可以通过 `.` 来访问和修改对象的属性，实际上是 `(*user3Address).id = 3`，
+这在 Golang 底层就帮我们实现了。我其实不是很赞成这种语法糖的修改。
+
+Golang 中是没有构造函数的概念的，但是我们也可以自己来实现，具体代码如下：
+
+```
+func newUser(id int, username string, password int) *User {
+  return &User{
+    id: id,
+    username: username,
+    password: password,
+  }
+}
+
+user4 := newUser(4, "user4", 123)
+fmt.Println(&user4)
+```
+
+TypeScript 中的对象不仅仅有属性还有方法，同样的，Golang 中的结构体变量也可以有相关的「行为」，即方法。
+
+章节 [13-方法](#13-method) 中已经介绍了 Golang 中的方法，这里再介绍一下结构体的方法。
+
+由于自定义类型可以在函数上定义一个接收器，使得类型是自定义类型的变量可以通过 `.` 来调用这个方法。
+更具体的来说，由于结构体本质也是一种自定义类型，所以也可以在函数上定义一个接收器，只不过这个接收器的类型是当前的结构体类型，
+所以可以使得结构体类型的变量可以通过 `.` 来调用这个方法。
+
+```
+// Struct User has methods on both value and pointer receivers.
+// 值接收者（调用的时候可以是指针类型也可以是值类型来调用）
+func (user User) print() {
+  fmt.Println(user.id, user.username, user.password)
+}
+
+// 指针接收者（调用的时候可以是指针类型也可以是值类型来调用）
+func (user *User) setUsername(username string) string {
+  user.username = username
+  return username
+}
+
+user1.print()
+user1.setUsername("lesenelir changed")
+user1.print()
+
+(&user1).setUsername("lesenelir changed") // ok 个人觉得这么做更合理
+
+user5 := &User{ // 指针类型的变量
+  id: 5,
+  username: "user5",
+  username: "user5",
+}
+user5.print()
+user5.setUsername("user5 changed")
+(*user5).print() // ok
+```
+
+得益于结构体属于自定义类型，所以可以通过自定义类型的方法来使得结构体具有方法。
+但需要注意的是，对于结构体的方法而言，由于结构体是值类型，所以结构体是一种值传递，它会复制一份新的数据给参数。
+所以，当你在结构体方法时修改了结构体的属性，这个修改只会在方法内部生效，不会影响到原有的结构体变量。
+所以，如果你想要修改原有的结构体变量，可以通过指针类型的接收器来实现，即 setUsername 方法的接收器。
+
+通常来说，我们可以把结构体的方法分为两种：指针接收者(需要修改结构体内部属性)、值接收者（不需要修改结构体内部属性）。
+指针接收者的方法可以通过指针类型的变量来调用也可以通过值类型变量调用，同样值接收者的方法可以通过值类型的变量和指针类型的变量来调用
+（个人觉得为了统一，值接收者的方法还是要用值类型的变量进行调用，虽然 Golang 底层我们实现了**自动解引用指针**获取指针指向的值，但个人觉得这么做更不严谨、不统一😅）。
+
+一般都是将结构体方法的接收器定义为指针类型。
 
 
 ---
 ### 15. 接口
 
+章节 [14-结构体和对象](#14-struct) 已经介绍了 Golang 中结构体的概念，本质来说结构体就是一种新的自定义类型。
+它定义了对象的属性，并通过自定义类型的方法来使得结构体具有行为。
+
+TypeScript 中的接口有两个作用：
+- 对象的形状（shape）进行描述
+- 对类（class）进行抽象
+
+对于前者，接口可以描述对象的形状，即对象的属性和方法，这样可以使得对象的属性和方法更加规范化。
+对于后者，接口可以对类进行抽象，使得类的属性和方法更加规范化，这样可以使得类的属性和方法更加规范化。
+
+但是，在 Golang 中 interface 的概念和 TypeScript 中的 interface 的概念是不一样的。
+Golang 中的接口和结构体一样，都是一种**类型**（没错，它也是个类型😅）。接口本质也是一种自定义类型。
+
+```
+type interfaceNamer interface {
+  // 方法名(参数列表) 返回值列表
+  name() string
+}
+```
+
+上述是接口的定义，这和自定义类型一致，其中 `interface { ... }` 代表了一种类型。
+与结构体不同的是，结构体是定义了属性，而接口更多是对方法的抽象封装。接口名一般都常用 er 结尾。
+
+如果一个结构体的绑定了所有接口的方法，那么这个结构体就实现了这个接口，这个**结构体实例对象就可以赋值给这个接口类型的变量**，
+即**结构体实例对象就是接口类型的变量**。
+
+```
+type Animaler interface {
+  speak() string
+}
+
+type Dog struct {
+  name string
+}
+
+func (d *Dog) speak() string {
+  return "wang wang"
+}
+
+type Cat struct {
+  name string
+}
+
+func (c *Cat) speak() string {
+  return "miao miao"
+}
+
+func main() {
+  var animal Animaler
+  animal = &Dog{"dog"} // 结构体指针赋值给接口类型的变量
+  fmt.Println(animal.speak())
+
+  animal = &Cat{"cat"}
+  fmt.Println(animal.speak())
+
+  // -------------------------------------------
+
+  animals := []Animaler{&Dog{"dog"}, &Cat{"cat"}}
+  for _, animal := range animals {
+    fmt.Println(animal.speak())
+  }
+}
+```
+
+上述说，接口是一种类型（自定义类型），如果实现了接口的所有方法，就可以说实现了这个接口，并可以把结构体实例对象赋值给接口类型的变量。
+此处，即定义了一个 `animal` 变量，它的类型是 `Animaler` 接口，由于 `Dog` 和 `Cat` 结构体实现了 `Animaler` 接口的所有方法，
+所以可以将 `Dog` 和 `Cat` 结构体实例对象赋值给 `animal` 变量。
+但需要注意的是，由于结构体方法的接收者一般都是指针类型，所以当结构体实现了接口的所有方法后，
+是将结构体实例对象的指针赋值给接口类型的变量，而不能将结构体实例对象赋值给接口类型的变量。
+
+这和 TypeScript 不同，TypeScript 中的接口如果是对类进行抽象，不仅可以描述方法还可以描述属性，
+并且在 TypeScript 中是用 implements 关键字来实现接口的，而 Golang 中是隐式实现的。
+
+Golang 隐式实现接口的好处是：实现多接口时，相对而言就更加简单了。
+
+```
+type Livinger interface {
+  eat()
+  sleep()
+}
+
+func (d *Dog) eat() {
+  fmt.Println("dog eat")
+}
+
+func (d *Dog) sleep() {
+  fmt.Println("dog sleep")
+}
+```
+
+只要结构体实现了具体某个接口的所有方法，那么这个结构体就实现了这个接口。
+上述例子中，`Dog` 结构体实现了多接口，分别是 `Animaler` 和 `Livinger` 接口。
+而如果在 TypeScript 中则需要用 implements 关键字来实现多接口，比如 `class Dog implements Animaler, Livinger { ... }`。
+
+很难说，这两者的实现方式哪个更好，只能说各有优劣。Golang 中鼓励实现具体小接口的设计，而不是大而全的接口，有利于保持接口的专注和高效；同时，解耦更加方便。
+但是在 TypeScript 中，这种实现方式上在语义上更加明确、规范；Golang 的隐式实现上还需要开发者自己去阅读代码来判断是否实现了接口。
+
+其实，我个人觉得，Golang 中如果有一个语法：`type structName struct implements interfaceName { ... }` 会是一个比较不错的选择😄，这样就可以明确知道这个结构体实现了哪些接口。
+但这种方式，解耦性就会降低，使得当前的 struct 和 interface 之间的耦合性增加，所以 Golang 中没有这种语法也是有它的道理的。
+
+最后介绍一个常见知识点，Golang 中的空接口 `interface{}`，它是所有类型的父接口，即所有类型都实现了空接口，类似于 `any`，
+但 any 类型是空接口的类型别名，即 `type any = interface{}`。对于 TypeScript 而言，一般都不希望看到 `any`，那是因为 TypeScript 的
+类型检查只会在编译阶段进行，在运行时是转为 JavaScript 文件，所以 any 类型会导致类型检查的失效，所以尽量避免使用 any 类型。
+但在 Golang 中，不管是在编译时还是运行时都能保证类型安全，所以 any 在 Golang 中并不可怕。
+
 
 ---
 ### 15. 泛型
+
+TypeScript 和 Golang 中都有泛型的概念。泛型是常见的编程特性，都是对数据类型进行抽象，使得数据类型更加灵活。
+定义的时候不指定具体的类型，而是在使用的时候再指定具体的类型。
+
+TypeScript 中的泛型相较于 Golang 中的泛型更加的灵活，因为 TypeScript 中的类型系统是图灵完备的，所以泛型的使用也更加灵活。
+
+```
+// go 中泛型
+func Plus[T string | int | float64](a, b T) T {
+  return a + b
+}
+
+type Getter[T any] interface {
+    Get() T
+}
+
+type MyContainer[T any] struct {
+    value T
+}
+
+func (m *MyContainer[T]) Get() T {
+    return m.value
+}
+```
+
+TypeScript 中的泛型主要是在函数、接口、类中使用，其中有一个很重要的功能是用于定义一个新的类型（工具类型）。
+
+Golang 中的泛型和 TypeScript 中的泛型一个使用 `[]` 一个使用 `<>` 来分别定义不同的泛型。
+它们之间还有一个重要的区别：Golang 中的泛型一定需要泛型约束，但 TypeScript 中的泛型并没有这个硬性要求。
 
 
 ---
 ### 16. 指针
 
+TypeScript 中没有指针的概念，因为 TypeScript 并不涉及到内存的操作，所以也就没有指针的概念。
+
+但是 Golang 中有涉及到内存的操作，指针 Golang 中存放内存空间地址的类型，同样的它也是一种类型，即 `*T`，
+但它不像结构体和接口一样，它不属于自定义类型，它是一种基础类型。
+
+指针存储的是变量的内存地址，指向一块内存空间，可以通过指针**解引用**来获取这块内存空间的值。
+
+指针的常见操作：
+- 指针数据类型：`*T`
+- 地址运算符：`&普通数据变量名`，获取变量的内存地址
+- 解引用运算符：`*指针变量名`，获取指针指向的内存空间的值
+
+```
+// runtime error: invalid memory address or nil pointer dereference
+var a *int // 野指针 nil 零值
+*a = 10
+
+if a != nil {
+  fmt.Println(*a)
+}
+
+b := new(int) // 返回一个指向 int 类型的指针
+fmt.Println(*b) // 0
+```
+
+`address := new(T)` 函数可以创建一个 T 类型的零值，并返回其地址，即返回一个指向 T 类型的指针。
+如果单纯定义一个指针变量，但没有初始化，一般都称之为野指针，它的值是 nil，不能进行解引用操作（如上述代码的赋值操作），否则会运行报错。
+所以对于上文的代码，需要先判断指针是否为 nil，再进行解引用操作，例如：
+
+```
+func (user *User) setUsername(username string) string {
+  if user == nil {
+    return ""
+  }
+  user.username = username
+  return username
+}
+```
+
+指针还有一个常见的应用场景就是函数的参数传递，Golang 中对于结构体和数组的函数参数是值传递，
+所以如果想要在函数内部修改结构体和数组的值，就需要传递指针类型的参数。
+
+---
+
+### Wrapping Up
 
 
+以上就是我拥有 TypeScript 基础学习 Golang 语言的一些总结和感悟。当然这篇文章主要是对 Golang
+基础知识的一个梳理和对比，并没有涉及到 Golang 并发相关的知识，后续学完 Golang 并发可能会单独写一篇文章，当然也有可能不写。。
 
-【 writing ... 】
+Anyway，希望这篇文章对你有所帮助。
 
+[本文谢绝一切转载，谢谢]
 
-
-
-
-
-
-
-
-
-
-
+Lesenelir
