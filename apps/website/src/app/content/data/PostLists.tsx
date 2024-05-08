@@ -13,7 +13,7 @@ export const postData: IPosts[] = [
     name: 'Go 与 TS 语法差异',
     href: '/posts/go-ts',
     file: '2024-05-07-Go-TS',
-    date: 'May 07, 2024 ⋅ 20 min'
+    date: 'May 07, 2024 ⋅ 30 min'
   },
   {
     name: 'Jotai 理念与实践',
