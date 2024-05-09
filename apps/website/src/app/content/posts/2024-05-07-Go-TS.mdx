@@ -25,7 +25,7 @@
 - TypeScript 运行：`ts-node <文件名>`
 - TypeScript 编译：`tsc <文件名>`
 
-需要注意的是，Golang 编译后会生成一个可执行的二进制文件，而 TypeScript 编译后会进行 transform 生成一个 JavaScript 文件。
+需要注意的是，Golang 编译后会生成一个可执行的二进制文件，而 TypeScript 编译后会进行 Transform 生成一个 JavaScript 文件。
 
 
 ---
@@ -339,7 +339,7 @@ Golang 中数组的特点：
 - 固定长度
 - 数组各元素类型一致
 
-TypeScript 由于只是在编译的时候进行类型检查，编译 transform 为 javascript 文件，在运行时是没有类型校验的。
+TypeScript 由于只是在编译的时候进行类型检查，编译 Transform 为 Javascript 文件，在运行时是没有类型校验的。
 所以 TypeScript 中的元祖或数组的元素类型可以不一致，这是最大的区别。
 
 ```
@@ -554,8 +554,7 @@ Golang 中的引用类型主要有：
 
 值传递：传递给函数的是实参的拷贝，所以在函数中进行更新的时候，不会修改源数据。
 
-引用传递：传递给函数的是实参的引用地址（但肯定不是将地址传递啦，因为函数形参的类型肯定不是指针类型，
-这里说地址是为了表明都是同一个堆内存实例的引用🥹），所以在函数中进行更新的时候，会修改源数据。
+引用传递：传递给函数的是实参的引用地址（同一个堆内存实例的引用），所以在函数中进行更新的时候，会修改源数据。
 
 对于 struct 和 array 是值类型，同时也是值传递，所以在函数中进行更新的时候，不会修改源数据（对于结构体需要格外注意）。
 对于 slice、map、channel、interface、func 是引用类型，同时也是引用传递，所以在函数中进行更新的时候，会修改源数据。
@@ -571,12 +570,36 @@ Golang 中的零值：
 - 数值类型：0
 - 布尔类型：false
 - 字符串类型：空字符串 ""
-- 指针、切片、字典、通道、函数、接口：nil
+- 指针、切片、字典、通道、函数、接口：nil  （struct 没有 nil）
 
-对应 TypeScript 也有一个变量初始化但没有赋值的情况，这个变量的值是 `undefined`。
+在 Golang 语言中，引用类型值的空值是零值，即 nil。对应 TypeScript 也有一个变量初始化但没有赋值的情况，这个变量的值是 `undefined`。
+需要注意，struct 结构体没有零值，因为 struct 是一种装载多个字段的数据结构，但 struct 内部有可能有零值。
+
+```
+a := nil // 编译错误
+```
+
+上述短变量无法定义 nil 值的变量，因为 nil 并不是一个数据结构，而是一个值。如果进行短变量定义后，并不知道该变量的类型，
+即上述 `a` 变量类型有可能是任意的引用类型。所以如果要进行 nil 值的定义，必须需要**显式**的声明符合初始值是零值（引用类型）的变量。
+
+```
+var s1 []int
+s1[0] = 1 // panic: runtime error: index out of range [0] with length 0
+fmt.Println(s1)
+
+var m1 map[string]string
+m1["name"] = "lesenelir" // panic: assignment to entry in nil map
+fmt.Println(m1)
+
+var m2 = make(map[string]string, 0)
+m2["name"] = "lesenelir" // ok
+```
+
+如果引用类型的变量没有赋值，它们的值就是 nil，所以并不能直接对这些变量进行操作，否则会运行报错。
+所以如果要对这些变量进行操作，推荐用 `make` 内置函数来初始化 map、slice、channel 等引用类型的变量，来避免初始值是 nil 的情况。
 
 nil 的一些作用：
-- 处理错误信息：Golang 中错误是一个接口类型，需要函数返回错误信息，如果没有错误信息，就返回 nil。所以当 nil 作为返回值时，表示没有错误😅。
+- 处理错误： Golang 中错误是通过返回值来实现的，错误通过实现 `error` 接口来返回错误信息，如果没有错误信息，就返回 nil。所以当 nil 作为返回值时，表示没有错误😅
 - 安全性：避免运行时的空指针异常
 - 保证初始化：根据 nil 判断引用类型的变量是否被初始化
 
@@ -728,7 +751,138 @@ Golang 中的方法使得类型有自己的行为，从而增加类型的表达�
 
 
 ---
-### 14. <a id="14-struct"></a>结构体和对象
+### 14. 错误处理
+
+Golang 和 TypeScript 都有错误处理的机制，从而确保程序在运行时不会因为某些错误（异常）从而导致程序崩溃（比如网路错误、读写文件失败等）。
+
+在 TypeScript 中对于错误的处理主要是通过 `try...catch` 语句来捕获错误，
+但 `try...catch` 语句只能捕获同步代码的错误，对于异步代码的错误处理，可以通过 `Promise` 的 `catch` 方法来捕获错误。具体说明如下：
+
+```
+try {
+  const response = await fetch(url, options)
+  const data = await response.json()
+} catch (error) {
+  // error handle
+} finally {
+  // finally handle
+}
+
+// 异步代码错误处理
+fetch(url, options)
+  .then(response => response.json())
+  .catch(error => {
+    // error handle
+  })
+```
+
+上述为常见的错误处理方式（捕获异常），但是对于异步代码的错误处理。`try` 语句用来存放可能会抛出错误的代码，`catch` 语句用来捕获同步错误，
+`finally` 语句用来在 `try` 语句执行完毕后执行，无论是否发生错误。
+如果不进行错误的捕获，则会导致程序崩溃，即中断程序的运行。
+
+抛出异常：在 TypeScript 中可以通过 `throw` 关键字来抛出异常，抛出的异常可以是任意类型的值，但通常是一个 `Error` 对象。
+
+```
+function divide(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error('除数不能为 0')
+  }
+
+  return a / b
+}
+
+try {
+  divide(10, 0)
+} catch (error) {
+  console.log(error.message)
+}
+
+// 如果没有捕获异常，程序会崩溃
+divide(10, 0) // 运行错误：Uncaught Error: 除数不能为 0
+```
+
+可以显而易见的看到，TypeScript 中处理异常的逻辑是：针对某一个具体的行为，如果这个行为可能会抛出异常，那么就在这个行为的上下文中进行异常的捕获和处理。
+这也是很多编程语言中的异常处理的通用逻辑。
+
+Golang 中的错误处理机制和 TypeScript 中的错误处理机制有很大的不同，Golang 中的错误处理是通过返回值来实现，而不是通过抛出错误的方式来实现。
+一般来说，Golang 中的函数会返回两个值，一个是函数的返回值，一个是错误信息。如果没有错误，那么错误信息就是 nil。
+所以 `if err != nil { panic(error.message) }` 就是判断是否有错误，如果有错误就会抛出错误（panic("error string")）。
+抛出错误后，就需要通过 `recover()` 函数来捕获错误，防止程序崩溃。
+
+Golang 中的错误处理常用三个语句：
+- panic(err.message): 抛出一个异常，导致程序崩溃
+- err := recover(): 捕获 panic 异常，防止程序崩溃
+- defer func() {}(): 延迟执行，通常用于释放资源
+
+`defer` 语句通常用于释放资源、关闭文件、解锁资源等操作。
+
+```
+func main() {
+  defer fmt.Println("defer1")
+  defer fmt.Println("defer2")
+
+  fmt.Println("main1")
+  fmt.Println("main2")
+  defer fmt.Println("defer2")
+  fmt.Println("main3")
+  defer fmt.Println("defer4")
+}
+
+// 输出
+main1
+main2
+main3
+defer4
+defer3
+defer2
+defer1
+```
+
+`defer` 关键字用于延迟执行一个函数，它会在函数调用结束前（函数 `return` 语句前）执行，即先执行完所有函数的逻辑再执行 `defer` 语句。
+并且多个 `defer` 语句会按照先进后出顺序（栈顺序）执行。
+
+如果函数执行了 `panic()` 抛出错误，则会终止程序的运行不会再执行 panic 后的函数语句，但如果当前函数有 `defer` 语句，那么 `defer` 语句会在程序终止前执行。
+即，如果函数执行了 `panic()` 抛出错误，那么还是逆序执行 `defer` 语句，然后再终止程序的运行。
+但这里有一个前提条件：**defer 语句一定写在 panic 之前！** 这个是至关重要的。
+
+```
+func main() {
+  defer fmt.Println("defer1") // defer 需要在 panic 之前定义
+	panic("throw error")
+  // defer fmt.Println("defer1") // defer 不能定义在 panic 后
+	fmt.Println("main1")
+}
+```
+
+一般来说，如果函数中使用 `panic()` 抛出错误后，就一定要有 `recover()` 来捕获这个错误。
+`recover()` 函数用于终止错误的传播，防止程序崩溃。
+这里有一个关键点：**`recover()` 函数只能在 `defer` 语句中调用**，否则当 panic 时，recover 无法捕获到 panic，
+从而无法防止 panic 在程序中扩散。
+
+`recover()` 都有一个固定的写法，如下所示：
+
+```
+func main() {
+  defer func() {
+    if err := recover(); err != nil {
+      fmt.Println("catch panic:", err)
+    }
+  }()
+
+  panic("throw error")
+  fmt.Println("main1") // 抛出错误后，panic 后的代码就不执行
+}
+
+// 输出
+catch panic: throw error
+```
+
+上述 defer 匿名自调用函数是一个固定写法，如果 `err != nil` 即 err 值不为零值，则有抛出的错误，所以就可以通过 `recover()` 来捕获错误。
+`if` 语句中的代码类似于 TypeScript 中的 `catch` 语句，用来捕获并处理错误。
+
+
+---
+### 15. <a id="15-struct"></a>结构体和对象
 
 Golang 中的结构体和 TypeScript 中的对象很类似。对于一个物体如果有很多的属性，如果用很多变量来定义显得很烦琐，
 所以在 TypeScript 中有对象这种数据结构；而 Golang 中是没有对象这个概念的，它是通过结构体来定义的。
@@ -827,12 +981,13 @@ func (user User) print() {
 
 // 指针接收者（调用的时候可以是指针类型也可以是值类型来调用）
 func (user *User) setUsername(username string) string {
-  user.username = username
+  // (*user).username = username
+  user.username = username // 底层实现自动解引用
   return username
 }
 
 user1.print()
-user1.setUsername("lesenelir changed")
+user1.setUsername("lesenelir changed") // 调用时，自动取地址
 user1.print()
 
 (&user1).setUsername("lesenelir changed") // ok 个人觉得这么做更合理
@@ -853,16 +1008,19 @@ user5.setUsername("user5 changed")
 所以，如果你想要修改原有的结构体变量，可以通过指针类型的接收器来实现，即 setUsername 方法的接收器。
 
 通常来说，我们可以把结构体的方法分为两种：指针接收者(需要修改结构体内部属性)、值接收者（不需要修改结构体内部属性）。
-指针接收者的方法可以通过指针类型的变量来调用也可以通过值类型变量调用，同样值接收者的方法可以通过值类型的变量和指针类型的变量来调用
-（个人觉得为了统一，值接收者的方法还是要用值类型的变量进行调用，虽然 Golang 底层我们实现了**自动解引用指针**获取指针指向的值，但个人觉得这么做更不严谨、不统一😅）。
+指针接收者的方法可以通过指针类型的变量来调用也可以通过值类型变量调用，同样值接收者的方法可以通过值类型的变量和指针类型的变量来调用。
+
+但个人觉得为了统一，值接收者的方法还是要用值类型的变量进行调用，指针接收者还是要用指针类型的变量进行调用，
+虽然 Golang 底层实现了**自动解引用指针**获取指针指向的值、**自动取地址**调用指针接收者方法的时候可以不通过指针类型进行调用，
+但个人觉得这么做更不严谨、不统一😅。
 
 一般都是将结构体方法的接收器定义为指针类型。
 
 
 ---
-### 15. 接口
+### 16. 接口
 
-章节 [14-结构体和对象](#14-struct) 已经介绍了 Golang 中结构体的概念，本质来说结构体就是一种新的自定义类型。
+章节 [15-结构体和对象](#15-struct) 已经介绍了 Golang 中结构体的概念，本质来说结构体就是一种新的自定义类型。
 它定义了对象的属性，并通过自定义类型的方法来使得结构体具有行为。
 
 TypeScript 中的接口有两个作用：
@@ -933,9 +1091,9 @@ func main() {
 是将结构体实例对象的指针赋值给接口类型的变量，而不能将结构体实例对象赋值给接口类型的变量。
 
 这和 TypeScript 不同，TypeScript 中的接口如果是对类进行抽象，不仅可以描述方法还可以描述属性，
-并且在 TypeScript 中是用 implements 关键字来实现接口的，而 Golang 中是隐式实现的。
+并且在 TypeScript 中是用 `implements` 关键字来实现接口的，而 Golang 中是隐式实现的。
 
-Golang 隐式实现接口的好处是：实现多接口时，相对而言就更加简单了。
+Golang 隐式实现接口的好处是：实现多接口的情况，相对而言就更加简单了。
 
 ```
 type Livinger interface {
@@ -954,7 +1112,7 @@ func (d *Dog) sleep() {
 
 只要结构体实现了具体某个接口的所有方法，那么这个结构体就实现了这个接口。
 上述例子中，`Dog` 结构体实现了多接口，分别是 `Animaler` 和 `Livinger` 接口。
-而如果在 TypeScript 中则需要用 implements 关键字来实现多接口，比如 `class Dog implements Animaler, Livinger { ... }`。
+而如果在 TypeScript 中则需要用 `implements` 关键字来实现多接口，比如 `class Dog implements Animaler, Livinger { ... }`。
 
 很难说，这两者的实现方式哪个更好，只能说各有优劣。Golang 中鼓励实现具体小接口的设计，而不是大而全的接口，有利于保持接口的专注和高效；同时，解耦更加方便。
 但是在 TypeScript 中，这种实现方式上在语义上更加明确、规范；Golang 的隐式实现上还需要开发者自己去阅读代码来判断是否实现了接口。
@@ -969,10 +1127,11 @@ func (d *Dog) sleep() {
 
 
 ---
-### 15. 泛型
+### 17. 泛型
 
 TypeScript 和 Golang 中都有泛型的概念。泛型是常见的编程特性，都是对数据类型进行抽象，使得数据类型更加灵活。
-定义的时候不指定具体的类型，而是在使用的时候再指定具体的类型。
+泛型的目的也是为了做更好的抽象，而抽象的目的就是为了封装，所以说泛型的目的就是为了高度的封装，即高内聚。
+泛型的定义不需要指定具体的类型，而是在使用的时候再指定具体的类型。
 
 TypeScript 中的泛型相较于 Golang 中的泛型更加的灵活，因为 TypeScript 中的类型系统是图灵完备的，所以泛型的使用也更加灵活。
 
@@ -1002,7 +1161,7 @@ Golang 中的泛型和 TypeScript 中的泛型一个使用 `[]` 一个使用 `<>
 
 
 ---
-### 16. 指针
+### 18. 指针
 
 TypeScript 中没有指针的概念，因为 TypeScript 并不涉及到内存的操作，所以也就没有指针的概念。
 
