@@ -804,9 +804,37 @@ divide(10, 0) // 运行错误：Uncaught Error: 除数不能为 0
 这也是很多编程语言中的异常处理的通用逻辑。
 
 Golang 中的错误处理机制和 TypeScript 中的错误处理机制有很大的不同，Golang 中的错误处理是通过返回值来实现，而不是通过抛出错误的方式来实现。
-一般来说，Golang 中的函数会返回两个值，一个是函数的返回值，一个是错误信息。如果没有错误，那么错误信息就是 nil。
-所以 `if err != nil { panic(error.message) }` 就是判断是否有错误，如果有错误就会抛出错误（panic("error string")）。
+一般来说，Golang 中的函数会返回两个值，一个是函数的返回值，一个是错误信息（函数最后一个返回值通常是错误信息）。如果没有错误，那么错误信息就是 nil。
+所以 `if err != nil { panic(error.message) }` 就是判断是否有错误，如果有错误就会抛出错误（panic("error string")）或者用日志系统进行收集再 return。
 抛出错误后，就需要通过 `recover()` 函数来捕获错误，防止程序崩溃。
+
+```
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func divide(a, b int) (int, error) {
+	if b == 0 {
+    // 使用 errors.New() 函数来创建一个新的错误
+		return 0, errors.New("cannot divide by zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	result, err := divide(10, 0)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Result:", result)
+	}
+}
+```
+
+上述是一种处理错误的方式，还有一种是使用 `panic()` 和 `defer` + `recover()` 函数来处理错误。
 
 Golang 中的错误处理常用三个语句：
 - panic(err.message): 抛出一个异常，导致程序崩溃
