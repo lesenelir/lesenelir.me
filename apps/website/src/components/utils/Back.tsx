@@ -7,7 +7,7 @@ export default function Back() {
 
   return (
     <>
-      <span className={'back-span'} onClick={() => router.back()}>
+      <span className={'back-span'} onClick={() => router.push('/posts')}>
         Back
       </span>
     </>

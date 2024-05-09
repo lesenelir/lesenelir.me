@@ -7,7 +7,7 @@ export default function Cd() {
 
   return (
     <div className={'cd-container'}>
-      <span onClick={() => router.back()}>
+      <span onClick={() => router.push('/posts')}>
         <span className={'mr-2 font-medium'}>&gt;</span>
         <a className={'underline underline-offset-2'}>
           cd {' '}.{' '}.
