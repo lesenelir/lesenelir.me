@@ -1068,7 +1068,8 @@ type interfaceNamer interface {
 ```
 
 上述是接口的定义，这和自定义类型一致，其中 `interface { ... }` 代表了一种类型。
-与结构体不同的是，结构体是定义了属性，而接口更多是对方法的抽象封装。接口名一般都常用 er 结尾。
+与结构体不同的是，结构体是定义了属性，而接口更多是对方法的抽象封装。
+所以结构体和接口就可以明确的来表述一个对象了。接口名一般都常用 er 结尾。
 
 如果一个结构体的绑定了所有接口的方法，那么这个结构体就实现了这个接口，这个**结构体实例对象就可以赋值给这个接口类型的变量**，
 即**结构体实例对象就是接口类型的变量**。
@@ -1117,7 +1118,7 @@ func main() {
 但需要注意的是，由于结构体方法的接收者一般都是指针类型，所以当结构体实现了接口的所有方法后，
 是将结构体实例对象的指针赋值给接口类型的变量，而不能将结构体实例对象赋值给接口类型的变量。
 
-这和 TypeScript 不同，TypeScript 中的接口如果是对类进行抽象，不仅可以描述方法还可以描述属性，
+这和 TypeScript 不同，TypeScript 中的接口如果是对类进行抽象，不仅可以描述方法还可以描述属性（但接口一般都是用来描述**方法**而不是描述属性），
 并且在 TypeScript 中是用 `implements` 关键字来实现接口的，而 Golang 中是隐式实现的。
 
 Golang 隐式实现接口的好处是：实现多接口的情况，相对而言就更加简单了。
@@ -1146,6 +1147,64 @@ func (d *Dog) sleep() {
 
 其实，我个人觉得，Golang 中如果有一个语法：`type structName struct implements interfaceName { ... }` 会是一个比较不错的选择😄，这样就可以明确知道这个结构体实现了哪些接口。
 但这种方式，解耦性就会降低，使得当前的 struct 和 interface 之间的耦合性增加，所以 Golang 中没有这种语法也是有它的道理的。
+
+接口和结构体共同解决了 Golang 中的面向对象编程的问题。接下来介绍一下多接口的合并和继承。
+
+在 TypeScript 中，接口是可以继承，继承后的接口是一个更加具体的类型，具体表述如下：
+
+```
+interface A {
+  methodA(): void
+}
+
+interface B extends A {
+  methodB(): void
+}
+
+// B 接口继承了 A 接口
+// interface B {
+//   methodA(): void
+//   methodB(): void
+// }
+
+class Test implements B {
+  methodA() {
+    console.log('methodA')
+  }
+
+  methodB() {
+    console.log('methodB')
+  }
+}
+```
+
+上述是 TypeScript 中的接口合并和继承的概念，这样就可以将接口进行扩展，使得接口更加具体。
+
+Golang 中也有接口继承合并的概念，但是 Golang 中接口的继承概念就非常简单，只需要在接口定义的时候将父接口写在接口的后面即可。
+
+```
+type A interface {
+  methodA()
+}
+
+type B interface {
+  A
+  methodB()
+}
+
+type Test struct {}
+
+func (t *Test) methodA() {
+  fmt.Println("methodA")
+}
+
+func (t *Test) methodB() {
+  fmt.Println("methodB")
+}
+```
+
+上述的代码就是Golang 中的多接口的继承和合并，看起来非常简单，但如果你是从传统语言转过来的，可能会觉得这种方式有点不太符合直觉。
+当然这也是 Golang 是作为一门比较新的语言有关，它的面向对象的思想和传统的面向对象语言有很大的不同。
 
 最后介绍一个常见知识点，Golang 中的空接口 `interface{}`，它是所有类型的父接口，即所有类型都实现了空接口，类似于 `any`，
 但 any 类型是空接口的类型别名，即 `type any = interface{}`。对于 TypeScript 而言，一般都不希望看到 `any`，那是因为 TypeScript 的
