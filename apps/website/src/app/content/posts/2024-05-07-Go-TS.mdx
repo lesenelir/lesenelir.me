@@ -25,7 +25,20 @@
 - TypeScript 运行：`ts-node <文件名>`
 - TypeScript 编译：`tsc <文件名>`
 
-需要注意的是，Golang 编译后会生成一个可执行的二进制文件，而 TypeScript 编译后会进行 Transform 生成一个 JavaScript 文件。
+需要注意的是，Golang 编译后会生成一个可执行的二进制文件（机器码），而 TypeScript 编译后会进行 Transform 生成一个 JavaScript 文件。
+
+具体来说，TypeScript 的编译过程是：
+1. TypeScript 源码 => TypeScript AST
+2. 类型检查器检查 AST
+3. TypeScript AST => JavaScript 源码
+4. JavaScript 源码 => JavaScript AST
+5. JavaScript AST => 字节码（字节码需要有虚拟机或解释器来执行）
+6. 运行时计算字节码
+
+而 Golang 的编译过程是：
+1. Golang 源码 => Golang AST
+2. Golang AST => 机器码（二进制机器码，直接由 CPU 来执行低级指令）
+3. 运行时执行机器码
 
 
 ---
