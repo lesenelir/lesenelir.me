@@ -1088,7 +1088,7 @@ type interfaceNamer interface {
 即**结构体实例对象就是接口类型的变量**。
 
 ```
-type Animaler interface {
+type Animaler interface { // 一种类型
   speak() string
 }
 
@@ -1109,6 +1109,8 @@ func (c *Cat) speak() string {
 }
 
 func main() {
+  // dog 实现了 Animaler 接口的所有方法
+  // 可以将 dog实例 赋值给 Animaler 类型的变量（结构化类型，子类型可赋值给父类型）
   var animal Animaler
   animal = &Dog{"dog"} // 结构体指针赋值给接口类型的变量
   fmt.Println(animal.speak())
@@ -1131,8 +1133,35 @@ func main() {
 但需要注意的是，由于结构体方法的接收者一般都是指针类型，所以当结构体实现了接口的所有方法后，
 是将结构体实例对象的指针赋值给接口类型的变量，而不能将结构体实例对象赋值给接口类型的变量。
 
-这和 TypeScript 不同，TypeScript 中的接口如果是对类进行抽象，不仅可以描述方法还可以描述属性（但接口一般都是用来描述**方法**而不是描述属性），
-并且在 TypeScript 中是用 `implements` 关键字来实现接口的，而 Golang 中是隐式实现的。
+这一点上和 TypeScript 类似，TypeScript 中的接口（interface）如果是对类进行描述的化，那么接口是抽象方法的集合，而不是用来描述属性。
+与 Golang 中不同的一点是，TypeScript 需要用 `implements` 关键字来实现接口，而 Golang 中是隐式实现的。
+
+```
+// ts interface
+interface Animaler {
+  speak(): string
+}
+
+class Dog implements Animaler {
+  name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
+
+  speak() {
+    return "wang wang"
+  }
+}
+
+const dog = new Dog("dog")
+cont animal: Animaler = dog // 可以进行赋值
+```
+
+不管是上述 Golang 语法，还是 TypeScript 语法，对于实现接口后，都可以将实例后的对象赋值给接口变量。为什么可以这么做呢？
+这是因为，在 Golang 和 TypeScript 都遵循结构化类型系统。比如，上述 TypeScript 代码中，`Dog` 类实现了 `Animaler` 接口，
+新创建的 `dog` 实例对象已经有了 `speak` 方法，此时就可以直接赋值给 `Animaler` 类型的变量，更何况 `dog` 实例对象还有 `name` 属性，
+这更加说明，当前的 `dog` 实例类型是 `Animaler` 类型的子类型。不管是在 TypeScript 还是 Golang 中，都可以将子类型赋值给父类型。
 
 Golang 隐式实现接口的好处是：实现多接口的情况，相对而言就更加简单了。
 
