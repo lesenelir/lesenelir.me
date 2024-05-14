@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "module": "ESNext",                                  /* Specify what module code is generated. */
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],            /* Specify library files to be included in the compilation. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
     "declaration": true,                                 /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
     "declarationMap": true,                              /* Create sourcemaps for d.ts files. */
@@ -10,8 +11,13 @@
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "allowSyntheticDefaultImports": true,                /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+
     "strict": true,                                      /* Enable all strict type-checking options. */
+    "noUnusedLocals": true,                              /* Report errors on unused locals. */
+    "noUnusedParameters": true,                          /* Report errors on unused parameters. */
+    "noFallthroughCasesInSwitch": true,                  /* Report errors for fallthrough cases in a switch statement. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+
     "baseUrl": "./",                                     /* Base directory to resolve non-absolute module names. */
     "paths": {
       "@/*": ["src/*"],
