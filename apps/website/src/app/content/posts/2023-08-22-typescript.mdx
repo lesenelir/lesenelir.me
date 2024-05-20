@@ -88,6 +88,53 @@ type Union5 = (string | number | boolean) & any // any  特殊情况
 `}
 </SyntaxHighlighter>
 
+<SyntaxHighlighter language="typescript" style={nord}>
+  {`type TCat = {
+  name: string
+  purrs: boolean
+}
+
+type TDog = {
+  name: string
+  barks: boolean
+  wags: boolean
+}
+
+type CatOrDogOrBoth = TCat | TDog
+
+type CatAndDog = TCat & TDog // 类型更具体
+
+const catAndDog: CatAndDog = { // 一定要满足 TCat 和 TDog 中所有的属性
+  name: 'foo',
+  purrs: true,
+  barks: true,
+  wags: true,
+}
+
+interface ICat {
+  name: string
+  purrs: boolean
+}
+
+interface IDog {
+  name: string
+  barks: boolean
+  wags: boolean
+}
+
+interface CatOrDogOrBoth2 extends ICat, IDog {} // 类型更具体
+
+// 一定要满足 TCat 和 TDog 中所有的属性
+const catAndDog2: CatOrDogOrBoth2 = {
+  name: 'foo',
+  purrs: true,
+  barks: true,
+  wags: true,
+}
+`}
+</SyntaxHighlighter>
+
+
 如上代码所示，类型表示的范围越小则类型越具体，而 `&`  就是为了缩小类型的范围，从而让类型更加的具体。
 
 需要注意的，如果按照我们的理解：「`&` 操作符会让类型更加的具体、精准」，那么这里有个特殊情况，即类型名为`Union5`。`(string | number | boolean) ` 显然是要比 `any` 更具体的类型，为什么 `&` 后得到的类型是更通用的类型 any 呢？我能想到的解释是，`any` 类型比较特殊，我们把它看作一个通配符即可。
@@ -264,7 +311,6 @@ type Wrapped<T> = [T] extends [boolean] ? "Y" : "N"
 type Res1 = Naked<number | boolean> // "N" | "Y"
 
 type Res2 = Wrapped<number | boolean> // "N"
-
 `}
 </SyntaxHighlighter>
 
