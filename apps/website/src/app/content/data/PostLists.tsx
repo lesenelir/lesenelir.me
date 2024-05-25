@@ -10,6 +10,12 @@ interface IPosts {
 
 export const postData: IPosts[] = [
   {
+    name: "Go 并发编程浅析",
+    href: '/posts/go-concurrency',
+    file: '2024-05-20-Go-Concurrency',
+    date: 'May 20, 2024 ⋅ 20 min'
+  },
+  {
     name: 'Go 与 TS 语法差异',
     href: '/posts/go-ts',
     file: '2024-05-07-Go-TS',
