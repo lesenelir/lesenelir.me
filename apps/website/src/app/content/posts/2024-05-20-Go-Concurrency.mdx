@@ -465,9 +465,92 @@ func main() {
 
 
 ---
+### 9. Context
+
+Context 是 Golang 中的一个标准库，主要功能是在多个 Goroutine 之间传递上下文信息，包括：取消信号、超时控制（截止时间）、key-value 等。
+相同的 context 可以运行在不同的 G 中。Context 总结一句：可以在不同的 G 中同步请求特定数据、取消信号以及处理请求截止时间。
+
+当一个 client 向 server 发出请求的时候，假设 server 侧需要 10 秒来返回内容，但当 client 在 2 秒的时候进行中断请求（用户不想要请求结果了），这种情况下，
+server 还是会处理用户发出的请求。这是我们不愿意看到的，这会造成资源的浪费。所以，当用户切断请求的时候，server 需要知道用户的请求被取消，这个就是 context 最常见的场景，
+即在不同的 G 之间同步取消信号。
+
+Context 的数据结构类型如下：
+
+```
+type Context interface {
+  Deadline() (deadline time.Time, ok bool) // 返回被取消的时间
+  Done() <-chan struct{} // 当 context 被取消或超时，返回一个信号
+  Err() error
+  Value(key interface{}) interface{}
+}
+```
+
+Context 分为两种类型：
+- 根 Context
+- 派生 Context
+
+空 Context 是一个根 Context，它不能被取消，没有截止时间，没有值。`context.Background()` 返回一个空的 Context，它是所有 Context 树的根节点。
+
+派生 Context 是从一个已有的 Context 中派生出来的，派生 Context 会继承父 Context 的截止时间、取消信号等信息。所以，当父 Context 取消时，子 Context 也会取消。
+派生出 Context 的方法有：
+
+```
+1. ctx, cancel := context.WithCancel(context.Background())
+2. ctx, cancel := context.WithDeadline(
+      context.Background(),
+      time.Now().Add(5*time.Second), // 跟一个具体的时间点
+  )
+3. ctx, cancel := context.WithTimeout(
+      context.Background(),
+      5*time.Second  // 跟一个时间段
+  )
+
+4. ctx := context.WithValue(ctx, "key", "value") // 传递共享数据
+```
+
+超时控制的场景：
+
+```
+func doSth(ctx context.Context) {
+  select {
+    case <-ctx.Done(): // 当 ctx 被取消或超时，返回一个只读 channel
+      err := ctx.Err()
+      if errors.Is(err, context.Canceled) {
+        fmt.Println("context canceled")
+      } else if errors.Is(err, context.DeadlineExceeded){
+        fmt.Println("context deadline exceeded")
+      }
+    // 当过去 3s 后，会向这个 channel 发送一个当前时间
+    // 监听到时间，说明已经过去 3s
+    case <-time.After(3 * time.Second): // 3s 后返回一个只读 channel
+      fmt.Println("doing sth")
+  }
+}
+
+func main() {
+  ctx := context.Background()
+  ctx, cancel := context.WithCancel(ctx)
+
+  go func() {
+    // time.Sleep(5 * time.Second)
+    time.Sleep(2 * time.Second)
+    cancel()
+  }()
+
+  doSth(ctx)
+}
+```
+
+上述超时控制的场景中，当 `time.Sleep(2 * time.Second)` 时，会在 2s 后向 `ctx.Done()` 发送一个信号，此时 `ctx.Done()` 会被 select 监听到，从而执行对应的取消信号 case。
+当 `time.Sleep(5 * time.Second)` 时，会在 5s 后向 `ctx.Done()` 发送一个信号，但由于在 3s 时，select 会监听到 `time.After(3 * time.Second)` 返回 channel 的信号，所以会执行对应的 case 语句。
+
+
+---
 ### Wrapping Up
 
-最近写的技术文章真的是有点多了...
+填坑「Go 与 TS 语法差异」 一文中，最后提到会写 Golang 并发编程的文章 ...
+
+已填坑 😀
 
 
 [本文谢绝一切转载，谢谢]
