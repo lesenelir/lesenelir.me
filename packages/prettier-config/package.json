@@ -1,12 +1,14 @@
 {
   "name": "@lesenelir/prettier-config",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "lesenelir's Prettier config",
   "main": "index.js",
   "scripts": {
-    "release:patch": "pnpm version patch && pnpm publish",
-    "release:minor": "pnpm version minor && pnpm publish",
-    "release:major": "pnpm version major && pnpm publish"
+    "get-version": "node -p \"require('./package.json').version\"",
+    "commit-version": "git add . && git commit -m \"chore: release v$(pnpm run --silent get-version)\"",
+    "release:patch": "pnpm version patch && pnpm run commit-version && pnpm publish",
+    "release:minor": "pnpm version minor && pnpm run commit-version && pnpm publish",
+    "release:major": "pnpm version major && pnpm run commit-version && pnpm publish"
   },
   "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config",
   "repository": {
