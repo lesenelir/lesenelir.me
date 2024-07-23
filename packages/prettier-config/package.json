@@ -1,10 +1,12 @@
 {
   "name": "@lesenelir/prettier-config",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "lesenelir's Prettier config",
   "main": "index.js",
   "scripts": {
-    "release": "pnpm publish"
+    "release:patch": "pnpm version patch && pnpm publish",
+    "release:minor": "pnpm version minor && pnpm publish",
+    "release:major": "pnpm version major && pnpm publish"
   },
   "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config",
   "repository": {
