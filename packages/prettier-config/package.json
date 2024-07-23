@@ -6,9 +6,10 @@
   "scripts": {
     "release": "pnpm publish"
   },
+  "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config"
   },
   "keywords": [
     "lesenelir",
