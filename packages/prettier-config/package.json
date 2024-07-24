@@ -10,10 +10,10 @@
     "release:minor": "pnpm version minor && pnpm run commit-version && pnpm publish",
     "release:major": "pnpm version major && pnpm run commit-version && pnpm publish"
   },
-  "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config",
+  "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config"
+    "url": "git+https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config.git"
   },
   "keywords": [
     "lesenelir",
