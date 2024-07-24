@@ -16,7 +16,8 @@
     "build": "bunchee src/index.ts",
     "dev": "bunchee src/index.ts -w",
     "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules",
-    "@lesenelir/create-ts-starter": "node dist/bin/index.js"
+    "@lesenelir/create-ts-starter": "node dist/bin/index.js",
+    "release:patch": "npm version patch && npm publish"
   },
   "dependencies": {
     "fs-extra": "^11.2.0",
