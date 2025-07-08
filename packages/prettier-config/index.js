@@ -1,9 +1,10 @@
 /** @type {import('prettier').Config} */
 module.exports = {
-  printWidth: 80,
+  printWidth: 100,
   tabWidth: 2,
   semi: false,
   singleQuote: true,
+  quoteProps: 'consistent',
   trailingComma: 'none',
   arrowParens: 'always',
   endOfLine: 'lf',
