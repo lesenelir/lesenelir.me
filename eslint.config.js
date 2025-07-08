@@ -24,9 +24,9 @@ export default [
   // Base configuration for all TypeScript/JavaScript files
   ...base,
 
-  // Next.js specific configuration for web app
+  // Next.js specific configuration for website app
   {
-    files: ['apps/web/**/*.{js,jsx,ts,tsx}'],
+    files: ['apps/website/**/*.{js,jsx,ts,tsx}'],
     ...next[0]
   },
 
