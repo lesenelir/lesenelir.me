@@ -1,3 +1,3 @@
 export default function Home() {
-  return <div className={'bg-red-100'}>hello</div>
+  return <div className={'bg-background font-comic text-lg'}>Lesenelir Zhou</div>
 }

@@ -1,0 +1,5 @@
+@theme {
+  --font-comic: Comic Sans MS;
+
+  --color-background: oklch(var(--lz-background));
+}

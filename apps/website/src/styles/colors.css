@@ -1,0 +1,7 @@
+[data-theme='light'] {
+  --lz-background: 0.9911 0 0;
+}
+
+[data-theme='dark'] {
+  --lz-background: 0.1987 0.0025 145.48;
+}
