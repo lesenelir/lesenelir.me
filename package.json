@@ -13,6 +13,7 @@
   "type": "module",
   "scripts": {
     "build:website": "pnpm --filter @lesenelir/website build",
+    "clear": "pnpm -r exec rm -rf node_modules dist .turbo .next && rm -rf node_modules dist .turbo .next",
     "dev:website": "pnpm --filter @lesenelir/website dev",
     "format:check": "prettier . --check",
     "format:write": "prettier . --write",
