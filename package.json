@@ -16,17 +16,22 @@
     "dev:website": "pnpm --filter @lesenelir/website dev",
     "format:check": "prettier . --check",
     "format:write": "prettier . --write",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepare": "husky install"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,cjs,mjs}": [
+      "eslint --fix",
       "prettier --write"
     ],
     "package.json": "prettier --write",
     "*.{css,md}": "prettier --write"
   },
   "devDependencies": {
+    "@lesenelir/eslint-config": "workspace:*",
     "@lesenelir/prettier-config": "workspace:*",
+    "eslint": "^9.30.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2"
