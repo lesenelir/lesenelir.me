@@ -94,19 +94,19 @@ importers:
   packages/prettier-config:
     dependencies:
       '@ianvs/prettier-plugin-sort-imports':
-        specifier: ^4.3.1
+        specifier: ^4.4.2
         version: 4.4.2(prettier@3.6.2)
       prettier:
-        specifier: ^3.3.3
+        specifier: ^3.6.2
         version: 3.6.2
       prettier-plugin-packagejson:
-        specifier: ^2.5.1
+        specifier: ^2.5.18
         version: 2.5.18(prettier@3.6.2)
       prettier-plugin-sort-json:
-        specifier: ^4.0.0
+        specifier: ^4.1.1
         version: 4.1.1(prettier@3.6.2)
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.5
+        specifier: ^0.6.13
         version: 0.6.13(@ianvs/prettier-plugin-sort-imports@4.4.2(prettier@3.6.2))(prettier@3.6.2)
 
 packages:
