@@ -3,6 +3,7 @@
   "version": "0.0.9",
   "description": "lesenelir's Prettier config",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "get-version": "node -p \"require('./package.json').version\"",
     "commit-version": "git add . && git commit -m \"chore: release v$(pnpm run --silent get-version)\"",
