@@ -6,6 +6,11 @@
     "lesenelir",
     "eslint config"
   ],
+  "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/eslint-config#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lesenelir/lesenelir.me/tree/master/packages/eslint-config.git"
+  },
   "license": "MIT",
   "author": "lesenelir <hi@lesenelir.me>",
   "type": "module",
@@ -19,7 +24,13 @@
   "files": [
     "*.js"
   ],
-  "scripts": {},
+  "scripts": {
+    "commit-version": "git add . && git commit -m \"chore: release v$(pnpm run --silent get-version)\"",
+    "get-version": "node -p \"require('./package.json').version\"",
+    "release:major": "pnpm version major && pnpm run commit-version && pnpm publish",
+    "release:minor": "pnpm version minor && pnpm run commit-version && pnpm publish",
+    "release:patch": "pnpm version patch && pnpm run commit-version && pnpm publish"
+  },
   "dependencies": {
     "@eslint/js": "^9.30.1",
     "@next/eslint-plugin-next": "^15.3.5",
