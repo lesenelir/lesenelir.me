@@ -1,7 +1,8 @@
 # Lesenelir.me
 
 ## Introduction
-This project is about a personal website and personal configuration.
+
+This project is a collection of my personal projects and tools, primarily focused on TypeScript and web development.
 
 ## Projects
 
@@ -12,4 +13,3 @@ This project is about a personal website and personal configuration.
   - `pnpm create @lesenelir/ts-starter`
   - `yarn create @lesenelir/ts-starter`
   - `npm create @lesenelir/ts-starter@latest`
-

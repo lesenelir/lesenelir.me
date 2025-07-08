@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-import fse from 'fs-extra'
-import path from 'node:path'
-import prompts from 'prompts'
-import fsPromises from 'node:fs/promises'
-import { red, green, bold } from 'kolorist'
 import { existsSync, readdirSync } from 'node:fs'
+import fsPromises from 'node:fs/promises'
+import path from 'node:path'
+
+import fse from 'fs-extra'
+import { bold, green, red } from 'kolorist'
+import prompts from 'prompts'
 
 // check if the package name is valid
 // unValid package name: MyProject | @my-scope/ | -my-project
 function isValidPackageName(projectName: string): boolean {
-  return /^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(
-    projectName
-  )
+  return /^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(projectName)
 }
 
 function toValidPackageName(projectName: string) {
@@ -22,7 +21,6 @@ function toValidPackageName(projectName: string) {
     .replace(/^[._]/, '')
     .replace(/[^a-z0-9-~]+/g, '-')
 }
-
 
 function canSafelyOverwrite(dir: string): boolean {
   const directoryExists = existsSync(dir)
@@ -46,7 +44,7 @@ async function main() {
   }
 
   try {
-    result = (await prompts(
+    result = await prompts(
       [
         {
           type: 'text',
@@ -82,8 +80,7 @@ async function main() {
           throw new Error(red('✖') + ' Operation cancelled')
         }
       }
-    ))
-
+    )
   } catch (e) {
     if (e instanceof Error) {
       console.log(e.message)
@@ -102,7 +99,7 @@ async function main() {
 
   const pkg = {
     name: packageName ?? toValidPackageName(targetDir),
-    version: '0.0.0',
+    version: '0.0.0'
   }
 
   console.log('Setting up project ...')
@@ -122,10 +119,7 @@ async function main() {
   fse.copySync(templateDir, root)
 
   if (existsSync(path.join(root, 'gitignore'))) {
-    await fsPromises.rename(
-      path.join(root, 'gitignore'),
-      path.join(root, '.gitignore')
-    )
+    await fsPromises.rename(path.join(root, 'gitignore'), path.join(root, '.gitignore'))
   }
 
   await fsPromises.writeFile(
@@ -142,11 +136,7 @@ async function main() {
 
   // -----------------------------------------------------------------------------------
   const manager = process.env.npm_config_user_agent ?? ''
-  const packageManager = /pnpm/.test(manager)
-    ? 'pnpm'
-    : /yarn/.test(manager)
-      ? 'yarn'
-      : 'npm'
+  const packageManager = /pnpm/.test(manager) ? 'pnpm' : /yarn/.test(manager) ? 'yarn' : 'npm'
 
   const commandsMap = {
     install: {

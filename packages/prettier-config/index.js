@@ -16,11 +16,11 @@ export default {
   ],
   // options for prettier-plugin-sort-json
   ...{
-    jsonRecursiveSort: true,
+    jsonRecursiveSort: true
   },
   // options for prettier-plugin-tailwindcss
   ...{
-    tailwindFunctions: ['cva', 'cn'],
+    tailwindFunctions: ['cva', 'cn']
   },
   // options for @ianvs/prettier-plugin-sort-imports
   importOrder: [
@@ -45,6 +45,6 @@ export default {
 
     '^(?!.*[.]css$)[./].*$',
     '.css$',
-    '',
+    ''
   ]
 }

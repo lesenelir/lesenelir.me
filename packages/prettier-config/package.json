@@ -2,30 +2,30 @@
   "name": "@lesenelir/prettier-config",
   "version": "0.0.9",
   "description": "lesenelir's Prettier config",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "get-version": "node -p \"require('./package.json').version\"",
-    "commit-version": "git add . && git commit -m \"chore: release v$(pnpm run --silent get-version)\"",
-    "release:patch": "pnpm version patch && pnpm run commit-version && pnpm publish",
-    "release:minor": "pnpm version minor && pnpm run commit-version && pnpm publish",
-    "release:major": "pnpm version major && pnpm run commit-version && pnpm publish"
-  },
+  "keywords": [
+    "lesenelir",
+    "prettier config"
+  ],
   "homepage": "https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lesenelir/lesenelir.me/tree/master/packages/prettier-config.git"
   },
-  "keywords": [
-    "lesenelir",
-    "prettier config"
-  ],
+  "license": "MIT",
+  "author": "lesenelir <hi@lesenelir.me>",
+  "type": "module",
+  "main": "index.js",
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "commit-version": "git add . && git commit -m \"chore: release v$(pnpm run --silent get-version)\"",
+    "get-version": "node -p \"require('./package.json').version\"",
+    "release:major": "pnpm version major && pnpm run commit-version && pnpm publish",
+    "release:minor": "pnpm version minor && pnpm run commit-version && pnpm publish",
+    "release:patch": "pnpm version patch && pnpm run commit-version && pnpm publish"
+  },
   "prettier": "./index.js",
-  "author": "lesenelir <hi@lesenelir.me>",
-  "license": "MIT",
   "dependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
     "prettier": "^3.6.2",
