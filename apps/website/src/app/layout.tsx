@@ -20,8 +20,23 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Lesenelir Zhou',
-  description: "Lesenelir Zhou's personal website"
+  title: {
+    default: 'Lesenelir Zhou',
+    template: '%s - Lesenelir Zhou'
+  },
+  description: "Lesenelir Zhou's personal website",
+  authors: [
+    {
+      name: 'Lesenelir Zhou',
+      url: 'https://lesenelir.me'
+    },
+    {
+      name: 'Lesenelir Zhou',
+      url: 'https://github.com/lesenelir'
+    }
+  ],
+  creator: 'Lesenelir Zhou',
+  publisher: 'Lesenelir Zhou'
 }
 
 export default function RootLayout({
