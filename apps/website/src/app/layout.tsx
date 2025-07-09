@@ -1,11 +1,12 @@
 import React from 'react'
 
-import { ThemeProvider } from 'next-themes'
 import { Geist, Geist_Mono } from 'next/font/google'
 import type { Metadata } from 'next'
 
 import '@/styles/main.css'
 
+import { Providers } from '@/components/common/providers'
+import { Sidebar } from '@/components/common/sidebar'
 import { cn } from '@/lib/utils'
 
 const geistSans = Geist({
@@ -30,8 +31,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(geistSans.variable, geistMono.variable, 'bg-background antialiased')}>
-        <ThemeProvider>{children}</ThemeProvider>
+      <body
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          'bg-background flex p-16 antialiased'
+        )}
+      >
+        <Providers>
+          <Sidebar />
+          {children}
+        </Providers>
       </body>
     </html>
   )

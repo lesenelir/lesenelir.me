@@ -1,3 +1,3 @@
 export default function Home() {
-  return <div className={'bg-background font-comic text-lg'}>Lesenelir Zhou</div>
+  return <main className={'border-l pl-16'}>home</main>
 }
