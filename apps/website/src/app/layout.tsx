@@ -52,6 +52,7 @@ export default function RootLayout({
           geistMono.variable,
           'bg-background flex p-16 antialiased'
         )}
+        suppressHydrationWarning
       >
         <Providers>
           <Sidebar />
