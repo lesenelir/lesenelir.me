@@ -6,6 +6,8 @@ import type { Metadata } from 'next'
 
 import '@/styles/main.css'
 
+import { cn } from '@/lib/utils'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin']
@@ -28,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={cn(geistSans.variable, geistMono.variable, 'bg-background antialiased')}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
