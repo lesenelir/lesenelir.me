@@ -1,9 +1,15 @@
 @plugin '@egoist/tailwindcss-icons';
 
 @theme {
+  /* font family */
   --font-comic: Comic Sans MS;
   --font-eduTasBeginner: Edu TAS Beginner;
   --font-cormorant: Cormorant Upright;
+  --font-cursive: cursive;
 
+  /* color */
   --color-background: oklch(var(--lz-background));
+  --color-text-foreground: oklch(var(--lz-text-foreground));
+  --color-text-primary: oklch(var(--lz-text-primary));
+  --color-dividing: var(--lz-dividing);
 }

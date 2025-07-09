@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <main className={'border-l pl-16'}>posts</main>
+  return <main className={'border-dividing border-l pl-16'}>posts</main>
 }
