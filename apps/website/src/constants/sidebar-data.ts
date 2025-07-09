@@ -9,7 +9,7 @@ export const sidebarData: TSidebarData[] = [
   {
     id: 1,
     title: 'posts',
-    href: '/blog'
+    href: '/posts'
   },
   {
     id: 2,
