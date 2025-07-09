@@ -1,5 +1,7 @@
 @theme {
   --font-comic: Comic Sans MS;
+  --font-eduTasBeginner: Edu TAS Beginner;
+  --font-cormorant: Cormorant Upright;
 
   --color-background: oklch(var(--lz-background));
 }
