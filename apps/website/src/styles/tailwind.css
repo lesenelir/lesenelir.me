@@ -1,3 +1,5 @@
+@plugin '@egoist/tailwindcss-icons';
+
 @theme {
   --font-comic: Comic Sans MS;
   --font-eduTasBeginner: Edu TAS Beginner;
