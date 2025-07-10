@@ -33,7 +33,19 @@ export default function Page() {
           </a>
         </p>
 
-        <p>Mail me: hi@lesenelir.me</p>
+        <p>
+          Mail me:{' '}
+          <a
+            href={'mailto:hi@lesenelir.me'}
+            className={cn(
+              'inline-flex w-fit items-center gap-1',
+              'relative after:absolute after:bottom-0.5 after:left-0 after:h-px after:w-full',
+              'after:bg-text-primary/50 hover:after:bg-text-primary after:transition-colors after:duration-200'
+            )}
+          >
+            hi@lesenelir.me
+          </a>
+        </p>
       </div>
     </>
   )
