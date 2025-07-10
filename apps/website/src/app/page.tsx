@@ -9,8 +9,8 @@ export default function Page() {
         <p>Hello, I'm lesenelir, a software engineer who loves building anything.</p>
 
         <p>
-          Currently working and living in Beijing. Current time in Beijing: xxx. I have previously
-          lived in Quzhou, Wuhan, and Guangzhou.
+          Beijing is where I currently work and live. Local time here: xxx. My life journey has
+          taken me through Quzhou, Wuhan, and Guangzhou.
         </p>
 
         <p>Besides coding, I also enjoy sleeping, movies, photography, and rock music.</p>
