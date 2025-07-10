@@ -10,8 +10,8 @@ export default function Page() {
         <p>Hello, I'm lesenelir, a software engineer who loves building anything.</p>
 
         <p>
-          Beijing is where I currently work and live. Local time here: <TimeClock />. My life
-          journey has taken me through Quzhou, Wuhan, and Guangzhou.
+          Beijing is where I currently work and live. Local time here: <TimeClock />. Prior to
+          Beijing, My life journey has taken me to live in Quzhou, Wuhan, and Guangzhou.
         </p>
 
         <p>Besides coding, I also enjoy sleeping, movies, photography, and rock music.</p>
