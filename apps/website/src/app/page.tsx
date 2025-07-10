@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <main className={'border-dividing ml-24 min-h-96 border-l pl-16'}>
+    <div>
       <p>Hi</p>
       <p>Hi</p>
       <p>Hi</p>
@@ -69,6 +69,6 @@ export default function Home() {
       <p>Hi</p>
       <p>Hi</p>
       <p>Hi</p>
-    </main>
+    </div>
   )
 }
