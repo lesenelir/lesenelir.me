@@ -37,7 +37,7 @@
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2"
   },
-  "packageManager": "pnpm@10.12.4",
+  "packageManager": "pnpm@10.13.1",
   "engines": {
     "node": ">=20.18.0"
   }
