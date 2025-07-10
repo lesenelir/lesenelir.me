@@ -1,3 +1,4 @@
+import TimeClock from '@/components/common/time-clock'
 import { cn } from '@/lib/utils'
 
 export default function Page() {
@@ -9,8 +10,8 @@ export default function Page() {
         <p>Hello, I'm lesenelir, a software engineer who loves building anything.</p>
 
         <p>
-          Beijing is where I currently work and live. Local time here: xxx. My life journey has
-          taken me through Quzhou, Wuhan, and Guangzhou.
+          Beijing is where I currently work and live. Local time here: <TimeClock />. My life
+          journey has taken me through Quzhou, Wuhan, and Guangzhou.
         </p>
 
         <p>Besides coding, I also enjoy sleeping, movies, photography, and rock music.</p>
