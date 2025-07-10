@@ -47,11 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={cn(
-          geistSans.variable,
-          geistMono.variable,
-          'bg-background flex p-16 antialiased'
-        )}
+        className={cn(geistSans.variable, geistMono.variable, 'bg-background p-16 antialiased')}
         suppressHydrationWarning
       >
         <Providers>

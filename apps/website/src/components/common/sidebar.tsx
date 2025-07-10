@@ -10,7 +10,11 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className={'text-text-foreground font-cursive mr-16 flex flex-col gap-3'}>
+    <aside
+      className={
+        'text-text-foreground font-cursive fixed left-16 top-16 mr-16 flex h-auto flex-col gap-3'
+      }
+    >
       {sidebarData.map((item) => (
         <Link
           key={item.id}
