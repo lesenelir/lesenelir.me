@@ -53,7 +53,7 @@ export default function RootLayout({
       >
         <Providers>
           <Sidebar />
-          <main className={'border-dividing ml-24 min-h-96 border-l pl-16'}>
+          <main className={'border-dividing ml-24 min-h-96 max-w-2xl border-l pl-16'}>
             <PageTransition>{children}</PageTransition>
           </main>
         </Providers>
