@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 
 import '@/styles/main.css'
 
+import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
 import { cn } from '@/lib/utils'
@@ -52,7 +53,7 @@ export default function RootLayout({
       >
         <Providers>
           <Sidebar />
-          {children}
+          <PageTransition>{children}</PageTransition>
         </Providers>
       </body>
     </html>

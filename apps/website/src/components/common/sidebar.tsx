@@ -12,7 +12,7 @@ export function Sidebar() {
   return (
     <aside
       className={
-        'text-text-foreground font-cursive fixed left-16 top-16 mr-16 flex h-auto flex-col gap-3'
+        'text-text-foreground font-cursive fixed left-16 top-16 z-50 mr-16 flex h-auto flex-col gap-3'
       }
     >
       {sidebarData.map((item) => (
