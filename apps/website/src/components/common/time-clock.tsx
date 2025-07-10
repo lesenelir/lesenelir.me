@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 export default function TimeClock() {
-  const [currentTime, setCurrentTime] = useState('')
+  const [currentTime, setCurrentTime] = useState('--:--')
   const [showColon, setShowColon] = useState(true)
 
   useEffect(() => {
