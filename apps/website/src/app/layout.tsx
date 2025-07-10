@@ -48,12 +48,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={cn(geistSans.variable, geistMono.variable, 'bg-background p-16 antialiased')}
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          'bg-background antialiased max-sm:p-6 sm:p-16'
+        )}
         suppressHydrationWarning
       >
         <Providers>
           <Sidebar />
-          <main className={'border-dividing ml-24 min-h-96 max-w-2xl border-l pl-16'}>
+          <main
+            className={
+              'border-dividing min-h-96 max-w-2xl max-sm:mt-12 max-sm:border-t max-sm:pt-16 sm:ml-24 sm:border-l sm:pl-16'
+            }
+          >
             <PageTransition>{children}</PageTransition>
           </main>
         </Providers>
