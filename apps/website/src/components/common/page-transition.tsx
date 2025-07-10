@@ -10,10 +10,12 @@ interface PageTransitionProps {
 
 const pageVariants = {
   initial: {
-    opacity: 0
+    opacity: 0,
+    filter: 'blur(2px)'
   },
   in: {
-    opacity: 1
+    opacity: 1,
+    filter: 'blur(0px)'
   },
   out: {
     opacity: 0,
@@ -24,7 +26,7 @@ const pageVariants = {
 const pageTransition = {
   type: 'tween' as const,
   ease: 'easeInOut' as const,
-  duration: 0.3
+  duration: 0.38
 }
 
 export function PageTransition({ children }: PageTransitionProps) {
