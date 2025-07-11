@@ -7,5 +7,4 @@ export type TPostMetadata = {
 export type TPost = {
   id: string
   metadata: TPostMetadata
-  content: string
 }

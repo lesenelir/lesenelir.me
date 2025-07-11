@@ -15,12 +15,11 @@ export function getAllPosts(): TPost[] {
       const id = name.replace(/\.mdx$/, '')
       const fullPath = path.join(postsDirectory, name)
       const fileContents = fs.readFileSync(fullPath, 'utf8')
-      const { data, content } = matter(fileContents)
+      const { data } = matter(fileContents)
 
       return {
         id,
-        metadata: data as TPost['metadata'],
-        content
+        metadata: data as TPost['metadata']
       }
     })
     .sort((a, b) => {
@@ -28,19 +27,23 @@ export function getAllPosts(): TPost[] {
     })
 }
 
-export function getPost(id: string): TPost | null {
+export function getPostMetadata(id: string): TPost['metadata'] | null {
   try {
     const fullPath = path.join(postsDirectory, `${id}.mdx`)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { data, content } = matter(fileContents)
+    const { data } = matter(fileContents)
 
-    return {
-      id,
-      metadata: data as TPost['metadata'],
-      content
-    }
+    return data as TPost['metadata']
   } catch (_e) {
-    // If the post is not found, return null
+    return null
+  }
+}
+
+export async function getPostComponent(id: string) {
+  try {
+    const component = await import(`../../content/posts/${id}.mdx`)
+    return component.default
+  } catch (_e) {
     return null
   }
 }
