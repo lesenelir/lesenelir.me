@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div>post id</div>
+  return <>post id page</>
 }
