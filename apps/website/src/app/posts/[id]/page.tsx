@@ -6,11 +6,12 @@ import type { Metadata } from 'next'
 import { getPost } from '@/lib/mdx'
 
 type TProps = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: TProps): Promise<Metadata> {
-  const post = getPost(params.id)
+  const { id } = await params
+  const post = getPost(id)
 
   if (!post) {
     return {
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: TProps): Promise<Metadata> {
   }
 }
 
-export default function Page({ params }: TProps) {
-  const post = getPost(params.id)
+export default async function Page({ params }: TProps) {
+  const { id } = await params
+  const post = getPost(id)
 
   if (!post) {
     notFound()
