@@ -1,6 +1,4 @@
-import {
-  ImageMdx
-} from "../../src/components/common/Image-mdx"
+import { ImageMdx } from '../../src/components/common/Image-mdx'
 
 今年当我开始专注于编码的时候，递归这种程序设计一直是我比较头疼的问题。一来若说它简单，代码层面来看确实很简单；但若说它很难，从思维层面模拟整个代码执行过程又是一件相对而言比较困难的事情。所以很多人包括我在内，也很难彻底的领悟递归这种程序设计。
 
@@ -63,7 +61,7 @@ main()
 >
 > A：`return 0`代表结束函数的返回值是0，如果该函数调用语句是一个赋值语句，则变量值为0；`return`仅仅代表结束当前函数调用（函数的`return`相当于函数调用栈的pop操作）
 
-------
+---
 
 ### 递归调用栈
 
@@ -84,7 +82,7 @@ main()
 
 ```javascript
 const arr = [0, 1, 2],
-      len = arr.length
+  len = arr.length
 
 // 正向打印数组元素
 for (let i = 0; i < len; i++) {
@@ -103,7 +101,7 @@ for (let i = len - 1; i >= 0; i--) {
 
 ```javascript
 const arr = [0, 1, 2],
-      len = arr.length
+  len = arr.length
 
 function traversal(arr, i) {
   // 递归出口
@@ -111,20 +109,20 @@ function traversal(arr, i) {
     return
   }
 
-  console.log('arr[', i, '] = ', arr[i])  // 正序打印
+  console.log('arr[', i, '] = ', arr[i]) // 正序打印
   traversal(arr, i + 1)
-  console.log('arr[', i, '] = ', arr[i])  // 逆序打印
+  console.log('arr[', i, '] = ', arr[i]) // 逆序打印
 }
 
 traversal(arr, 0)
 // ------------------------------------
 // 最终输出结果如下：
-arr[ 0 ] =  0
-arr[ 1 ] =  1
-arr[ 2 ] =  2
-arr[ 2 ] =  2 // 从这一步开始“归操作”
-arr[ 1 ] =  1
-arr[ 0 ] =  0
+arr[0] = 0
+arr[1] = 1
+arr[2] = 2
+arr[2] = 2 // 从这一步开始“归操作”
+arr[1] = 1
+arr[0] = 0
 ```
 
 我将带你完整的讲述整个递归的过程：
@@ -160,7 +158,7 @@ arr[ 0 ] =  0
 
 > 「递」过程是进入节点；「归」过程是离开节点（节点的概念将在递归树中讲解）
 
-------
+---
 
 ### 递归树
 
@@ -174,7 +172,7 @@ function fib(n) {
     return 1
   }
 
-  return fib(n-1) + fib(n-2)
+  return fib(n - 1) + fib(n - 2)
 }
 
 fib(5)
@@ -188,7 +186,6 @@ fib(5)
 
 上述斐波那契数列代码，利用递归树遍历过程如下：
 
-
 <ImageMdx
   lightSrc={'/images/recursion.png'}
   darkSrc={'/images/recursion-dark.png'}
@@ -196,7 +193,6 @@ fib(5)
   width={2122}
   height={1061}
 />
-
 
 > 如上图所示:
 >
@@ -207,7 +203,7 @@ fib(5)
 
 fib(5) 函数执行首先去调用 fib(4) 函数，fib(4) 执行调用 fib(3) 函数，fib(3) 执行调用 fib(2) 函数，**fib(2) 函数执行完毕后向上后退至上一层 fib(3) 函数调用的语句，去执行 fib(1) 函数，等 fib(1) 函数执行完毕返回至 fib(3) 函数，此时 fib(3) 节点才完全执行完毕。依次往复，直至最顶层结点 fib(5)。**
 
-------
+---
 
 ### LeetCode问题
 
@@ -272,9 +268,9 @@ function preorderTraversal(root) {
  *     this.right = (right===undefined ? null : right)
  * }
  */
-var maxDepth = function(root) {
+var maxDepth = function (root) {
   let depth = 0,
-      maxDepth = 0
+    maxDepth = 0
 
   traversal(root)
   return maxDepth
@@ -309,7 +305,7 @@ var maxDepth = function(root) {
  *     this.right = (right===undefined ? null : right)
  * }
  */
-var maxDepth = function(root) {
+var maxDepth = function (root) {
   return getDepth(root)
 
   // 递归函数定义：找根节点的最大深度
@@ -338,9 +334,9 @@ var maxDepth = function(root) {
 [77-组合](https://leetcode.cn/problems/combinations/)
 
 ```javascript
-var combine = function(n, k) {
+var combine = function (n, k) {
   let res = [],
-      path = []
+    path = []
 
   backTracking(1)
   return res
@@ -364,7 +360,7 @@ var combine = function(n, k) {
 
 所以对于单层逻辑的遍历需要从当前节点的 index 开始，即从 startIndex 开始往树的深层开始遍历。
 
-------
+---
 
 ### Wrapping Up
 
