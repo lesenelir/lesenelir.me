@@ -23,7 +23,9 @@ export function Sidebar() {
           href={item.href}
           className={cn(
             'hover:text-text-primary/85',
-            pathname === item.href && 'text-text-primary hover:text-text-primary font-semibold'
+            (pathname === item.href ||
+              (item.href === '/posts' && pathname.startsWith('/posts/'))) &&
+              'text-text-primary hover:text-text-primary font-semibold'
           )}
         >
           {item.title}
