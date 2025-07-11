@@ -23,29 +23,20 @@ export default function Page() {
             href={'https://github.com/lesenelir'}
             rel={'noopener noreferrer'}
             className={cn(
-              'inline-flex w-fit items-center gap-1',
+              'text-link inline-flex w-fit items-center gap-1',
               'relative after:absolute after:bottom-0.5 after:left-0 after:h-px after:w-full',
-              'after:bg-text-primary/50 hover:after:bg-text-primary after:transition-colors after:duration-200'
+              'after:bg-link/85 hover:after:bg-link after:transition-colors after:duration-200'
             )}
           >
             <span className={'i-mingcute-github-line'} />
             Github
+            <span
+              className={'i-mingcute-right-line absolute -right-2.5 -top-0.5 size-3.5 -rotate-45'}
+            />
           </a>
         </p>
 
-        <p>
-          Mail me:{' '}
-          <a
-            href={'mailto:hi@lesenelir.me'}
-            className={cn(
-              'inline-flex w-fit items-center gap-1',
-              'relative after:absolute after:bottom-0.5 after:left-0 after:h-px after:w-full',
-              'after:bg-text-primary/50 hover:after:bg-text-primary after:transition-colors after:duration-200'
-            )}
-          >
-            hi@lesenelir.me
-          </a>
-        </p>
+        <p>Or mail me: hi@lesenelir.me</p>
       </div>
     </>
   )
