@@ -7,6 +7,9 @@
   --font-cormorant: Cormorant Upright;
   --font-cursive: cursive;
 
+  /* font size */
+  --text-md: 0.9375rem; /* 15px */
+
   /* color */
   --color-background: oklch(var(--lz-background));
   --color-foreground: oklch(var(--lz-foreground));

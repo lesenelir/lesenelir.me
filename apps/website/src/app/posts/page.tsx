@@ -15,7 +15,7 @@ export default function Page() {
     <>
       <h3 className={'font-comic text-text-primary mb-11'}>Posts</h3>
 
-      <div className={'text-text-primary/85 flex flex-col gap-3'}>
+      <div className={'text-text-primary/85 text-md flex flex-col gap-3'}>
         {posts.map((post) => (
           <Link
             key={post.id}
@@ -27,7 +27,7 @@ export default function Page() {
             </span>
             <div
               className={
-                'text-text-primary/60 group-hover:text-text-primary flex items-center gap-1.5 text-sm transition-all duration-200'
+                'text-text-primary/60 group-hover:text-text-primary flex items-center gap-1.5 text-[13px] transition-all duration-200'
               }
             >
               <time dateTime={post.metadata.date}>

@@ -26,7 +26,7 @@ const components = {
   ),
   h4: (props: HeadingProps) => <h4 className={'text-text-primary mb-1'} {...props} />,
   p: (props: ParagraphProps) => (
-    <p className={'text-text-primary/85 my-4 leading-relaxed'} {...props} />
+    <p className={'text-text-primary/85 text-md my-4 leading-relaxed'} {...props} />
   ),
   hr: (props: HorizontalRuleProps) => (
     <hr className={'border-dividing my-12 border-t'} {...props} />
