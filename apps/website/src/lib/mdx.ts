@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import matter from 'gray-matter'
+import type { TPost, TPostMetadata } from '@/types'
 
-import type { TPost } from '@/types'
+import { postsMetadata } from '../../content/posts/posts-metadata'
 
 const postsDirectory = path.join(process.cwd(), 'content/posts')
 
@@ -13,13 +13,15 @@ export function getAllPosts(): TPost[] {
     .filter((name) => name.endsWith('.mdx'))
     .map((name) => {
       const id = name.replace(/\.mdx$/, '')
-      const fullPath = path.join(postsDirectory, name)
-      const fileContents = fs.readFileSync(fullPath, 'utf8')
-      const { data } = matter(fileContents)
+      const metadata = postsMetadata[id]
+
+      if (!metadata) {
+        throw new Error(`Metadata not found for post: ${id}`)
+      }
 
       return {
         id,
-        metadata: data as TPost['metadata']
+        metadata
       }
     })
     .sort((a, b) => {
@@ -27,16 +29,8 @@ export function getAllPosts(): TPost[] {
     })
 }
 
-export function getPostMetadata(id: string): TPost['metadata'] | null {
-  try {
-    const fullPath = path.join(postsDirectory, `${id}.mdx`)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { data } = matter(fileContents)
-
-    return data as TPost['metadata']
-  } catch (_e) {
-    return null
-  }
+export function getPostMetadata(id: string): TPostMetadata | null {
+  return postsMetadata[id] || null
 }
 
 export async function getPostComponent(id: string) {
