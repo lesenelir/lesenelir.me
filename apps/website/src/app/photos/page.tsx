@@ -6,5 +6,11 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <div>photos</div>
+  return (
+    <>
+      <h3 className={'font-comic text-text-primary mb-11'}>Photos</h3>
+
+      <span>WIP</span>
+    </>
+  )
 }
