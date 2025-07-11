@@ -28,26 +28,19 @@ export function getAllPosts(): TPost[] {
     })
 }
 
-//
-// export function getPost(id: string): Post | null {
-//   try {
-//     const fullPath = path.join(postsDirectory, `${id}.mdx`)
-//     const fileContents = fs.readFileSync(fullPath, 'utf8')
-//     const { data, content } = matter(fileContents)
-//
-//     return {
-//       id,
-//       metadata: data as PostMetadata,
-//       content
-//     }
-//   } catch (_error) {
-//     return null
-//   }
-// }
-//
-// export function getAllPostIds(): string[] {
-//   const fileNames = fs.readdirSync(postsDirectory)
-//   return fileNames
-//     .filter((name) => name.endsWith('.mdx'))
-//     .map((name) => name.replace(/\.mdx$/, ''))
-// }
+export function getPost(id: string): TPost | null {
+  try {
+    const fullPath = path.join(postsDirectory, `${id}.mdx`)
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data, content } = matter(fileContents)
+
+    return {
+      id,
+      metadata: data as TPost['metadata'],
+      content
+    }
+  } catch (_e) {
+    // If the post is not found, return null
+    return null
+  }
+}
