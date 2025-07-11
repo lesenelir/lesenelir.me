@@ -1,9 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { postsMetadata } from '@/constants'
 import type { TPost, TPostMetadata } from '@/types'
-
-import { postsMetadata } from '../../content/posts/posts-metadata'
 
 const postsDirectory = path.join(process.cwd(), 'content/posts')
 

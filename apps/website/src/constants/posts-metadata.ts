@@ -1,5 +1,8 @@
 import type { TPostMetadata } from '@/types'
 
+/**
+ * Metadata key is the filename of the posts folder without the `.mdx` extension.
+ */
 export const postsMetadata: Record<string, TPostMetadata> = {
   'hello-world': {
     title: 'Hello World',
