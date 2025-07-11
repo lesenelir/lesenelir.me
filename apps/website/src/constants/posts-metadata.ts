@@ -4,24 +4,19 @@ import type { TPostMetadata } from '@/types'
  * Metadata key is the filename of the posts folder without the `.mdx` extension.
  */
 export const postsMetadata: Record<string, TPostMetadata> = {
-  'hello-world': {
-    title: 'Hello World',
-    date: '2024-02-01',
-    readTime: '3 min read'
+  'global-village': {
+    title: '地球村',
+    date: '2023-10-09',
+    readTime: '08 min'
   },
   'recursion': {
     title: 'Recursion',
-    date: '2025-01-15',
-    readTime: '3 min read'
+    date: '2023-08-22',
+    readTime: '22 min'
   },
-  'web-development-tips': {
-    title: 'Web Development Tips',
-    date: '2024-01-10',
-    readTime: '5 min read'
-  },
-  'photography-journey': {
-    title: 'My Photography Journey',
-    date: '2024-07-05',
-    readTime: '4 min read'
+  'time-stopped': {
+    title: '时间已经停止，剩下就是慢慢变老',
+    date: '2022-11-18',
+    readTime: '10 min'
   }
 }
