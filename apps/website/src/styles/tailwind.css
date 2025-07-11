@@ -9,6 +9,7 @@
 
   /* color */
   --color-background: oklch(var(--lz-background));
+  --color-foreground: oklch(var(--lz-foreground));
   --color-text-foreground: oklch(var(--lz-text-foreground));
   --color-text-primary: oklch(var(--lz-text-primary));
   --color-dividing: var(--lz-dividing);
