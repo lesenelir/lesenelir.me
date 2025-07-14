@@ -4,6 +4,11 @@ import type { TPostMetadata } from '@/types'
  * Metadata key is the filename of the posts folder without the `.mdx` extension.
  */
 export const postsMetadata: Record<string, TPostMetadata> = {
+  'go-ts': {
+    title: 'Go 与 TS 语法差异',
+    date: '2024-05-07',
+    readTime: '30 min'
+  },
   'global-village': {
     title: '地球村',
     date: '2023-10-09',
