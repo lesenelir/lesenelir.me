@@ -24,14 +24,16 @@ export default function Page() {
             rel={'noopener noreferrer'}
             className={cn(
               'text-link inline-flex w-fit items-center gap-1',
-              'relative after:absolute after:bottom-0.5 after:left-0 after:h-px after:w-full',
-              'after:bg-link/85 hover:after:bg-link after:transition-colors after:duration-200'
+              'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
+              'transition-colors duration-200'
             )}
           >
             <span className={'i-mingcute-github-line'} />
             Github
             <span
-              className={'i-mingcute-right-line absolute -right-2.5 -top-0.5 size-3.5 -rotate-45'}
+              className={
+                'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'
+              }
             />
           </a>
         </p>
