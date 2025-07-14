@@ -30,7 +30,7 @@ const components = {
     <p className={'text-text-primary/85 text-md my-4 leading-relaxed'} {...props} />
   ),
   hr: (props: HorizontalRuleProps) => (
-    <hr className={'border-dividing my-12 border-t'} {...props} />
+    <hr className={'border-dividing my-12 w-1/3 border-t'} {...props} />
   ),
   strong: (props: StrongProps) => (
     <strong className={'text-text-primary font-semibold'} {...props} />
