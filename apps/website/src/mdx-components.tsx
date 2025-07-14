@@ -90,8 +90,8 @@ const components = {
   a: ({ children, href, ...props }: AnchorProps) => {
     const className = cn(
       'text-link',
-      'relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-full',
-      'after:bg-link/85 hover:after:bg-link after:transition-colors after:duration-200'
+      'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
+      'transition-colors duration-200'
     )
 
     // Internal links (Next.js)
@@ -125,7 +125,9 @@ const components = {
         <a href={href} target="_blank" rel="noopener noreferrer" className={className} {...props}>
           {children}
           <span
-            className={'i-mingcute-right-line absolute -right-2 -top-1.5 size-3.5 -rotate-45'}
+            className={
+              'i-mingcute-right-line relative -top-1.5 -ml-0.5 inline-block size-3.5 -rotate-45'
+            }
           />
         </a>{' '}
       </>
