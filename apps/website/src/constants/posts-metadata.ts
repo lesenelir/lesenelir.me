@@ -25,7 +25,7 @@ export const postsMetadata: Record<string, TPostMetadata> = {
     readTime: '08 min'
   },
   'typescript': {
-    title: 'TypeScript',
+    title: 'TS 类型系统',
     date: '2023-08-22',
     readTime: '10 min'
   },
