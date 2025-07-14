@@ -97,29 +97,38 @@ const components = {
     // Internal links (Next.js)
     if (href?.startsWith('/')) {
       return (
-        <Link href={href} className={className} {...props}>
-          {children}
-        </Link>
+        <>
+          {' '}
+          <Link href={href} className={className} {...props}>
+            {children}
+          </Link>{' '}
+        </>
       )
     }
 
     // Hash links (internal anchors)
     if (href?.startsWith('#')) {
       return (
-        <a href={href} className={className} {...props}>
-          {children}
-        </a>
+        <>
+          {' '}
+          <a href={href} className={className} {...props}>
+            {children}
+          </a>{' '}
+        </>
       )
     }
 
     // External links
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className} {...props}>
-        {children}
-        <span
-          className={'i-mingcute-right-line absolute -right-2.5 -top-1.5 size-3.5 -rotate-45'}
-        />
-      </a>
+      <>
+        {' '}
+        <a href={href} target="_blank" rel="noopener noreferrer" className={className} {...props}>
+          {children}
+          <span
+            className={'i-mingcute-right-line absolute -right-2 -top-1.5 size-3.5 -rotate-45'}
+          />
+        </a>{' '}
+      </>
     )
   }
 }
