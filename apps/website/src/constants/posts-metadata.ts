@@ -9,6 +9,11 @@ export const postsMetadata: Record<string, TPostMetadata> = {
     date: '2023-10-09',
     readTime: '08 min'
   },
+  'typescript': {
+    title: 'TypeScript',
+    date: '2023-08-22',
+    readTime: '10 min'
+  },
   'recursion': {
     title: 'Recursion',
     date: '2023-08-22',
