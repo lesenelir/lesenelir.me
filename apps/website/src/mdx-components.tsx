@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { highlight } from 'sugar-high'
 import type { MDXComponents } from 'mdx/types'
 import type { ComponentPropsWithoutRef } from 'react'
 
@@ -46,15 +47,46 @@ const components = {
       {...props}
     />
   ),
-  pre: (props: PreProps) => (
-    <pre
-      className={'bg-foreground my-4 overflow-x-auto rounded-lg p-4 font-mono text-sm'}
-      {...props}
-    />
-  ),
-  code: (props: CodeProps) => (
-    <code className={'bg-foreground rounded px-1 py-0.5 font-mono text-sm'} {...props} />
-  ),
+  pre: ({ children, ...props }: PreProps) => {
+    const codeElement = Array.isArray(children) ? children[0] : children
+    if (codeElement && typeof codeElement === 'object' && 'props' in codeElement) {
+      const code = codeElement.props.children
+      if (typeof code === 'string') {
+        return (
+          <pre
+            className={'bg-foreground my-4 overflow-x-auto rounded-lg p-4 font-mono text-sm'}
+            {...props}
+          >
+            <code dangerouslySetInnerHTML={{ __html: highlight(code) }} />
+          </pre>
+        )
+      }
+    }
+    return (
+      <pre
+        className={'bg-foreground my-4 overflow-x-auto rounded-lg p-4 font-mono text-sm'}
+        {...props}
+      >
+        {children}
+      </pre>
+    )
+  },
+  code: ({ children, ...props }: CodeProps) => {
+    if (typeof children === 'string') {
+      return (
+        <code
+          className={'bg-foreground rounded px-1 py-0.5 font-mono text-sm'}
+          dangerouslySetInnerHTML={{ __html: highlight(children) }}
+          {...props}
+        />
+      )
+    }
+    return (
+      <code className={'bg-foreground rounded px-1 py-0.5 font-mono text-sm'} {...props}>
+        {children}
+      </code>
+    )
+  },
   a: ({ children, href, ...props }: AnchorProps) => {
     const className = cn(
       'text-link',
