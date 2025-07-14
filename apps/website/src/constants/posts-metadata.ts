@@ -14,6 +14,11 @@ export const postsMetadata: Record<string, TPostMetadata> = {
     date: '2024-05-07',
     readTime: '30 min'
   },
+  'jotai': {
+    title: 'Jotai 理念与实践',
+    date: '2024-04-01',
+    readTime: '20 min'
+  },
   'global-village': {
     title: '地球村',
     date: '2023-10-09',
