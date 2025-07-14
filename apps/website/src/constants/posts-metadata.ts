@@ -16,7 +16,7 @@ export const postsMetadata: Record<string, TPostMetadata> = {
   },
   'recursion': {
     title: 'Recursion',
-    date: '2023-08-22',
+    date: '2022-12-22',
     readTime: '22 min'
   },
   'time-stopped': {
