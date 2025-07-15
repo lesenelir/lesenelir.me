@@ -20,14 +20,18 @@ export default function Page() {
           <Link
             key={post.id}
             href={`/posts/${post.id}`}
-            className={'group flex items-center justify-between'}
+            className={'group flex items-start justify-between gap-4'}
           >
-            <span className={'group-hover:text-text-primary transition-all duration-200'}>
+            <span
+              className={
+                'group-hover:text-text-primary wrap-break-word min-w-0 flex-1 leading-relaxed transition-all duration-200'
+              }
+            >
               {post.metadata.title}
             </span>
             <div
               className={
-                'text-text-primary/60 group-hover:text-text-primary flex items-center gap-1.5 text-[13px] transition-all duration-200'
+                'text-text-primary/60 group-hover:text-text-primary flex shrink-0 items-center gap-1.5 text-[13px] transition-all duration-200'
               }
             >
               <time dateTime={post.metadata.date}>
