@@ -1,66 +1,70 @@
 import React from 'react'
-import { Analytics } from '@vercel/analytics/react'
 
-import './globals.css'
-import Favicon from '/public/favicon.ico'
+import { Geist, Geist_Mono } from 'next/font/google'
+import type { Metadata } from 'next'
 
-import Mask from '@/components/header/Mask'
-import Footer from '@/components/ui/Footer'
-import Divide from '@/components/utils/Divide'
-import Provider from '@/components/theme/Provider'
-import NavbarList from '@/components/header/NavbarList'
-import HeaderClient from '@/components/header/HeaderClient'
-import MotionWrapper from '@/components/utils/motionWrapper'
+import '@/styles/main.css'
 
-interface IProps {
+import { PageTransition } from '@/components/common/page-transition'
+import { Providers } from '@/components/common/providers'
+import { Sidebar } from '@/components/common/sidebar'
+import { cn } from '@/lib/utils'
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin']
+})
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin']
+})
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Lesenelir Zhou',
+    template: '%s - Lesenelir Zhou'
+  },
+  description: "Lesenelir Zhou's personal website",
+  authors: [
+    {
+      name: 'Lesenelir Zhou',
+      url: 'https://lesenelir.me'
+    },
+    {
+      name: 'Lesenelir Zhou',
+      url: 'https://github.com/lesenelir'
+    }
+  ],
+  creator: 'Lesenelir Zhou',
+  publisher: 'Lesenelir Zhou'
+}
+
+export default function RootLayout({
+  children
+}: Readonly<{
   children: React.ReactNode
-}
-
-export const metadata = {
-  icons: [{ rel: 'icon', url: Favicon.src }]
-}
-
-export default function RootLayout(props: IProps) {
-  const {children} = props
-
+}>) {
   return (
-    <html lang='en' suppressHydrationWarning={true}>
+    <html lang="en" suppressHydrationWarning>
       <body
-        suppressHydrationWarning={true}
-        className={'custom-scrollbar bg-gray-50 min-h-screen font-sans dark:bg-bgDark transition-all duration-300 ease-in'}
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          'bg-background antialiased max-sm:p-6 sm:p-16'
+        )}
+        suppressHydrationWarning
       >
-        <Provider>
-          <Mask/>
-          <div className={'max-w-screen-sm mx-auto md:py-20 max-md:py-20 max-md:px-4'}>
-            {/* Header */}
-            <header className={'mb-10'}>
-              <h1 className={'text-3xl font-comic text-black dark:text-white max-md:text-2xl'}>
-                <HeaderClient/>
-              </h1>
-              <ul className={'header-ul max-md:text-base'}>
-                <NavbarList/>
-              </ul>
-            </header>
-
-            {/* Content */}
-            <article className="mb-12">
-              <MotionWrapper>
-                {children}
-              </MotionWrapper>
-            </article>
-
-            <Divide/>
-
-            {/* Footer */}
-            {/* Margin takes the larger value, so use padding. mb-12 + pt-4 */}
-            <footer className="pt-4">
-              <Footer/>
-            </footer>
-          </div>
-
-          {/* Analytics */}
-          <Analytics />
-        </Provider>
+        <Providers>
+          <Sidebar />
+          <main
+            className={
+              'border-dividing/70 max-w-2xl max-sm:mt-12 max-sm:border-t max-sm:pt-16 sm:ml-24 sm:border-l sm:pl-16'
+            }
+          >
+            <PageTransition>{children}</PageTransition>
+          </main>
+        </Providers>
       </body>
     </html>
   )

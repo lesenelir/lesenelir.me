@@ -1,23 +1,28 @@
 {
   "name": "@lesenelir/create-ts-starter",
   "version": "0.0.7",
-  "type": "module",
   "description": "Lesenelir ts start template",
+  "keywords": [
+    "ts project template"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/lesenelir/lesenelir.me/packages/create-ts-starter"
   },
-  "keywords": [
-    "ts project template"
-  ],
-  "author": "lesenelir <hi@lesenelir.me>",
   "license": "MIT",
+  "author": "lesenelir <hi@lesenelir.me>",
+  "type": "module",
+  "bin": "./dist/bin/index.js",
+  "files": [
+    "template",
+    "dist"
+  ],
   "scripts": {
+    "@lesenelir/create-ts-starter": "node dist/bin/index.js",
     "build": "bunchee src/index.ts",
     "dev": "bunchee src/index.ts -w",
-    "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules",
-    "@lesenelir/create-ts-starter": "node dist/bin/index.js",
-    "release:patch": "npm version patch && npm publish"
+    "release:patch": "npm version patch && npm publish",
+    "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules"
   },
   "dependencies": {
     "fs-extra": "^11.2.0",
@@ -30,10 +35,5 @@
     "@types/prompts": "^2.4.9",
     "bunchee": "^4.4.8",
     "typescript": "^5.2.2"
-  },
-  "files": [
-    "template",
-    "dist"
-  ],
-  "bin": "./dist/bin/index.js"
+  }
 }

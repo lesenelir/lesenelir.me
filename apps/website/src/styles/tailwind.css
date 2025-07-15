@@ -1,0 +1,38 @@
+@plugin '@egoist/tailwindcss-icons';
+
+@theme {
+  /* font family */
+  --font-comic: Comic Sans MS;
+  --font-eduTasBeginner: Edu TAS Beginner;
+  --font-cormorant: Cormorant Upright;
+  --font-cursive: cursive;
+
+  /* font size */
+  --text-md: 0.9375rem; /* 15px */
+
+  /* color */
+  --color-background: oklch(var(--lz-background));
+  --color-foreground: oklch(var(--lz-foreground));
+  --color-text-foreground: oklch(var(--lz-text-foreground));
+  --color-text-primary: oklch(var(--lz-text-primary));
+  --color-link: oklch(var(--lz-link));
+  --color-dividing: var(--lz-dividing);
+
+  /* animate */
+  --animate-blink: blink 2s infinite;
+
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    49% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}

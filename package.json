@@ -1,22 +1,44 @@
 {
-  "name": "@lesenelir/personal",
+  "name": "lesenelir.me",
   "version": "0.0.0",
-  "description": "lesenelir's profile website and basic configuration for my personal projects",
   "private": true,
-  "type": "module",
-  "packageManager": "pnpm@8.6.12",
-  "engines": {
-    "node": ">=16.9.0"
-  },
-  "scripts": {
-    "build:website": "pnpm --filter @lesenelir/website build",
-    "dev:website": "pnpm --filter @lesenelir/website dev"
-  },
+  "description": "lesenelir's profile website and basic configuration for my personal projects",
   "keywords": [
     "lesenelir",
     "website",
     "ui"
   ],
+  "license": "MIT",
   "author": "lesenelir <hi@lesenelir.me>",
-  "license": "MIT"
+  "type": "module",
+  "scripts": {
+    "build:website": "pnpm --filter @lesenelir/website build",
+    "clear": "pnpm -r exec rm -rf node_modules dist .turbo .next && rm -rf node_modules dist .turbo .next",
+    "dev:website": "pnpm --filter @lesenelir/website dev",
+    "format:check": "prettier . --check",
+    "format:write": "prettier . --write",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mdx,js,jsx,cjs,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "package.json": "prettier --write",
+    "*.{css,md}": "prettier --write"
+  },
+  "devDependencies": {
+    "@lesenelir/eslint-config": "workspace:*",
+    "@lesenelir/prettier-config": "workspace:*",
+    "eslint": "^9.30.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=20.18.0"
+  }
 }

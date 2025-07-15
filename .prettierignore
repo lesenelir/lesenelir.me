@@ -1,0 +1,10 @@
+**/.next/
+**/public/
+**/dist/
+**/.turbo/
+
+node_modules
+pnpm-lock.yaml
+
+**/tsconfig.json
+**/settings.local.json

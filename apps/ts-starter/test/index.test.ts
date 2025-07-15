@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { sayName } from '../src/name'
+
+import { sayName } from '@/name'
 
 describe('simple', () => {
   it('sayName', () => {

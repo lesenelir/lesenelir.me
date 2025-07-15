@@ -1,9 +1,10 @@
 /** @type {import('prettier').Config} */
-module.exports = {
-  printWidth: 80,
+export default {
+  printWidth: 100,
   tabWidth: 2,
   semi: false,
   singleQuote: true,
+  quoteProps: 'consistent',
   trailingComma: 'none',
   arrowParens: 'always',
   endOfLine: 'lf',
@@ -15,11 +16,11 @@ module.exports = {
   ],
   // options for prettier-plugin-sort-json
   ...{
-    jsonRecursiveSort: true,
+    jsonRecursiveSort: true
   },
   // options for prettier-plugin-tailwindcss
   ...{
-    tailwindFunctions: ['cva', 'cn'],
+    tailwindFunctions: ['cva', 'cn']
   },
   // options for @ianvs/prettier-plugin-sort-imports
   importOrder: [
@@ -44,6 +45,6 @@ module.exports = {
 
     '^(?!.*[.]css$)[./].*$',
     '.css$',
-    '',
+    ''
   ]
 }

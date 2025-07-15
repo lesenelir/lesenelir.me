@@ -1,36 +1,57 @@
-import { clsx } from 'clsx'
+import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
-import Cd from '@/components/utils/Cd'
-import { postData } from '@/app/content/data/PostLists'
-import PageComponent from '@/app/posts/[id]/page-component'
+import { getPostComponent, getPostMetadata } from '@/lib/mdx'
 
-type Props = {
-  params: { id: string }
+type TProps = {
+  params: Promise<{ id: string }>
 }
 
-export const generateMetadata = ({ params }: Props): Metadata => {
-  const title = postData.filter(item => item.href === `/posts/${params.id}`)[0].name
+export async function generateMetadata({ params }: TProps): Promise<Metadata> {
+  const { id } = await params
+  const metadata = getPostMetadata(id)
+
+  if (!metadata) {
+    return {
+      title: 'Post Not Found'
+    }
+  }
 
   return {
-    title
+    title: metadata.title
   }
 }
 
-export default function page() {
-  return (
-    <>
-      <article
-        className={clsx(
-          'mb-12 custom-typography text-justify',
-          'text-[#374151] dark:text-zinc-400',
-          'prose max-md:prose-stone dark:prose-invert'
-        )}
-      >
-        <PageComponent/>
-      </article>
+export default async function Page({ params }: TProps) {
+  const { id } = await params
+  const metadata = getPostMetadata(id)
+  const PostComponent = await getPostComponent(id)
 
-      <Cd/>
-    </>
+  if (!metadata || !PostComponent) {
+    notFound()
+  }
+
+  return (
+    <article className={'text-text-primary/85'}>
+      <header className={'mb-8 space-y-4'}>
+        <h1 className={'font-comic text-text-primary text-2xl'}>{metadata.title}</h1>
+
+        <div className={'text-text-primary/60 flex items-center gap-3 text-sm'}>
+          <time dateTime={metadata.date}>
+            {new Date(metadata.date).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </time>
+          <span>·</span>
+          <span>{metadata.readTime}</span>
+        </div>
+      </header>
+
+      <div className={'prose prose-neutral max-w-none'}>
+        <PostComponent />
+      </div>
+    </article>
   )
 }

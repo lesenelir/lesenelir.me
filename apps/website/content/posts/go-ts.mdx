@@ -1,0 +1,1235 @@
+前几天在看 Golang 的基础语法，给我的感觉 Golang 语法写起来不是很顺手，于是就把 Golang 的基础语法和自己熟悉的 TypeScript 一起来进行比对，从而加深对 Golang 的学习。所以这篇文章并不是对比两者语言的优劣，而是我个人的 Golang 学习总结。
+
+在进行对比前，需要知道 Golang 有入口函数，即 `main` 函数。 所以在写 Golang 代码时，需要有一个 `main` 函数，而且 `main` 函数必须在 `package main` 下定义，并且在 Golang 中 `main` 函数是自调用的函数。
+
+---
+
+### 1. 终端指令
+
+1.1 项目初始化：
+
+- Golang 项目初始化：`go mod init <项目名>`
+- TypeScript 项目初始化：`pnpm init`
+
+初始化项目后，Golang 会生成一个 `go.mod` 文件，类似于 node 下 `package.json`。
+
+1.2 安装包：
+
+- Golang 安装包：`go get <包名>`
+- TypeScript 安装包：`pnpm install <包名>`
+
+  1.3 编译与运行：
+
+- Golang 运行：`go run <文件名>`
+- Golang 编译：`go build <文件名>`
+- TypeScript 运行：`ts-node <文件名>`
+- TypeScript 编译：`tsc <文件名>`
+
+需要注意的是，Golang 编译后会生成一个可执行的二进制文件（机器码），而 TypeScript 编译后会进行 Transform 生成一个 JavaScript 文件。
+
+具体来说，TypeScript 的编译过程是：
+
+1. TypeScript 源码 => TypeScript AST
+2. 类型检查器检查 AST
+3. TypeScript AST => JavaScript 源码
+4. JavaScript 源码 => JavaScript AST
+5. JavaScript AST => 字节码（字节码需要有虚拟机或解释器来执行）
+6. 运行时计算字节码
+
+而 Golang 的编译过程是：
+
+1. Golang 源码 => Golang AST
+2. Golang AST => 机器码（二进制机器码，直接由 CPU 来执行低级指令）
+3. 运行时执行机器码
+
+---
+
+### 2. 项目管理和包管理
+
+Golang 的项目管理是通过 `go mod` 来管理的，而 TypeScript 的包管理是通过 `npm` / `pnpm` 来管理的。 这里我用到了「项目管理」和「包管理」两个概念，这两个在 Golang 中是不同的概念。 Golang 中可以定义多个包，而对于 TypeScript 来说，一个 `package.json` 就是一个包。
+
+```
+// Golang 中的项目结构
+/my-golang-app
+  /cmd
+    cmd.go           // package cmd
+  /utils
+    safe_content.go  // package utils
+    convert.go       // package utils
+  main.go            // package main
+  go.mod
+
+
+// convert.go 代码：
+import (
+  "fmt"
+  "my-golang-app/cmd" // 项目名/包名
+)
+
+cmd.Cmd() // 使用
+```
+
+所以在 TypeScript 中常说的包管理，在 Golang 中是项目管理；而 Golang 中的包管理概念是 TypeScript 项目中所缺乏的，TypeScript 中只有模块的概念。
+
+对于 Golang 项目而言，`package` 包，如果需要对外暴露方法给其他包使用，需要将方法名**首字母大写**，否则只能在当前包中使用。 即公开方法名用大写字母开头，私有方法名用小写字母开头。
+
+而在 TypeScript 项目中，如果将方法在别的 .ts模块 中使用，则需要 `export` 导出，否则只能在当前模块中使用。 对于一个 TypeScript 类库而言，如果需要对外暴露方法给其他包（其他 node 项目）使用，需要在 `package.json` 中的 `exports` 字段中进行配置。
+
+---
+
+### 3. 类型系统
+
+Golang 和 TypeScript 都是静态类型语言，在类型系统上有一些相似之处，也有一些不同之处。
+
+首先介绍 Golang 中的类型系统：
+
+- 基本类型
+- 布尔类型：`bool`
+- 整数类型：`int`、`uint`、`byte`、`rune`等
+- 浮点数类型：`float32`、`float64`
+- 字符串类型：`string`
+- 复合类型
+- 数据（固定长度）：`[3]int`
+- 切片（动态长度）：`[]int`
+- 指针：`*int`
+- 通道：`chan int`
+- 字典：`map[string]int`
+- 接口：`interface { }`
+- 函数：`func (a int, b int) int`
+- 结构体：`struct { name string age int }`
+
+TypeScript 中的类型系统：
+
+- 基本类型
+- 布尔类型：`boolean`
+- 数值类型：`number`
+- 字符串类型：`string`
+- 任意类型：`any`
+- 空类型：`void`
+- never类型：`never`
+- 复合类型
+- 元组（固定长度）：`[string, number]`
+- 数组（动态长度）：`number[]`
+- 字典： `map<string, number>`
+- 接口：`interface { }`
+- 函数：`(a: number, b: number) => number`
+
+上述的类型系统，我可能没有完全列举完。可以看出，Golang 的类型相较于 TypeScript 来说，更加的精细， 比如 Golang 中的数值类型有很多，而 TypeScript 中只有 `number` 类型；Golang 中有浮点数类型，而 TypeScript 中没有。
+
+这里着重介绍一下 Golang 中的数值类型:
+
+| 类型名  | 字节数 | 二进制存储位数 | 取值范围                                  |
+| ------- | ------ | -------------- | ----------------------------------------- |
+| int8    | 1      | 8              | -2^7 ~ 2^7-1 (-128 ~ 127)                 |
+| int16   | 2      | 16             | -2^15 ~ 2^15-1 (-32768 ~ 32767)           |
+| int32   | 4      | 32             | -2^31 ~ 2^31-1 (-2147483648 ~ 2147483647) |
+| int64   | 8      | 64             | -2^63 ~ 2^63-1                            |
+| float32 | 4      | 32             | 😅                                        |
+| float64 | 8      | 64             | 😅                                        |
+
+**数值类型的特殊情况：**
+
+有两个特殊的数值类型：`byte` 和 `rune`，这两个虽然都是数值类型，但是用来存储字符的。`byte` 类型实际上是 `uint8` 类型别名，`rune` 类型实际上是 `int32` 类型别名， 即 `type byte = uint8` 和 `type rune = int32`。
+
+byte 类型其实是 ASCII 码，范围是 0 ~ 255，byte 存储的是字符的 ASCII 码。 rune 类型是 Unicode 码（万维码），包含了所有的字符。
+
+```
+var A byte = 'A' <=> var A byte = 65  // 65
+var a byte = 'a' <=> var b byte = 97  // 97
+var c rune = '喵' // 21941
+```
+
+**字符串类型：**
+
+Golang 中是严格区分字符和字符串的，字符用单引号包裹，字符串用双引号包裹。 对于字符类型，本质是一个数值类型，只不过使用 `byte` 或 `rune` 类型来存储。 但是在 TypeScript 中，字符和字符串没有严格的区分，都是 `string` 类型。
+
+Golang 中有 `len()` 方法可以获取字符串的字节长度，而 TypeScript 中有 `length` 属性可以获取字符串的字符长度。
+
+```
+// golang
+a := "hello"
+len(a) // 5
+
+// ts
+const a: string = "hello"
+a.length // 5
+```
+
+但需要注意的是，`len()` 方法只是获取字符串的字节长度，而不是字符长度。 这在字符串包含中文的时候需要格外注意，因为一个汉字在 Golang 中是占 3 个字节。
+
+```
+s := "你好"
+len(s) // 6
+
+slice := []rune(s) // [20320 22909]  转 rune 切片，每个元素都是 Unicode 码
+len(slice) // 2
+```
+
+---
+
+### 4. 变量声明
+
+Golang 中的声明变量的方式有以下几种方式：
+
+```
+var a int = 10
+var b = 10
+c := 10
+
+var (
+  d int = 10
+  e = "hello"
+)
+```
+
+TypeScript 中声明变量的方式：
+
+```
+const a: number = 10
+let b = 10
+```
+
+Golang 中声明的变量方式有显示声明、类型推断声明、短变量声明。 其中短变量声明必须在 func 中进行声明，在全局无法进行短变量声明。
+
+Golang 和 TypeScript 中都有类型推断机制，所以当你没有进行显示类型声明时，编译器会自动推断出变量的类型。 这也是 Golang 和 TypeScript 相较于 C、C++、Java 等语言的一个区别。如果用类型作为关键字来声明变量，就没有类型推断的空间。
+
+---
+
+### 5. 控制流
+
+Golang 和 TypeScript 中的控制流基本一致，都有 `if`、`for`、`switch`、`break`、`continue` 等关键字。 但是 Golang 中的 `if`、`for`、`switch` 语句有一些特殊的地方，它们的条件判断都没有括号。
+
+Golang 中 `if` 语句，可以在条件判断前声明一个变量，这个变量的作用域只在 `if` 语句中。
+
+```
+if a := 10; a > 5 {
+  fmt.Println(a)
+}
+```
+
+Golang 中 `switch` 语句中的 `case` 不需要 `break`，因为 Golang 中 switch 默认不会进行穿透，如果需要穿透，可以使用 `fallthrough` 关键字。
+
+Golang 中没有 `while` 关键字，只有 `for` 关键字，可以使用 `for` 语句来模拟 `while` 语句😅。
+
+```
+// while 循环
+a := 0
+
+for a < 10 {
+  fmt.Println(a)
+  a++
+}
+
+// while(true) 循环
+b := 0
+for {
+  if j >= 5 {
+    break
+  }
+  fmt.Println(b)
+  b++
+}
+```
+
+for range 循环和 TypeScript 中的 for...of 循环类似，可以遍历数组、切片、字典等。
+
+```
+// golang
+arr := []int{1, 2, 3, 4, 5}
+
+for index, element := range arr {
+  fmt.Println(index, element)
+}
+
+// typescript
+const arr: number[] = [1, 2, 3, 4, 5]
+
+for (const element of arr) {
+  console.log(element)
+}
+```
+
+---
+
+### 6. 标准库与原型方法
+
+Golang 和 TypeScript 在标准库的调用方式上有显著的不同。由于 JavaScript 会有一个标准的内置对象，很多方法都是写在原型对象上， 所以 TypeScript 一般都是通过 `实例.方法名()` 的方式来调用方法（得益于原型），而 Golang 一般都是通过 `包名.方法名(实例, ...参数)` 的方式来调用方法。
+
+这里以字符串方法为例：
+
+```go
+// 1. 检索字符串是否包含子串
+// ts
+const str: string = "hello world"
+const r: boolean = str.includes("hello") // true
+
+// golang
+str := "hello world"
+r := strings.Contains(str, "hello") // true
+
+// 2. 字符串的分割
+// ts
+const arr: string[] = str.split(" ") // ["hello", "world"]
+
+// golang
+arr := strings.Split(str, " ") // ["hello", "world"]
+
+// 3. 切片 join 为字符串
+// ts
+const str: string = arr.join(" ") // "hello world"
+
+// golang
+str := strings.Join(arr, " ") // "hello world"
+
+// 4. 子字符串第一次出现的下标
+// ts
+const index: number = str.indexOf("wo") // 6
+
+// golang
+index := strings.Index(str, "wo") // 6
+```
+
+这里列举了一些常见的字符串处理方法，可以看到 Golang 和 TypeScript 在调用方法上会有一些不同，但是很多方法的功能是一样的。
+
+---
+
+### 7. 数组与元祖
+
+Golang 中的数组是固定长度的，它类似于 TypeScript 中的元祖的概念。TypeScript 中的数组是动态长度的，它类似于 Golang 中的切片的概念。
+
+Golang 中数组的特点：
+
+- 固定长度
+- 数组各元素类型一致
+
+TypeScript 由于只是在编译的时候进行类型检查，编译 Transform 为 Javascript 文件，在运行时是没有类型校验的。 所以 TypeScript 中的元祖或数组的元素类型可以不一致，这是最大的区别。
+
+```
+// ts 元祖
+const tuple: [string, number] = ["hello", 10]  // 类型：[string, number]
+
+// golang 数组
+arr1 := [3]int{1, 2, 3}  // 类型：[3]int
+```
+
+Golang 中的数组是值类型，只要数组的长度和元素类型一致，那么这两个 Golang 数组就是相等的。 在 TypeScript 中，不管是元祖还是数组都是引用类型，只有引用地址相同，才是相等的， 所以一般来说单纯的比较两个数组或元祖，是无法得到相等的结果。
+
+由于 Golang 数组的长度在编译的时候就固定的，这使得数组可以直接存储在栈上，而不需要在堆上进行分配内存。 由于栈上的内存分配和回收通常比堆更快，这对于性能敏感的应用程序来说是一个优势。
+
+---
+
+### 8. 切片与数组
+
+Golang 中的切片对应 TypeScript 中的数组概念，它们都是非常核心的数据结构，主要用于存放有序的数据。 Golang 中的切片是一个引用类型，它是对底层数组的一个引用，包含了指向底层数组的第一个元素的地址指针、len 当前切片长度和 cap 容量（切片最大长度）。
+
+```
+type slice struct {
+  array unsafe.Pointer // 连续空间的起始地址  &slice[0]
+  len   int            // 连续空间的长度
+  cap   int            // 连续空间的容量 向操作系统申请的空间大小
+}
+```
+
+Golang 中切片的特点：
+
+- 动态大小，长度和容量不固定
+- 切片中元素类型一致
+- 切片是引用类型，切片背后有一个底层数组，切片通过指向数组的指针来访问数组元素
+
+切片有两种声明方式，一种是通过切片字面量的方式，一种是通过 `make` 内置函数来创建切片。具体代码如下：
+
+```
+// 切片的声明方式
+slice1 := []int{1, 2, 3}
+
+slice2 := make([]string, 3) // 长度和容量都是 3
+slice2[0] = "hello"
+slice2[1] = "world"
+slice2[2] = "!"
+
+// panic: runtime error: index out of range [3] with length 3
+slice2[3] = "error" // 超出容量，会报错；可以通过 append 来添加元素，实现扩容
+```
+
+切片相关操作有：访问、截取、追加、删除、拷贝等操作。具体代码如下：
+
+```
+slice := []int{1, 2, 3, 4, 5}
+
+// 1. 访问
+fmt.Println(slice[0]) // 1
+
+// 2. 截取
+fmt.Println(slice[1:3]) // [2, 3]
+fmt.Println(slice[:3]) // [1, 2, 3] 省略起始索引，默认从 0 开始
+fmt.Println(slice[3:]) // [4, 5] 省略结束索引，默认到最后一个元素
+fmt.Println(slice[:]) // [1, 2, 3, 4, 5] 省略起始和结束索引，表示整个切片
+
+// 3.追加
+slice = append(slice, 6, 7, 8) // [1, 2, 3, 4, 5, 6, 7, 8]
+temp := []int{9, 10, 11}
+// 省略参数，将一个切片追加到另一个切片（扩展符）
+slice = append(slice, temp[1:]...) // [1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
+
+// 4. 删除
+// 删除第一个元素
+slice = slice[1:] // [2, 3, 4, 5, 6, 7, 8, 10, 11]
+// 删除最后一个元素
+slice = slice[:len(slice)-1] // [2, 3, 4, 5, 6, 7, 8, 10]
+// 删除中间元素，比如删除第 3 个元素，index 为 2 的元素
+slice = append(slice[:2], slice[3:]...) // [2, 3, 5, 6, 7, 8, 10]
+
+// 5. 拷贝
+src := []int{1, 2, 3, 4}
+dst := make([]int, 3)
+// 只拷贝两个切片最小的内容，返回拷贝的元素个数
+num := copy(dst, src) // [1, 2, 3] 3
+```
+
+有几个需要关注的点：
+
+- 对于切片的截取操作，Golang 不支持负数索引的，而 TypeScript 中的 `slice` 是支持负数索引的。
+- Golang 中也有扩展符号，但是是通过 `切片...` 来实现的，而 TypeScript 中是通过 `...数组` 来实现的。
+- Golang 需要用 `append` 追加操作和截取操作来实现删除元素的操作。删除下标是 i 的元素，具体的删除公式为 `newSlice = append(slice[:i], slice[i+1:]...)`
+- 切片的拷贝操作，Golang 中是通过 `copy(dst, src)` 内置函数来实现的，且只会拷贝两个切片**最小**的那部分内容；而 TypeScript 中是通过 `[...arr]` 方法来实现的。
+
+Golang 中的切片只有 `append` 和 `copy` 内置方法，而 TypeScript 有丰富操作数组的方法。 虽然在 Golang 中很多方法都可以通过 append 和 copy 来实现，但个人觉得这样操作会显得很繁琐，不知道为什么官方不推出相关的方法 😅。
+
+切片还有一个重要的特点，当切片的容量满的时候会进行自动扩容，重新开辟一个连续的内存空间，将原有空间的元素全部拷贝到新的空间中。 如果不是重新开辟一个新的内存空间，直接在原有的内存空间后追加元素，有可能之后的内存空间已经有值，导致了切片的内存空间不连续。 这是不期望的事情。重新开辟一个新的连续内存空间可以有效减少内存碎片的情况。 由于是重新开辟一个新的内存空间，所以切片指向底层数组的第一个元素的地址会改变。
+
+扩容的规则：如果切片的容量小于 1024 个元素，则新切片的 cap 是原来切片的 2 倍；如果切片的容量大于 1024 个元素， 则新切片的 cap 会增加 25%，以平衡内存使用和复制成本。
+
+---
+
+### 9. Map
+
+Golang 中的 map 和 TypeScript 中的 map 一样，都是无序列表集合，都用来存储键值对的数据结构。Golang 中的 map 和 TypeScript 中的 map 都是引用类型。 但它们有很多的不同，具体表现如下：
+
+- Golang 中遍历 map 是无序的，每次遍历的顺序都是不一样的；而 TypeScript 中遍历 map 是有序的，遍历的顺序和插入的顺序一致。
+- Golang 中的 key 不能是 slice、map、func 类型，而 TypeScript 中的 key 可以是任意类型。
+- Golang 中的 map 存在零值：未初始化的 map 的值是 nil；而 TypeScript 中的 map 是一个对象，没有零值的概念。
+
+Golang 中的 map 声明方式：
+
+```
+// map 的声明方式
+m1 := map[string]int{"a": 1, "b": 2, "c": 3}
+
+m2 := map[string]interface{}{
+  "name": "hello",
+  "age": 10,
+  "isMan": true,
+}
+
+m3 := make(map[string]string, 3) // cap 3
+
+var m4 map[string]int  // nil map
+```
+
+Golang 中 map 的操作：增、删、改、查、遍历等操作。具体代码如下：
+
+```
+m := map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}
+
+// 1. 增
+m["e"] = 5 // {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}
+
+// 2. 删
+delete(m, "e") // {"a": 1, "b": 2, "c": 3, "d": 4}
+
+// 3. 改
+m["a"] = 10 // {"a": 10, "b": 2, "c": 3, "d": 4}
+
+// 4. 查 （返回 element，ok 存在标识）
+v, ok := m["a"] // 10, true
+
+// 5. 遍历
+for k, v := range m {
+  fmt.Println(k, v)
+}
+```
+
+```typescript
+// 相对于 TypeScript 中的 map 操作
+const map = new Map<unknown, unknown>()
+
+const arrKey = [1, 2, 3]
+const fnKey = () => console.log('key')
+const objKey = { name: 'lesenelir' }
+
+map.set(arrKey, 'arr')
+map.set(fnKey, 'fn')
+map.set(objKey, 'obj')
+
+map.get(arrKey) // arr
+
+map.delete(arrKey)
+
+for (const [key, value] of map) {
+  console.log(key, value)
+}
+
+for (const key of map.keys()) {
+  console.log(key)
+}
+
+for (const value of map.values()) {
+  console.log(value)
+}
+
+for (const [key, value] of map.entries()) {
+  console.log(key, value)
+}
+```
+
+Golang 中的 map 是引用类型，它是对底层哈希表的引用，所以 map 作为函数参数传递时，传递的是引用地址。 当在函数内部修改 map 的值时，会影响到源数据的值。
+
+```
+func change(temp map[string]int) {
+  temp["one"] = 100
+}
+
+func main() {
+  m := map[string]int {
+    "one": 1,
+    "two": 2,
+  }
+  change(m)
+  fmt.Println(m) // {"one": 100, "two": 2}
+}
+```
+
+Golang 中的引用类型主要有：
+
+- slice
+- map
+- channel: 通道用于在不同的 go 协程之间安全传递数据，通道本身是引用传递，因此一个协程中对通道的操作可以影响到其他协程中的通道。
+- interface
+- func
+
+特别注意：**结构体和数组是值类型**；对于上述的引用类型默认值都是 nil。
+
+此处还要明白两个概念，一个是值传递和引用传递。这两个概念可以理解为 TypeScript 项目中的深拷贝和浅拷贝。
+
+值传递：传递给函数的是实参的拷贝，所以在函数中进行更新的时候，不会修改源数据。
+
+引用传递：传递给函数的是实参的引用地址（同一个堆内存实例的引用），所以在函数中进行更新的时候，会修改源数据。
+
+对于 struct 和 array 是值类型，同时也是值传递，所以在函数中进行更新的时候，不会修改源数据（对于结构体需要格外注意）。 对于 slice、map、channel、interface、func 是引用类型，同时也是引用传递，所以在函数中进行更新的时候，会修改源数据。 这也解释了为什么上述的 map 传递给函数后会修改源数据的原因。
+
+---
+
+### 10. 零值和undefined
+
+Golang 中的零值代表变量被初始化但没有赋值，编译器自动赋予的默认值即称之为零值。
+
+Golang 中的零值：
+
+- 数值类型：0
+- 布尔类型：false
+- 字符串类型：空字符串 ""
+- 指针、切片、字典、通道、函数、接口：nil （struct 没有 nil）
+
+在 Golang 语言中，引用类型值的空值是零值，即 nil。对应 TypeScript 也有一个变量初始化但没有赋值的情况，这个变量的值是 `undefined`。 需要注意，struct 结构体没有零值，因为 struct 是一种装载多个字段的数据结构，但 struct 内部有可能有零值。
+
+```
+a := nil // 编译错误
+```
+
+上述短变量无法定义 nil 值的变量，因为 nil 并不是一个数据结构，而是一个值。如果进行短变量定义后，并不知道该变量的类型，Golang 无法进行类型推断 即上述 `a` 变量类型有可能是任意的引用类型。所以如果要进行 nil 值的定义，必须需要**显式**的声明符合初始值是零值（引用类型）的变量。
+
+```
+var s1 []int
+s1[0] = 1 // panic: runtime error: index out of range [0] with length 0
+fmt.Println(s1)
+
+var m1 map[string]string
+m1["name"] = "lesenelir" // panic: assignment to entry in nil map
+fmt.Println(m1)
+
+var m2 = make(map[string]string, 0)
+m2["name"] = "lesenelir" // ok
+```
+
+如果引用类型的变量没有赋值，它们的值就是 nil，所以并不能直接对这些变量进行操作，否则会运行报错。 所以如果要对这些变量进行操作，推荐用 `make` 内置函数来初始化 map、slice、channel 等引用类型的变量，来避免初始值是 nil 的情况。
+
+nil 的一些作用：
+
+- 处理错误： Golang 中错误是通过返回值来实现的，错误通过实现 `error` 接口来返回错误信息，如果没有错误信息，就返回 nil。所以当 nil 作为返回值时，表示没有错误😅
+- 安全性：避免运行时的空指针异常
+- 保证初始化：根据 nil 判断引用类型的变量是否被初始化
+
+---
+
+### 11. 自定义类型和类型别名
+
+Golang 中的自定义类型和类型别名是两个不同的概念，它们的区别在于是否在类型系统中创建一个新的类型。
+
+自定义类型：
+
+```
+type MyInt int
+var a int = 1
+var b MyInt = 1
+a == b // 无法比较，编译错误
+
+type celsius float64
+```
+
+自定义类型是通过一个已有的类型创建一个新的类型，新类型可以更好的来描述信息。这个新的类型和原有的类型是不同的， 不能直接进行比较和赋值，并不会和原始类型隐式相互转换。 比如上述 a 变量和 b 变量是无法进行比较的，因为它们是不同的类型。
+
+类型别名：
+
+```
+type MyInt = int
+var a int = 1
+var b MyInt = 1
+a == b // 可以比较，返回 true
+```
+
+Golang 中的类型别名只是给一个类型起一个别名，起到了一个语义化的作用,它们是相同的类型，可以相互赋值和比较。
+
+在 TypeScript 中，没有自定义类型的概念，但是有类型别名的概念。但 TypeScript 中的类型别名比 Golang 中的类型别名更加灵活， 它可以是基础类型、联合类型、交叉类型、元组、数组、对象等类型的别名等等。 而且 TypeScript 中的类型别名也是为了创建一个新的类型，这在一些复杂的类型定义时非常有用，比如类型体操。
+
+```
+// ts 中的类型别名 or 创建一个新的类型
+type MyString = string
+type MyType = string | number
+type MyTuple = [string, number]
+type User = {
+  name: string
+  age: number
+}
+type MyType<T> = T extends string ? string : number
+type MyType = (string | number | boolean) & string
+```
+
+以上就是部分 TypeScript 中的类型别名，只要明确 TypeScript 中的 type 关键字本质都是用来创建一个新类型的。这里就不再赘述了。
+
+---
+
+### 12. 函数
+
+Golang 中的函数和 TypeScript 中的函数在概念上来说都是一样的，尤其是包括一些纯函数、回调函数、闭包、闭包保持、作用域链等概念， 这些在 Golang 和 TypeScript 中都是一样的，这里就不再赘述。接下来讲一些 Golang 和 TypeScript 函数的一些使用上的不同之处。
+
+Golang 中的函数可以有多个返回值，而 TypeScript 中的函数只能有一个返回值，如果在 TypeScript 中需要返回多个值，通常用对象来实现。
+
+```
+// go
+// var args []int
+func getRes(args ...int) (int, []int) {
+  sum := 0
+
+  for _, v := range args {
+    sum += v
+  }
+
+  return sum, args
+}
+
+func getRes(args ...int) (sum int, res []int) {
+  for _, v := range args {
+    sum += v
+  }
+
+  res = args
+
+  return sum, res
+}
+
+getRes(0, 1, 2)
+
+// typescript
+function getRes(...args: number[]): Record<string, number | number[]> {
+  let sum = 0
+
+  for (const v of args) {
+    sum += v
+  }
+
+  return { sum, args }
+}
+```
+
+上述代码主要介绍了 Golang 中的多返回值函数、具名多返回值函数和可变参数函数的写法。 可以看到 Golang 中的可变参数中的 `...` 是作用于类型上 `...int`，来表示一个切片类型。 而 TypeScript 中的 `...` 是作用于变量上 `...args`，在函数调用的时候用来接收多个实参，并将其作为数组。
+
+```
+func main() {
+  // 函数内部无法进行具名函数的声明
+  // func fn() {} // syntax error: unexpected func, expecting name
+
+  // 函数内部可以进行匿名函数的声明，通过函数表达式来接收
+  fn := func() {
+    fmt.Println("hello")
+  }
+}
+```
+
+在 Golang 中也存在闭包的概念，所以也可以在函数内部去定义一个函数，但需要注意的是， **函数内部是不能在进行具名函数的声明，但可以通过一个函数表达式来接收一个匿名函数**。
+
+---
+
+### 13. 方法
+
+方法和函数很相似，都是用于封装代码执行逻辑的结构。两者的区别：**方法是与特定类型关联的函数**，而函数不依赖于特定的类型。 方法的声明和函数的声明很相似，只是在函数声明的基础上多了一个接收者。 这意味着方法是在给定类型的实例上调用的，这个类型就是该方法的接收者。
+
+有一种说法是：方法为类型添加行为。这意味着方法是在给定类型的实例上调用的，这个类型就是该方法的接收者，最终的调用方式：`自定义类型实例变量.方法()`。
+
+Golang 中的方法：
+
+```
+type MyFloat float64
+
+// 给自定义类型提供方法
+func (f MyFloat) Abs() MyFloat {
+	if f < 0 {
+		return -f
+	}
+	return f
+}
+
+func main() {
+	f := MyFloat(-10) // 强制类型转换
+	println(f.Abs())
+}
+```
+
+Golang 中的方法使得类型有自己的行为，从而增加类型的表达能力，即该类型的实例变量都可以调用这个方法，更加集成。很多时候方法都是和结构体一起配合使用。
+
+对于 TypeScript 中的方法，它是通过对象的属性来定义的，所以 TypeScript 中的方法是对象的属性，而 Golang 中的方法是类型的方法。
+
+对于方法，常见的场景是给结构体添加方法。结构体是一种自定义类型，它描述了一个对象的属性，但是没有描述对象的行为， 如果要让结构体类型实例具备方法，就需要给结构体类型添加方法。由于结构体是值类型，所以如果要修改结构体类型实例 则要使用指针接受者，详细可看：[15-结构体和对象](https://lesenelir.me/posts/go-ts#15-struct)。
+
+---
+
+### 14. 错误处理
+
+Golang 和 TypeScript 都有错误处理的机制，从而确保程序在运行时不会因为某些错误（异常）从而导致程序崩溃（比如网路错误、读写文件失败等）。
+
+错误主要分为：
+
+- 编译错误
+- 运行错误
+- 系统错误
+
+在 TypeScript 中对于错误的处理主要是通过 `try...catch` 语句来捕获错误， 但 `try...catch` 语句只能捕获同步代码的错误，对于异步代码的错误处理，可以通过 `Promise` 的 `catch` 方法来捕获错误。具体说明如下：
+
+```
+try {
+  const response = await fetch(url, options)
+  const data = await response.json()
+} catch (error) {
+  // error handle
+} finally {
+  // finally handle
+}
+
+// 异步代码错误处理
+fetch(url, options)
+  .then(response => response.json())
+  .catch(error => {
+    // error handle
+  })
+```
+
+上述为常见的错误处理方式（捕获异常）。`try` 语句用来存放可能会抛出错误的代码，`catch` 语句用来捕获同步错误， `finally` 语句用来在 `try` 语句执行完毕后执行，无论是否发生错误。 如果不进行错误的捕获，则会导致程序崩溃，即中断程序的运行。
+
+抛出异常：在 TypeScript 中可以通过 `throw` 关键字来抛出异常，抛出的异常可以是任意类型的值，但通常是一个 `Error` 对象。抛出错误并在 `try` 语句中捕获，从而进行错误处理逻辑。
+
+```
+function divide(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error('除数不能为 0')
+  }
+
+  return a / b
+}
+
+try {
+  divide(10, 0)
+} catch (error) {
+  console.log(error.message)
+}
+
+// 如果没有捕获异常，程序会崩溃
+divide(10, 0) // 运行错误：Uncaught Error: 除数不能为 0
+```
+
+可以显而易见的看到，TypeScript 中处理异常的逻辑是：针对某一个具体的行为，如果这个行为可能会抛出异常 `throw Error`，那么就在这个行为的上下文中进行异常的捕获和处理 `try catch`。 这也是很多编程语言中的异常处理的通用逻辑。
+
+Golang 中的错误处理机制和 TypeScript 中的错误处理机制有很大的不同，Golang 中的错误处理是通过返回值来实现，而不是通过抛出错误的方式来实现。 一般来说，Golang 中的函数会返回两个值，一个是函数的返回值，一个是错误信息（函数最后一个返回值通常是错误信息）。如果没有错误，那么错误信息就是 nil。 所以 `if err != nil { panic(error.message) }` 就是判断是否有错误，如果有错误就会抛出错误（panic("error string")）或者用日志系统进行收集再 return。 抛出错误后，就需要通过 `recover()` 函数来捕获错误，防止程序崩溃。
+
+```
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func divide(a, b int) (int, error) {
+	if b == 0 {
+    // 使用 errors.New() 函数来创建一个新的错误
+		return 0, errors.New("cannot divide by zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	result, err := divide(10, 0)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Result:", result)
+	}
+}
+```
+
+上述是一种处理错误的方式，还有一种是使用 `panic()` 和 `defer` + `recover()` 函数来处理错误。
+
+Golang 中的错误处理常用三个语句：
+
+- panic(err.message): 抛出一个异常，导致程序崩溃
+- err := recover(): 捕获 panic 异常，防止程序崩溃
+- defer func() (): 延迟执行，通常用于释放资源
+
+`defer` 语句通常用于释放资源、关闭文件、解锁资源等操作。
+
+```
+func main() {
+  defer fmt.Println("defer1")
+  defer fmt.Println("defer2")
+
+  fmt.Println("main1")
+  fmt.Println("main2")
+  defer fmt.Println("defer2")
+  fmt.Println("main3")
+  defer fmt.Println("defer4")
+}
+
+// 输出
+main1
+main2
+main3
+defer4
+defer3
+defer2
+defer1
+```
+
+`defer` 关键字用于延迟执行一个函数，它会在函数调用结束前（函数 `return` 语句前）执行，即先执行完所有函数的逻辑再执行 `defer` 语句。 并且多个 `defer` 语句会按照先进后出顺序（栈顺序）执行。
+
+如果函数执行了 `panic()` 抛出错误，则会终止程序的运行不会再执行 panic 后的函数语句，但如果当前函数有 `defer` 语句，那么 `defer` 语句会在程序终止前执行。 即，如果函数执行了 `panic()` 抛出错误，那么还是逆序执行 `defer` 语句，然后再终止程序的运行。 但这里有一个前提条件：**defer 语句一定写在 panic 之前！** 这个是至关重要的，这是因为程序不会再执行 panic 后的语句了。
+
+```
+func main() {
+  defer fmt.Println("defer1") // defer 需要在 panic 之前定义
+	panic("throw error")
+  // defer fmt.Println("defer1") // defer 不能定义在 panic 后
+	fmt.Println("main1")
+}
+```
+
+一般来说，如果函数中使用 `panic()` 抛出错误后，就一定要有 `recover()` 来捕获这个错误。 `recover()` 函数用于终止错误的传播，防止程序崩溃。 这里有一个关键点：**`recover()` 函数只能在 `defer` 语句中调用**，否则当 panic 时，recover 无法捕获到 panic， 从而无法防止 panic 在程序中扩散。
+
+`recover()` 都有一个固定的写法，如下所示：
+
+```
+func main() {
+  defer func() {
+    if err := recover(); err != nil {
+      fmt.Println("catch panic:", err)
+    }
+  }()
+
+  panic("throw error")
+  fmt.Println("main1") // 抛出错误后，panic 后的代码就不执行
+}
+
+// 输出
+catch panic: throw error
+```
+
+上述 defer 匿名自调用函数是一个固定写法，如果 `err != nil` 即 err 值不为零值，则有抛出的错误，所以就可以通过 `recover()` 来捕获错误。 `if` 语句中的代码类似于 TypeScript 中的 `catch` 语句，用来捕获并处理错误。
+
+---
+
+### 15. 结构体和对象
+
+Golang 中的结构体和 TypeScript 中的对象很类似。对于一个物体如果有很多的属性，如果用很多变量来定义显得很烦琐， 所以在 TypeScript 中有对象这种数据结构；而 Golang 中是没有对象这个概念的，它是通过结构体来定义的。 结构体是一种复合类型，可以封装多个基本数据类型合成一个单一的类型。
+
+结构体是通过 [11-自定义类型](https://lesenelir.me/posts/go-ts#11-custom-type) 来定义的。所以，**结构体本质是一种类型**，可以作为变量的类型，也可以作为函数的参数和返回值。
+
+```
+// 结构体定义
+type structName struct {
+  // 字段名 字段类型
+  name string
+  age int
+  // ....
+}
+
+// 结构体本质是一种新的类型
+var variable structName
+
+// 访问修改属性
+variable.name = "lesenelir"
+variable.age = 18
+```
+
+上述是结构体的定义，这个和上文提到的自定义类型和相似，其中 `struct { ... }` 中代表了一种类型。 这种表述类似于 `type A int` 只不过把 int 换成了一个结构体。 对于 struct 类型的变量，通常说是一个结构体变量，但我喜欢把他理解为一个实例后的对象，可以通过 `.` 来访问和修改对象的属性。 struct 会开辟一个连续的空间，它属于值类型。
+
+```
+type User struct {
+  id       int
+  username string
+  password int
+  email    string
+}
+
+user1 := User{ // 实例化对象
+  id: 1,
+  username: "lesenelir",
+  password: 123456,
+}
+
+user1.password = 654321 // 修改对象属性
+
+userMap := map[int]User {
+  1: user1,
+  2: {
+    id: 2,
+    username: "user2",
+    password: 123456,
+  },
+}
+
+user3Address := new(User) // 返回一个指向 User 类型的指针类型变量
+user3Address.id = 3
+user3Address.username = "user3"
+user3Address.password = 123456
+fmt.Println(&user3Address)
+fmt.Println(*user3Address)
+```
+
+上述代码使用 `new` 关键字，通常用来创建一个指针类型的变量。在此处，`new(User)` 返回的是一个指向 User 类型的指针类型变量。 即 `user3Address` 是一个地址变量。虽然返回的是对象的指针，但还是可以通过 `.` 来访问和修改对象的属性，实际上是 `(*user3Address).id = 3`， 这在 Golang 底层就帮我们实现了，俗称「解引用」。我其实不是很赞成这种语法糖的修改。
+
+Golang 中是没有构造函数的概念的，但是我们也可以自己来实现，具体代码如下：
+
+```
+func newUser(id int, username string, password int) *User {
+  return &User{
+    id: id,
+    username: username,
+    password: password,
+  }
+}
+
+user4 := newUser(4, "user4", 123)
+fmt.Println(&user4)
+```
+
+TypeScript 中的对象不仅仅有属性还有方法，同样的，Golang 中的结构体变量也可以有相关的「行为」，即方法。
+
+章节 [13-方法](https://lesenelir.me/posts/go-ts#13-method) 中已经介绍了 Golang 中的方法，这里再介绍一下结构体的方法。
+
+由于自定义类型可以在函数上定义一个接收器，使得类型是自定义类型的变量可以通过 `.` 来调用这个方法。 更具体的来说，由于结构体本质也是一种自定义类型，所以也可以在函数上定义一个接收器，只不过这个接收器的类型是当前的结构体类型， 所以可以使得结构体类型的变量可以通过 `.` 来调用这个方法。
+
+```
+// Struct User has methods on both value and pointer receivers.
+// 值接收者（调用的时候可以是指针类型也可以是值类型来调用）
+func (user User) print() {
+  fmt.Println(user.id, user.username, user.password)
+}
+
+// 指针接收者（调用的时候可以是指针类型也可以是值类型来调用）
+func (user *User) setUsername(username string) string {
+  // (*user).username = username
+  user.username = username // 底层实现自动解引用
+  return username
+}
+
+user1.print()
+user1.setUsername("lesenelir changed") // 调用时，自动取地址
+(&user1).print() // ok
+
+(&user1).setUsername("lesenelir changed") // ok 个人觉得这么做更合理
+
+user5 := &User{ // 指针类型的变量
+  id: 5,
+  username: "user5",
+}
+user5.print()
+user5.setUsername("user5 changed")
+(*user5).print() // ok
+```
+
+得益于结构体属于自定义类型，所以可以通过自定义类型的方法来使得结构体具有方法。 但需要注意的是，对于结构体的方法而言，由于结构体是值类型，所以结构体是一种值传递，它会复制一份新的数据给参数。 所以，当你在结构体方法时修改了结构体的属性，这个修改只会在方法内部生效，不会影响到原有的结构体变量。 所以，如果你想要修改原有的结构体变量，可以通过指针类型的接收器来实现，即 setUsername 方法的接收器。
+
+通常来说，我们可以把结构体的方法分为两种：指针接收者(需要修改结构体内部属性)、值接收者（不需要修改结构体内部属性）。 指针接收者的方法可以通过指针类型的变量来调用也可以通过值类型变量调用，同样值接收者的方法可以通过值类型的变量和指针类型的变量来调用。
+
+但个人觉得为了统一，值接收者的方法还是要用值类型的变量进行调用，指针接收者还是要用指针类型的变量进行调用， 虽然 Golang 底层实现了**自动解引用指针**获取指针指向的值、**自动取地址**调用指针接收者方法的时候可以不通过指针类型进行调用， 但个人觉得这么做更不严谨、不统一😅。
+
+一般都是将结构体方法的接收器定义为指针类型。
+
+---
+
+### 16. 接口
+
+章节 [15-结构体和对象](https://lesenelir.me/posts/go-ts#15-struct) 已经介绍了 Golang 中结构体的概念，本质来说结构体就是一种新的自定义类型。 它定义了对象的属性，并通过自定义类型的方法来使得结构体具有行为。
+
+TypeScript 中的接口有两个作用：
+
+- 对象的形状（shape）进行描述
+- 对类（class）进行抽象
+
+对于前者，接口可以描述对象的形状，即对象的属性和方法，这样可以使得对象的属性和方法更加规范化。 对于后者，接口可以对类进行抽象，使得类的属性和方法更加规范化，这样可以使得类的属性和方法更加规范化。
+
+但是，在 Golang 中 interface 的概念和 TypeScript 中的 interface 的概念是不一样的。 Golang 中的接口和结构体一样，都是一种**类型**（没错，它也是个类型😅）。接口本质也是一种自定义类型。
+
+```
+type interfaceNamer interface {
+  // 方法名(参数列表) 返回值列表
+  name() string
+}
+```
+
+上述是接口的定义，这和自定义类型一致，其中 `interface { ... }` 代表了一种类型。 与结构体不同的是，结构体是定义了属性，而**接口更多是对方法的抽象封装**。 所以结构体和接口结合起来就可以明确的来表述一个对象了。接口名一般都常用 er 结尾。
+
+如果一个结构体绑定了所有接口的方法，那么这个结构体就实现了这个接口，这个**结构体实例对象就可以赋值给这个接口类型的变量**， 即**结构体实例对象就是接口类型的变量**。
+
+```
+type Animaler interface { // 一种类型
+  speak() string
+}
+
+type Dog struct {
+  name string
+}
+
+func (d *Dog) speak() string {
+  return "wang wang"
+}
+
+type Cat struct {
+  name string
+}
+
+func (c *Cat) speak() string {
+  return "miao miao"
+}
+
+func main() {
+  // dog 实现了 Animaler 接口的所有方法
+  // 可以将 dog实例 赋值给 Animaler 类型的变量（结构化类型，子类型可赋值给父类型）
+  var animal Animaler
+  animal = &Dog{"dog"} // 结构体指针赋值给接口类型的变量
+  fmt.Println(animal.speak())
+
+  animal = &Cat{"cat"}
+  fmt.Println(animal.speak())
+
+  // -------------------------------------------
+
+  animals := []Animaler{&Dog{"dog"}, &Cat{"cat"}}
+  for _, animal := range animals {
+    fmt.Println(animal.speak())
+  }
+}
+```
+
+上述说，接口是一种类型（自定义类型），如果实现了接口的所有方法，就可以说实现了这个接口，并可以把结构体实例对象赋值给接口类型的变量。 此处，即定义了一个 `animal` 变量，它的类型是 `Animaler` 接口，由于 `Dog` 和 `Cat` 结构体实现了 `Animaler` 接口的所有方法， 所以可以将 `Dog` 和 `Cat` 结构体实例对象赋值给 `animal` 变量。 但需要注意的是，由于结构体方法的接收者一般都是指针类型，所以当结构体实现了接口的所有方法后， 是将结构体实例对象的指针赋值给接口类型的变量，而不能将结构体实例对象赋值给接口类型的变量。
+
+这一点上和 TypeScript 类似，TypeScript 中的接口（interface）如果是对类进行描述的化，那么接口是抽象方法的集合，而不是用来描述属性。 与 Golang 中不同的一点是，TypeScript 需要用 `implements` 关键字来实现接口，而 Golang 中是隐式实现的。
+
+```
+// ts interface
+interface Animaler {
+  speak(): string
+}
+
+class Dog implements Animaler {
+  name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
+
+  speak() {
+    return "wang wang"
+  }
+}
+
+const dog = new Dog("dog")
+cont animal: Animaler = dog // 可以进行赋值
+```
+
+不管是上述 Golang 语法，还是 TypeScript 语法，对于实现接口后，都可以将实例后的对象赋值给接口变量。为什么可以这么做呢？ 这是因为，在 Golang 和 TypeScript 都遵循结构化类型系统。比如，上述 TypeScript 代码中，`Dog` 类实现了 `Animaler` 接口， 新创建的 `dog` 实例对象已经有了 `speak` 方法，此时就可以直接赋值给 `Animaler` 类型的变量，更何况 `dog` 实例对象还有 `name` 属性， 这更加说明，当前的 `dog` 实例类型是 `Animaler` 类型的子类型。不管是在 TypeScript 还是 Golang 中，都可以将子类型赋值给父类型。
+
+Golang 隐式实现接口的好处是：实现多接口的情况，相对而言就更加简单了。
+
+```
+type Livinger interface {
+  eat()
+  sleep()
+}
+
+func (d *Dog) eat() {
+  fmt.Println("dog eat")
+}
+
+func (d *Dog) sleep() {
+  fmt.Println("dog sleep")
+}
+```
+
+只要结构体实现了具体某个接口的所有方法，那么这个结构体就实现了这个接口。 上述例子中，`Dog` 结构体实现了多接口，分别是 `Animaler` 和 `Livinger` 接口。 而如果在 TypeScript 中则需要用 `implements` 关键字来实现多接口，比如 `class Dog implements Animaler, Livinger { ... }`。
+
+很难说，这两者的实现方式哪个更好，只能说各有优劣。Golang 中鼓励实现具体小接口的设计，而不是大而全的接口，有利于保持接口的专注和高效；同时，解耦更加方便。 但是在 TypeScript 中，这种实现方式上在语义上更加明确、规范；Golang 的隐式实现上还需要开发者自己去阅读代码来判断是否实现了接口。
+
+其实，我个人觉得，Golang 中如果有一个语法：`type structName struct implements interfaceName { ... }` 会是一个比较不错的选择😄，这样就可以明确知道这个结构体实现了哪些接口。 但这种方式，解耦性就会降低，使得当前的 struct 和 interface 之间的耦合性增加，所以 Golang 中没有这种语法也是有它的道理的。
+
+接口和结构体共同解决了 Golang 中的面向对象编程的问题。接下来介绍一下多接口的合并和继承。
+
+在 TypeScript 中，接口是可以继承，继承后的接口是一个更加具体的类型，具体表述如下：
+
+```
+interface A {
+  methodA(): void
+}
+
+interface B extends A {
+  methodB(): void
+}
+
+// B 接口继承了 A 接口
+// interface B {
+//   methodA(): void
+//   methodB(): void
+// }
+
+class Test implements B {
+  methodA() {
+    console.log('methodA')
+  }
+
+  methodB() {
+    console.log('methodB')
+  }
+}
+```
+
+上述是 TypeScript 中的接口合并和继承的概念，这样就可以将接口进行扩展，使得接口更加具体。
+
+Golang 中也有接口继承合并的概念，但是 Golang 中接口的继承概念就非常简单，只需要在接口定义的时候将父接口写在接口的后面即可。
+
+```
+type A interface {
+  methodA()
+}
+
+type B interface {
+  A
+  methodB()
+}
+
+type Test struct {}
+
+func (t *Test) methodA() {
+  fmt.Println("methodA")
+}
+
+func (t *Test) methodB() {
+  fmt.Println("methodB")
+}
+```
+
+上述的代码就是Golang 中的多接口的继承和合并，看起来非常简单，但如果你是从传统语言转过来的，可能会觉得这种方式有点不太符合直觉。 当然这也是 Golang 是作为一门比较新的语言有关，它的面向对象的思想和传统的面向对象语言有很大的不同。
+
+最后介绍一个常见知识点，Golang 中的空接口 `interface{}`，它是所有类型的父接口，即所有类型都实现了空接口，类似于 `any`， 但 any 类型是空接口的类型别名，即 `type any = interface{}`。对于 TypeScript 而言，一般都不希望看到 `any`，那是因为 TypeScript 的 类型检查只会在编译阶段进行，在运行时是转为 JavaScript 文件，所以 any 类型会导致类型检查的失效，所以尽量避免使用 any 类型。 但在 Golang 中，不管是在编译时还是运行时都能保证类型安全，所以 any 在 Golang 中并不可怕。
+
+---
+
+### 17. 泛型
+
+TypeScript 和 Golang 中都有泛型的概念。泛型是常见的编程特性，都是对数据类型进行抽象，使得数据类型更加灵活。 泛型的目的也是为了做更好的抽象，而抽象的目的就是为了封装，所以说泛型的目的就是为了高度的封装，即高内聚。 泛型的定义不需要指定具体的类型，而是在使用的时候再指定具体的类型。
+
+TypeScript 中的泛型相较于 Golang 中的泛型更加的灵活，因为 TypeScript 中的类型系统是图灵完备的，所以泛型的使用也更加灵活。
+
+```
+// go 中泛型
+func Plus[T string | int | float64](a, b T) T {
+  return a + b
+}
+
+type Getter[T any] interface {
+    Get() T
+}
+
+type MyContainer[T any] struct {
+    value T
+}
+
+func (m *MyContainer[T]) Get() T {
+    return m.value
+}
+```
+
+TypeScript 中的泛型主要是在函数、接口、类中使用，其中有一个很重要的功能是用于定义一个新的类型（工具类型）。
+
+Golang 中的泛型和 TypeScript 中的泛型一个使用 `[]` 一个使用 `<>` 来分别定义不同的泛型。 它们之间还有一个重要的区别：Golang 中的泛型一定需要泛型约束，但 TypeScript 中的泛型并没有这个硬性要求。
+
+---
+
+### 18. 指针
+
+TypeScript 中没有指针的概念，因为 TypeScript 并不涉及到内存的操作，所以也就没有指针的概念。
+
+但是 Golang 中有涉及到内存的操作，指针 Golang 中存放内存空间地址的类型，同样的它也是一种类型，即 `*T`， 但它不像结构体和接口一样，它不属于自定义类型，它是一种基础类型。
+
+指针存储的是变量的内存地址，指向一块内存空间，可以通过指针**解引用**来获取这块内存空间的值。
+
+指针的常见操作：
+
+- 指针数据类型：`*T`
+- 地址运算符：`&普通数据变量名`，获取变量的内存地址
+- 解引用运算符：`*指针变量名`，获取指针指向的内存空间的值
+
+```
+// runtime error: invalid memory address or nil pointer dereference
+var a *int // 野指针 nil 零值
+*a = 10
+
+if a != nil {
+  fmt.Println(*a)
+}
+
+b := new(int) // 返回一个指向 int 类型的指针类型的变量值
+fmt.Println(*b) // 0
+```
+
+上述变量 `a` 是一个野指针，是一个 nil，代表没有指向任何内存空间，所以对它进行解引用会报运行错误（因为还没有分配内存空间）。 所以，当需要创建一个指针类型变量的时候，建议使用 `new` 函数来创建，因为 `new` 函数会返回一个指向 T 类型的指针。
+
+`address := new(T)` 函数可以创建一个 T 类型的零值，并返回其地址，即返回一个指向 T 类型的指针。
+
+所以对于上文的代码，需要先判断指针是否为 nil，再进行解引用操作，例如：
+
+```
+func (user *User) setUsername(username string) string {
+  if user == nil {
+    return ""
+  }
+  user.username = username
+  return username
+}
+```
+
+指针还有一个常见的应用场景就是函数的参数传递，Golang 中对于结构体和数组的函数参数是值传递， 所以如果想要在函数内部 or 方法中修改函数外部结构体或数组的值，就需要传递指针类型的参数。
+
+---
+
+### Wrapping Up
+
+以上就是我拥有 TypeScript 基础学习 Golang 语言的一些总结和感悟。当然这篇文章主要是对 Golang 基础知识的一个梳理和对比，并没有涉及到 Golang 并发相关的知识，后续学完 Golang 并发可能会单独写一篇文章，当然也有可能不写。。
+
+Anyway，希望这篇文章对你有所帮助。

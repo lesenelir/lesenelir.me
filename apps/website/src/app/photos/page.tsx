@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Lesenelir Photos',
-  description: 'Lesenelir Zhou Photos Page',
+  title: 'Photos',
+  description: "Lesenelir Zhou's personal website - Photos"
 }
 
-export default function PhotoPage() {
+export default function Page() {
   return (
     <>
-      building...
+      <h3 className={'font-comic text-text-primary mb-11'}>Photos</h3>
+
+      <span>WIP</span>
     </>
   )
 }

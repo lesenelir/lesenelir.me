@@ -1,0 +1,43 @@
+[data-theme='light'] {
+  --lz-background: 0.99 0 0;
+  --lz-foreground: 0.97 0 0;
+
+  --lz-text-foreground: 0.55 0.02 255.58;
+  --lz-text-primary: 0.3092 0 0;
+  --lz-link: 0.4972 0.1914 263.21;
+
+  --lz-dividing: theme(colors.zinc.200);
+
+  /* Sugar-high syntax highlighting - Nord theme */
+  --sh-class: #5c84ea;
+  --sh-identifier: #2e3440;
+  --sh-sign: #3b4252;
+  --sh-property: #5e81ac;
+  --sh-entity: #668a94;
+  --sh-string: #82b366;
+  --sh-keyword: #5d7aa0;
+  --sh-comment: #4c566a;
+  --sh-jsxliterals: #8e6b8a;
+}
+
+[data-theme='dark'] {
+  --lz-background: 0.19 0.0025 145.48;
+  --lz-foreground: 0.205 0.0025 200.48;
+
+  --lz-text-foreground: 0.62 0.02 255.58;
+  --lz-text-primary: 0.9 0.0043 197.08;
+  --lz-link: 0.7633 0.1267 248.88;
+
+  --lz-dividing: theme(colors.zinc.800);
+
+  /* Sugar-high syntax highlighting - Nord theme */
+  --sh-class: #8fbcbb;
+  --sh-identifier: #d8dee9;
+  --sh-sign: #eceff4;
+  --sh-property: #88c0d0;
+  --sh-entity: #5e81ac;
+  --sh-string: #a3be8c;
+  --sh-keyword: #81a1c1;
+  --sh-comment: #616e88;
+  --sh-jsxliterals: #b48ead;
+}
