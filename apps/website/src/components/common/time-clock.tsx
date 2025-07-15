@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 export default function TimeClock() {
   const [currentTime, setCurrentTime] = useState('--:--')
-  const [showColon, setShowColon] = useState(true)
+  const [hours, minutes] = currentTime.split(':')
 
   useEffect(() => {
     const updateTime = () => {
@@ -17,25 +17,19 @@ export default function TimeClock() {
       }).format(now)
 
       setCurrentTime(beijingTime)
-      setShowColon(now.getSeconds() % 2 === 0)
     }
 
     updateTime()
-    const interval = setInterval(updateTime, 1000)
+    const interval = setInterval(updateTime, 30000)
 
     return () => clearInterval(interval)
   }, [])
 
-  const formatTimeWithBlinkingColon = (time: string) => {
-    const [hours, minutes] = time.split(':')
-    return (
-      <>
-        {hours}
-        {showColon ? ':' : ' '}
-        {minutes}
-      </>
-    )
-  }
-
-  return <>{formatTimeWithBlinkingColon(currentTime)}</>
+  return (
+    <>
+      {hours}
+      <span className={'animate-blink'}>:</span>
+      {minutes}
+    </>
+  )
 }
