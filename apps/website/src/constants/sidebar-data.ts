@@ -15,5 +15,10 @@ export const sidebarData: TSidebarData[] = [
     id: 2,
     title: 'photos',
     href: '/photos'
+  },
+  {
+    id: 3,
+    title: 'songs',
+    href: '/songs'
   }
 ]
