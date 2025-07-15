@@ -27,7 +27,7 @@ export default [
   // Next.js specific configuration for website app
   {
     files: ['apps/website/**/*.{js,jsx,ts,tsx}'],
-    ...next[0]
+    ...(Array.isArray(next) && next[0] ? next[0] : {})
   },
 
   // Package-specific configurations
