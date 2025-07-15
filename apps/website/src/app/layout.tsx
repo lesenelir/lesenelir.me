@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { Analytics } from '@vercel/analytics/next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import type { Metadata } from 'next'
 
@@ -65,6 +66,7 @@ export default function RootLayout({
             <PageTransition>{children}</PageTransition>
           </main>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
