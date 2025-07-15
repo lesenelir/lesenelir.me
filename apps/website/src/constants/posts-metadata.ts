@@ -7,7 +7,7 @@ export const postsMetadata: Record<string, TPostMetadata> = {
   'goodbye-youth': {
     title: '再见，青春',
     date: '2024-06-28',
-    readTime: '02 min'
+    readTime: '05 min'
   },
   'go-concurrency': {
     title: 'Go 并发编程浅析',
