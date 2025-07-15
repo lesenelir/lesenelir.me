@@ -14,6 +14,14 @@ type BlockquoteProps = ComponentPropsWithoutRef<'blockquote'>
 type PreProps = ComponentPropsWithoutRef<'pre'>
 type CodeProps = ComponentPropsWithoutRef<'code'>
 type AnchorProps = ComponentPropsWithoutRef<'a'>
+type TableProps = ComponentPropsWithoutRef<'table'>
+type TableHeadProps = ComponentPropsWithoutRef<'thead'>
+type TableBodyProps = ComponentPropsWithoutRef<'tbody'>
+type TableRowProps = ComponentPropsWithoutRef<'tr'>
+type TableHeaderProps = ComponentPropsWithoutRef<'th'>
+type TableDataProps = ComponentPropsWithoutRef<'td'>
+type DelProps = ComponentPropsWithoutRef<'del'>
+type InputProps = ComponentPropsWithoutRef<'input'>
 
 const components = {
   h1: (props: HeadingProps) => (
@@ -132,6 +140,31 @@ const components = {
         </a>{' '}
       </>
     )
+  },
+  // GFM Extensions
+  table: (props: TableProps) => (
+    <div className={'my-6 overflow-x-auto'}>
+      <table className={'border-dividing w-full border-collapse border'} {...props} />
+    </div>
+  ),
+  thead: (props: TableHeadProps) => <thead className="bg-foreground/80" {...props} />,
+  tbody: (props: TableBodyProps) => <tbody {...props} />,
+  tr: (props: TableRowProps) => <tr className={'border-dividing border-b'} {...props} />,
+  th: (props: TableHeaderProps) => (
+    <th
+      className={'text-text-primary border-dividing border-r px-4 py-2 text-left font-semibold'}
+      {...props}
+    />
+  ),
+  td: (props: TableDataProps) => (
+    <td className={'text-text-primary/85 border-dividing border-r px-4 py-2'} {...props} />
+  ),
+  del: (props: DelProps) => <del className={'text-text-primary/60 line-through'} {...props} />,
+  input: (props: InputProps) => {
+    if (props.type === 'checkbox') {
+      return <input className={'accent-link mr-2'} disabled {...props} />
+    }
+    return <input {...props} />
   }
 }
 
