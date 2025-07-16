@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 export default function NotFound() {
   return (
-    <div className={'text-text-primary/85 space-y-8'}>
+    <div className={'text-text-primary/85 max-w-2xl space-y-8'}>
       <h1 className={'font-comic text-text-primary mb-8'}>404 - Page Not Found</h1>
 
       <p>Oops! The page you're looking for doesn't exist or has been moved.</p>
