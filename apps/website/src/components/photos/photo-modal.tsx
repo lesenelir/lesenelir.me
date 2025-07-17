@@ -1,28 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
+import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
 
-import type { Photo } from '@/types'
+import { closePhotoModalAtom, isPhotoModalOpenAtom, selectedPhotoAtom } from '@/store/photos'
 
-interface PhotoModalProps {
-  isOpen: boolean
-  onClose: () => void
-  selectedPhoto: Photo | null
-}
-
-export function PhotoModal({ isOpen, onClose, selectedPhoto }: PhotoModalProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+export function PhotoModal() {
+  const isOpen = useAtomValue(isPhotoModalOpenAtom)
+  const selectedPhoto = useAtomValue(selectedPhotoAtom)
+  const closeModal = useSetAtom(closePhotoModalAtom)
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        closeModal()
       }
     }
 
@@ -30,13 +23,13 @@ export function PhotoModal({ isOpen, onClose, selectedPhoto }: PhotoModalProps) 
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, closeModal])
 
-  if (!mounted || !isOpen || !selectedPhoto) return null
+  if (!isOpen || !selectedPhoto) return null
 
   return createPortal(
     <div
-      onClick={onClose}
+      onClick={closeModal}
       className={'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm'}
     >
       {/* Photo content */}

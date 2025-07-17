@@ -1,20 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useAtomValue } from 'jotai'
 
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
 import { PhotoModal } from '@/components/photos/photo-modal'
-import type { LayoutMode, Photo } from '@/types'
+import { layoutModeAtom } from '@/store/photos'
+import type { Photo } from '@/types'
 
 interface PhotoGalleryProps {
   photos: Photo[]
 }
 
 export function PhotoGallery({ photos }: PhotoGalleryProps) {
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('single')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+  const layoutMode = useAtomValue(layoutModeAtom)
 
   const getContainerClassName = () => {
     switch (layoutMode) {
@@ -31,30 +30,15 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
 
   return (
     <div className={'w-full'}>
-      <LayoutSelector layoutMode={layoutMode} setLayoutMode={setLayoutMode} />
+      <LayoutSelector />
 
       <div className={getContainerClassName()}>
         {photos.map((photo) => (
-          <PhotoItem
-            key={photo.id}
-            photo={photo}
-            layoutMode={layoutMode}
-            onOpenModal={(photo) => {
-              setSelectedPhoto(photo)
-              setIsModalOpen(true)
-            }}
-          />
+          <PhotoItem key={photo.id} photo={photo} />
         ))}
       </div>
 
-      <PhotoModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setSelectedPhoto(null)
-        }}
-        selectedPhoto={selectedPhoto}
-      />
+      <PhotoModal />
     </div>
   )
 }

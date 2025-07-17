@@ -1,14 +1,11 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useAtom } from 'jotai'
 
 import { cn } from '@/lib/utils'
-import type { LayoutMode } from '@/types'
+import { layoutModeAtom } from '@/store/photos'
 
-interface LayoutSelectorProps {
-  layoutMode: LayoutMode
-  setLayoutMode: Dispatch<SetStateAction<LayoutMode>>
-}
+export function LayoutSelector() {
+  const [layoutMode, setLayoutMode] = useAtom(layoutModeAtom)
 
-export function LayoutSelector({ layoutMode, setLayoutMode }: LayoutSelectorProps) {
   return (
     <div
       className={

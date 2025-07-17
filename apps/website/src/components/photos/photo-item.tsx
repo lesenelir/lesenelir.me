@@ -1,15 +1,18 @@
+import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 
 import { cn } from '@/lib/utils'
-import type { LayoutMode, Photo } from '@/types'
+import { layoutModeAtom, openPhotoModalAtom } from '@/store/photos'
+import type { Photo } from '@/types'
 
 interface PhotoItemProps {
   photo: Photo
-  layoutMode: LayoutMode
-  onOpenModal: (photo: Photo) => void
 }
 
-export function PhotoItem({ photo, layoutMode, onOpenModal }: PhotoItemProps) {
+export function PhotoItem({ photo }: PhotoItemProps) {
+  const layoutMode = useAtomValue(layoutModeAtom)
+  const openModal = useSetAtom(openPhotoModalAtom)
+
   const getImageClassName = () => {
     switch (layoutMode) {
       case 'single':
@@ -35,7 +38,7 @@ export function PhotoItem({ photo, layoutMode, onOpenModal }: PhotoItemProps) {
         width={layoutMode === 'single' ? 800 : layoutMode === 'row' ? 600 : 400}
         height={layoutMode === 'single' ? 600 : layoutMode === 'row' ? 384 : 288}
         className={getImageClassName()}
-        onClick={() => onOpenModal(photo)}
+        onClick={() => openModal(photo)}
         sizes={
           layoutMode === 'single'
             ? '(max-width: 640px) 100vw, (max-width: 768px) 672px, 672px'
