@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
+import { PhotoModal } from '@/components/photos/photo-modal'
 import type { LayoutMode, Photo } from '@/types'
 
 interface PhotoGalleryProps {
@@ -12,6 +13,8 @@ interface PhotoGalleryProps {
 
 export function PhotoGallery({ photos }: PhotoGalleryProps) {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('single')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
 
   const getContainerClassName = () => {
     switch (layoutMode) {
@@ -32,9 +35,26 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
 
       <div className={getContainerClassName()}>
         {photos.map((photo) => (
-          <PhotoItem key={photo.id} photo={photo} layoutMode={layoutMode} />
+          <PhotoItem
+            key={photo.id}
+            photo={photo}
+            layoutMode={layoutMode}
+            onOpenModal={(photo) => {
+              setSelectedPhoto(photo)
+              setIsModalOpen(true)
+            }}
+          />
         ))}
       </div>
+
+      <PhotoModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedPhoto(null)
+        }}
+        selectedPhoto={selectedPhoto}
+      />
     </div>
   )
 }

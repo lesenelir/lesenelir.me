@@ -6,9 +6,10 @@ import type { LayoutMode, Photo } from '@/types'
 interface PhotoItemProps {
   photo: Photo
   layoutMode: LayoutMode
+  onOpenModal: (photo: Photo) => void
 }
 
-export function PhotoItem({ photo, layoutMode }: PhotoItemProps) {
+export function PhotoItem({ photo, layoutMode, onOpenModal }: PhotoItemProps) {
   const getImageClassName = () => {
     switch (layoutMode) {
       case 'single':
@@ -21,13 +22,20 @@ export function PhotoItem({ photo, layoutMode }: PhotoItemProps) {
   }
 
   return (
-    <div className={cn(layoutMode === 'row' && 'shrink-0', layoutMode === 'grid' && 'relative')}>
+    <div
+      className={cn(
+        'cursor-pointer',
+        layoutMode === 'row' && 'shrink-0',
+        layoutMode === 'grid' && 'relative'
+      )}
+    >
       <Image
         src={photo.src}
         alt={photo.alt}
         width={layoutMode === 'single' ? 800 : layoutMode === 'row' ? 600 : 400}
         height={layoutMode === 'single' ? 600 : layoutMode === 'row' ? 384 : 288}
         className={getImageClassName()}
+        onClick={() => onOpenModal(photo)}
         sizes={
           layoutMode === 'single'
             ? '(max-width: 640px) 100vw, (max-width: 768px) 672px, 672px'
