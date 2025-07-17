@@ -1,8 +1,7 @@
-import { useEffect } from 'react'
-
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { closePhotoModalAtom, isPhotoModalOpenAtom, selectedPhotoAtom } from '@/atoms/photos'
 
@@ -12,18 +11,7 @@ export function PhotoModal() {
   const closeModal = useSetAtom(closePhotoModalAtom)
 
   // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeModal()
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown)
-      return () => document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isOpen, closeModal])
+  useHotkeys('esc', closeModal, { enabled: isOpen })
 
   if (!isOpen || !selectedPhoto) return null
 
