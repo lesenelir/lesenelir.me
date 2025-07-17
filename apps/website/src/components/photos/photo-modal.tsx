@@ -1,3 +1,7 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
 import { useAtomValue, useSetAtom } from 'jotai'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
@@ -25,12 +29,19 @@ const transition = {
 }
 
 export function PhotoModal() {
+  const [mounted, setMounted] = useState(false)
   const isOpen = useAtomValue(isPhotoModalOpenAtom)
   const selectedPhoto = useAtomValue(selectedPhotoAtom)
   const closeModal = useSetAtom(closePhotoModalAtom)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Keyboard navigation
   useHotkeys('esc', closeModal, { enabled: isOpen })
+
+  if (!mounted) return null
 
   return createPortal(
     <AnimatePresence mode="wait">
