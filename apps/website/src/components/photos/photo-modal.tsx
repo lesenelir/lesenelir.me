@@ -4,7 +4,7 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
 
-import { closePhotoModalAtom, isPhotoModalOpenAtom, selectedPhotoAtom } from '@/store/photos'
+import { closePhotoModalAtom, isPhotoModalOpenAtom, selectedPhotoAtom } from '@/atoms/photos'
 
 export function PhotoModal() {
   const isOpen = useAtomValue(isPhotoModalOpenAtom)

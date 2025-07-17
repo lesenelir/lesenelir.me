@@ -1,8 +1,8 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 
+import { layoutModeAtom, openPhotoModalAtom } from '@/atoms/photos'
 import { cn } from '@/lib/utils'
-import { layoutModeAtom, openPhotoModalAtom } from '@/store/photos'
 import type { Photo } from '@/types'
 
 interface PhotoItemProps {

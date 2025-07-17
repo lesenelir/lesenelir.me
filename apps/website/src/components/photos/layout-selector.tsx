@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai'
 
+import { layoutModeAtom } from '@/atoms/photos'
 import { cn } from '@/lib/utils'
-import { layoutModeAtom } from '@/store/photos'
 
 export function LayoutSelector() {
   const [layoutMode, setLayoutMode] = useAtom(layoutModeAtom)

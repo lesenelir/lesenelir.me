@@ -2,10 +2,10 @@
 
 import { useAtomValue } from 'jotai'
 
+import { layoutModeAtom } from '@/atoms/photos'
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
 import { PhotoModal } from '@/components/photos/photo-modal'
-import { layoutModeAtom } from '@/store/photos'
 import type { Photo } from '@/types'
 
 interface PhotoGalleryProps {
