@@ -21,9 +21,7 @@ export default function Page() {
       return {
         id: filename,
         src: `/photos/${file}`,
-        alt: filename,
-        width: 600,
-        height: 400
+        alt: filename
       }
     })
     .reverse()

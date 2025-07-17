@@ -1,6 +1,5 @@
 import Image from 'next/image'
 
-import { cn } from '@/lib/utils'
 import type { LayoutMode, Photo } from '@/types'
 
 interface PhotoItemProps {
@@ -9,61 +8,49 @@ interface PhotoItemProps {
 }
 
 export function PhotoItem({ photo, layoutMode }: PhotoItemProps) {
-  const getImageProps = () => {
+  const getImageClassName = () => {
     switch (layoutMode) {
-      case 'grid':
-        return {
-          width: 400,
-          height: 300,
-          className: 'w-full h-[300px] object-cover rounded-lg shadow-lg'
-        }
       case 'single':
-        return {
-          width: photo.width,
-          height: photo.height,
-          className: 'w-full max-w-2xl mx-auto rounded-lg shadow-lg'
-        }
-      case 'row': {
-        const aspectRatio = photo.width / photo.height
-        const rowHeight = 300
-        return {
-          width: Math.round(rowHeight * aspectRatio),
-          height: rowHeight,
-          className: 'h-[300px] object-cover rounded-lg shadow-lg shrink-0'
-        }
-      }
+        return 'w-full max-w-2xl mx-auto object-contain'
+      case 'row':
+        return 'h-80 w-auto max-w-sm shrink-0 object-contain'
+      case 'grid':
+        return 'size-full object-cover'
       default:
-        return {
-          width: photo.width,
-          height: photo.height,
-          className: 'w-full rounded-lg shadow-lg'
-        }
+        return 'size-full object-cover'
     }
   }
 
-  const imageProps = getImageProps()
+  const getContainerClassName = () => {
+    switch (layoutMode) {
+      case 'single':
+        return 'flex justify-center bg-red-100'
+      case 'row':
+        return 'shrink-0'
+      case 'grid':
+        return 'relative aspect-square bg-red-100'
+      default:
+        return 'relative aspect-square'
+    }
+  }
 
   return (
-    <div
-      className={cn(
-        'overflow-hidden rounded-lg shadow-lg',
-        layoutMode === 'single' && 'mb-8',
-        layoutMode === 'row' && 'shrink-0'
-      )}
-    >
+    <div className={getContainerClassName()}>
       <Image
         src={photo.src}
         alt={photo.alt}
-        width={imageProps.width}
-        height={imageProps.height}
-        className={imageProps.className}
+        width={layoutMode === 'single' ? 800 : layoutMode === 'row' ? 480 : 400}
+        height={layoutMode === 'single' ? 600 : layoutMode === 'row' ? 320 : 400}
+        className={getImageClassName()}
         sizes={
           layoutMode === 'single'
-            ? '(max-width: 768px) 100vw, 672px'
+            ? '(max-width: 640px) 100vw, (max-width: 768px) 672px, 672px'
             : layoutMode === 'row'
-              ? '300px'
-              : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+              ? '(max-width: 640px) 384px, 480px'
+              : '(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
         }
+        priority={false}
+        loading={'lazy'}
       />
     </div>
   )
