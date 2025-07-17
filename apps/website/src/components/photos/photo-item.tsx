@@ -1,5 +1,6 @@
 import Image from 'next/image'
 
+import { cn } from '@/lib/utils'
 import type { LayoutMode, Photo } from '@/types'
 
 interface PhotoItemProps {
@@ -21,21 +22,13 @@ export function PhotoItem({ photo, layoutMode }: PhotoItemProps) {
     }
   }
 
-  const getContainerClassName = () => {
-    switch (layoutMode) {
-      case 'single':
-        return 'flex justify-center bg-red-100'
-      case 'row':
-        return 'shrink-0'
-      case 'grid':
-        return 'relative aspect-square bg-red-100'
-      default:
-        return 'relative aspect-square'
-    }
-  }
-
   return (
-    <div className={getContainerClassName()}>
+    <div
+      className={cn(
+        layoutMode === 'row' && 'shrink-0',
+        layoutMode === 'grid' && 'relative aspect-square'
+      )}
+    >
       <Image
         src={photo.src}
         alt={photo.alt}
