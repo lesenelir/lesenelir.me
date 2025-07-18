@@ -1,11 +1,12 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
+import { photos } from '@/constants'
 import type { LayoutMode, Photo } from '@/types'
 
 export const layoutModeAtom = atomWithStorage<LayoutMode>('photos-layout-mode', 'single')
 
-export const photosAtom = atom<Photo[]>([])
+export const photosAtom = atom<Photo[]>(photos)
 
 export const selectedPhotoAtom = atom<Photo | null>(null)
 
