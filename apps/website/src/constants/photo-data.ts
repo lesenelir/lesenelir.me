@@ -125,7 +125,7 @@ export const photos: Photo[] = [
     id: 'R0000235',
     src: '/photos/R0000235.JPG',
     alt: 'R0000235',
-    desc: '2025/02/04 (Tues) Hong Kong, China @ Github Wall'
+    desc: '2025/02/04 (Tues) Hong Kong, China @ GitHub Wall'
   },
   {
     id: 'R0000192',
