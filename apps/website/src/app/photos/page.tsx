@@ -10,14 +10,14 @@ export const metadata: Metadata = {
   description: "Lesenelir Zhou's personal website - Photos"
 }
 
-export default function Page() {
+function getPhotos() {
   const photosDir = path.join(process.cwd(), 'public', 'photos')
   const files = fs.readdirSync(photosDir)
 
-  const photos = files
+  return files
     .filter((file) => file.endsWith('.JPG'))
     .map((file) => {
-      const filename = path.parse(file).name // extract the filename without extension
+      const filename = path.parse(file).name
       return {
         id: filename,
         src: `/photos/${file}`,
@@ -25,6 +25,10 @@ export default function Page() {
       }
     })
     .reverse()
+}
+
+export default function Page() {
+  const photos = getPhotos()
 
   return (
     <>
@@ -32,4 +36,8 @@ export default function Page() {
       <PhotoGallery photos={photos} />
     </>
   )
+}
+
+export async function generateStaticParams() {
+  return [{}]
 }
