@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 export default function Page() {
   return (
-    <>
+    <div className={'max-w-2xl'}>
       <h3 className={'font-comic text-text-primary mb-11'}>Lesenelir Zhou</h3>
 
       <div className={'text-text-primary/85 space-y-8'}>
@@ -40,6 +40,6 @@ export default function Page() {
 
         <p>Or mail me: hi@lesenelir.me</p>
       </div>
-    </>
+    </div>
   )
 }
