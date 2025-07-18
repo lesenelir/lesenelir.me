@@ -8,18 +8,18 @@ export const getSongs = async (): Promise<TSong[]> => {
     return s3Objects.flatMap((obj) => {
       if (!obj.Key) return []
 
-      let fileName = obj.Key.replace('songs/', '')
-      fileName = fileName.replace(/\.(mp3|ogg|webm|m4a)$/i, '')
-      fileName = fileName.replace(/^\d+\.\s*/, '')
+      const fileName = obj.Key.replace('songs/', '')
+      const id = fileName.replace(/\.(mp3|ogg|webm|m4a)$/i, '')
+      const cleanId = id.replace(/^\d+\.\s*/, '')
 
-      const [artist, ...titleParts] = fileName.split(' - ')
+      const [artist, ...titleParts] = cleanId.split(' - ')
       const title = titleParts.join(' - ')
 
       return [
         {
-          id: fileName,
+          id,
           src: getPublicUrl(obj.Key),
-          title: title || fileName,
+          title: title || cleanId,
           artist: artist || 'Unknown'
         }
       ]
