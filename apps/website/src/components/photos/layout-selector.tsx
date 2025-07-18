@@ -42,7 +42,7 @@ export function LayoutSelector() {
         )}
         title={'Grid layout'}
       >
-        <span className={'i-mingcute-layout-grid-fill size4.5'} />
+        <span className={'i-mingcute-layout-grid-fill size-4.5'} />
       </button>
     </div>
   )
