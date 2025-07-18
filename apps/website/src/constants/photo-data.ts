@@ -107,25 +107,25 @@ export const photos: Photo[] = [
     id: 'R0000297',
     src: '/photos/R0000297.JPG',
     alt: 'R0000297',
-    desc: '2025/02/05 (Wed) Hongkong, China @ Reading'
+    desc: '2025/02/05 (Wed) Hong Kong, China @ Reading'
   },
   {
     id: 'R0000296',
     src: '/photos/R0000296.JPG',
     alt: 'R0000296',
-    desc: "2025/02/05 (Wed) Hongkong, China @ Mr Jiang's Gesture"
+    desc: "2025/02/05 (Wed) Hong Kong, China @ Mr Jiang's Gesture"
   },
   {
     id: 'R0000255',
     src: '/photos/R0000255.JPG',
     alt: 'R0000255',
-    desc: '2025/02/04 (Tues) Hongkong, China @ The Crypto Shadow'
+    desc: '2025/02/04 (Tues) Hong Kong, China @ The Crypto Shadow'
   },
   {
     id: 'R0000235',
     src: '/photos/R0000235.JPG',
     alt: 'R0000235',
-    desc: '2025/02/04 (Tues) Hongkong, China @ Github Wall'
+    desc: '2025/02/04 (Tues) Hong Kong, China @ Github Wall'
   },
   {
     id: 'R0000192',
