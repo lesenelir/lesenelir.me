@@ -49,6 +49,18 @@ export function PhotoItem({ photo }: PhotoItemProps) {
         priority={false}
         loading={'lazy'}
       />
+      {photo.desc && (
+        <p
+          className={cn(
+            'text-text-primary/85 mt-2 text-center text-sm',
+            layoutMode === 'single' && 'mx-auto max-w-2xl',
+            layoutMode === 'row' && 'max-w-md',
+            layoutMode === 'grid' && 'max-w-full'
+          )}
+        >
+          {photo.desc}
+        </p>
+      )}
     </div>
   )
 }
