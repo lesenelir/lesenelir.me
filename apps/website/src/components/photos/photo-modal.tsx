@@ -8,7 +8,12 @@ import Image from 'next/image'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { closePhotoModalAtom, isPhotoModalOpenAtom, selectedPhotoAtom } from '@/atoms/photos'
+import {
+  closePhotoModalAtom,
+  isPhotoModalOpenAtom,
+  navigatePhotoAtom,
+  selectedPhotoAtom
+} from '@/atoms/photos'
 
 const backdropVariants = {
   initial: { opacity: 0 },
@@ -33,6 +38,7 @@ export function PhotoModal() {
   const isOpen = useAtomValue(isPhotoModalOpenAtom)
   const selectedPhoto = useAtomValue(selectedPhotoAtom)
   const closeModal = useSetAtom(closePhotoModalAtom)
+  const navigatePhoto = useSetAtom(navigatePhotoAtom)
 
   useEffect(() => {
     setMounted(true)
@@ -40,6 +46,8 @@ export function PhotoModal() {
 
   // Keyboard navigation
   useHotkeys('esc', closeModal, { enabled: isOpen })
+  useHotkeys('arrowleft', () => navigatePhoto('prev'), { enabled: isOpen })
+  useHotkeys('arrowright', () => navigatePhoto('next'), { enabled: isOpen })
 
   if (!mounted) return null
 
