@@ -37,6 +37,9 @@ export const audioControlsAtom = atom<
   const audio = get(audioInstanceAtom)
   if (!audio) return
 
+  const currentSong = get(currentSongAtom)
+  const songs = get(songsAtom)
+
   const setupAudioEventListeners = () => {
     audio.addEventListener('timeupdate', () => {
       set(currentTimeAtom, audio.currentTime)
@@ -57,9 +60,6 @@ export const audioControlsAtom = atom<
       .then(() => set(isPlayingAtom, true))
       .catch(() => set(isPlayingAtom, false))
   }
-
-  const currentSong = get(currentSongAtom)
-  const songs = get(songsAtom)
 
   const findAndPlaySong = (song: TSong) => {
     set(currentSongAtom, song)

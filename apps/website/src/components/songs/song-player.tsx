@@ -114,24 +114,6 @@ export function SongPlayer() {
           className={
             'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
           }
-          aria-label={'Shuffle'}
-        >
-          <span className={'i-mingcute-shuffle-fill size-5'} />
-        </button>
-
-        <button
-          className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
-          }
-          aria-label={'Repeat'}
-        >
-          <span className={'i-mingcute-repeat-fill size-5'} />
-        </button>
-
-        <button
-          className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
-          }
           aria-label={'Volume'}
         >
           <span className={'i-mingcute-volume-fill size-5'} />
