@@ -26,7 +26,9 @@ export function SongItem({ song, onPlay }: SongItemProps) {
       aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
       onClick={handlePlay}
     >
-      <div className={'bg-foreground flex size-8 items-center justify-center rounded-full'}>
+      <div
+        className={'bg-foreground flex size-8 shrink-0 items-center justify-center rounded-full'}
+      >
         {isCurrentlyPlaying ? (
           <span className={'i-mingcute-pause-fill size-4'} />
         ) : (
@@ -34,7 +36,7 @@ export function SongItem({ song, onPlay }: SongItemProps) {
         )}
       </div>
 
-      <div className={'flex min-w-0 flex-1 flex-col items-start'}>
+      <div className={'min-w-0 flex-1 text-left'}>
         <p className={'text-text-primary truncate text-sm font-medium'}>{song.title}</p>
         <p className={'text-text-foreground/85 truncate text-xs'}>{song.artist}</p>
       </div>

@@ -29,7 +29,7 @@ export function SongLists() {
   }
 
   return (
-    <div className={'space-y-1'}>
+    <div className={'w-full space-y-1'}>
       {songs.map((song) => (
         <SongItem key={song.id} song={song} onPlay={handlePlay} />
       ))}
