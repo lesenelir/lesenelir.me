@@ -1,6 +1,7 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
+import type { MouseEvent } from 'react'
 
 import {
   audioControlsAtom,
@@ -32,6 +33,17 @@ export function SongPlayer() {
     setAudioControls({ type: 'next' })
   }
 
+  const handleProgressClick = (e: MouseEvent<HTMLButtonElement>) => {
+    if (duration === 0) return
+
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width))
+    const newTime = percentage * duration
+
+    setAudioControls({ type: 'seek', time: newTime })
+  }
+
   return (
     <div className={'bg-background mb-4 w-full space-y-4 px-2 py-4'}>
       {/* Song Info Row */}
@@ -49,12 +61,15 @@ export function SongPlayer() {
       <div className={'flex flex-wrap items-center gap-3'}>
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
         <div className={'flex-1'}>
-          <div className={'bg-foreground/20 h-1 w-full rounded-full'}>
+          <button
+            className={'bg-foreground/70 h-1 w-full cursor-pointer rounded-full'}
+            onClick={handleProgressClick}
+          >
             <div
-              className={'bg-foreground h-1 rounded-full transition-all duration-300'}
+              className={'bg-dividing h-1 rounded-full'}
               style={{ width: `${progressPercentage}%` }}
             />
-          </div>
+          </button>
         </div>
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(duration)}</span>
       </div>

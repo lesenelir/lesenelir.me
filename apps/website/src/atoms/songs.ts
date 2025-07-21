@@ -30,6 +30,7 @@ export const audioControlsAtom = atom<
     | { type: 'pause' }
     | { type: 'previous' }
     | { type: 'next' }
+    | { type: 'seek'; time: number }
   ],
   void
 >(null, (get, set, action) => {
@@ -102,6 +103,14 @@ export const audioControlsAtom = atom<
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
       const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
       findAndPlaySong(nextSong)
+      break
+    }
+
+    case 'seek': {
+      if (!currentSong) return
+      const seekTime = Math.max(0, Math.min(action.time, audio.duration || 0))
+      audio.currentTime = seekTime
+      set(currentTimeAtom, seekTime)
       break
     }
   }
