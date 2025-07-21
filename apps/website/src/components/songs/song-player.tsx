@@ -15,7 +15,7 @@ export function SongPlayer() {
   return (
     <div className={'bg-background mb-4 w-full space-y-4 px-2 py-4'}>
       {/* Song Info Row */}
-      <div className={'flex items-center gap-3'}>
+      <div className={'flex flex-wrap items-center gap-3'}>
         <div className={'bg-foreground flex size-12 items-center justify-center rounded-lg'}>
           <span className={'i-mingcute-music-2-fill text-text-foreground size-6'} />
         </div>
@@ -26,7 +26,7 @@ export function SongPlayer() {
       </div>
 
       {/* Progress Section */}
-      <div className={'flex items-center gap-3'}>
+      <div className={'flex flex-wrap items-center gap-3'}>
         <span className={'text-text-foreground/85 text-xs'}>0:43</span>
         <div className={'flex-1'}>
           <div className={'bg-foreground/20 h-1 w-full rounded-full'}>
@@ -37,7 +37,7 @@ export function SongPlayer() {
       </div>
 
       {/* Player Controls */}
-      <div className={'flex items-center justify-between'}>
+      <div className={'flex flex-wrap items-center justify-between'}>
         <button
           className={
             'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
