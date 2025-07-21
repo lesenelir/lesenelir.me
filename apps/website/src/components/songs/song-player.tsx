@@ -13,6 +13,14 @@ export function SongPlayer() {
     setAudioControls({ type: isPlaying ? 'pause' : 'continue' })
   }
 
+  const handlePrevious = () => {
+    setAudioControls({ type: 'previous' })
+  }
+
+  const handleNext = () => {
+    setAudioControls({ type: 'next' })
+  }
+
   return (
     <div className={'bg-background mb-4 w-full space-y-4 px-2 py-4'}>
       {/* Song Info Row */}
@@ -44,6 +52,7 @@ export function SongPlayer() {
             'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
           }
           aria-label={'Previous'}
+          onClick={handlePrevious}
         >
           <span className={'i-mingcute-skip-previous-fill size-6'} />
         </button>
@@ -67,6 +76,7 @@ export function SongPlayer() {
             'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
           }
           aria-label={'Next'}
+          onClick={handleNext}
         >
           <span className={'i-mingcute-skip-forward-fill size-6'} />
         </button>

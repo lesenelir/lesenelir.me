@@ -20,7 +20,13 @@ export const isPlayingAtom = atom<boolean>(false)
 
 export const audioControlsAtom = atom<
   null,
-  [{ type: 'play'; song: TSong } | { type: 'continue' } | { type: 'pause' }],
+  [
+    | { type: 'play'; song: TSong }
+    | { type: 'continue' }
+    | { type: 'pause' }
+    | { type: 'previous' }
+    | { type: 'next' }
+  ],
   void
 >(null, (get, set, action) => {
   const audio = get(audioInstanceAtom)
@@ -34,6 +40,13 @@ export const audioControlsAtom = atom<
   }
 
   const currentSong = get(currentSongAtom)
+  const songs = get(songsAtom)
+
+  const findAndPlaySong = (song: TSong) => {
+    set(currentSongAtom, song)
+    audio.src = song.src
+    playAudio()
+  }
 
   switch (action.type) {
     case 'play':
@@ -55,5 +68,21 @@ export const audioControlsAtom = atom<
       audio.pause()
       set(isPlayingAtom, false)
       break
+
+    case 'previous': {
+      if (!currentSong || songs.length === 0) return
+      const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+      const previousSong = currentIndex <= 0 ? songs[songs.length - 1] : songs[currentIndex - 1]
+      findAndPlaySong(previousSong)
+      break
+    }
+
+    case 'next': {
+      if (!currentSong || songs.length === 0) return
+      const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+      const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+      findAndPlaySong(nextSong)
+      break
+    }
   }
 })
