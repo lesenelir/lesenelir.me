@@ -9,7 +9,7 @@ export const getSongs = async (): Promise<TSong[]> => {
       if (!obj.Key) return []
 
       const fileName = obj.Key.replace('songs/', '')
-      const id = fileName.replace(/\.(mp3|ogg|webm|m4a)$/i, '')
+      const id = fileName.replace(/\.[^.]+$/i, '')
       const cleanId = id.replace(/^\d+\.\s*/, '')
 
       const [artist, ...titleParts] = cleanId.split(' - ')
