@@ -60,13 +60,13 @@ export function SongPlayer() {
       {/* Progress Section */}
       <div className={'flex flex-wrap items-center gap-3'}>
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
-        <div className={'flex-1'}>
+        <div className={'flex flex-1 items-center'}>
           <button
-            className={'bg-foreground/70 h-1 w-full cursor-pointer rounded-full'}
+            className={'bg-text-foreground/10 h-1 w-full cursor-pointer rounded-full'}
             onClick={handleProgressClick}
           >
             <div
-              className={'bg-dividing h-1 rounded-full'}
+              className={'bg-text-foreground/50 h-1 rounded-full'}
               style={{ width: `${progressPercentage}%` }}
             />
           </button>
@@ -78,7 +78,7 @@ export function SongPlayer() {
       <div className={'flex flex-wrap items-center justify-between'}>
         <button
           className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
+            'text-text-foreground/50 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
           }
           aria-label={'Previous'}
           onClick={handlePrevious}
@@ -88,7 +88,7 @@ export function SongPlayer() {
 
         <button
           className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-12 cursor-pointer items-center justify-center rounded-full transition-colors'
+            'text-text-foreground/50 hover:text-text-foreground flex size-12 cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
           }
           aria-label={isPlaying ? 'Pause' : 'Play'}
           onClick={handlePlayPause}
@@ -102,21 +102,12 @@ export function SongPlayer() {
 
         <button
           className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
+            'text-text-foreground/50 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
           }
           aria-label={'Next'}
           onClick={handleNext}
         >
           <span className={'i-mingcute-skip-forward-fill size-6'} />
-        </button>
-
-        <button
-          className={
-            'text-text-foreground/70 hover:text-text-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors'
-          }
-          aria-label={'Volume'}
-        >
-          <span className={'i-mingcute-volume-fill size-5'} />
         </button>
       </div>
     </div>
