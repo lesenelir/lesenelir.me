@@ -18,6 +18,10 @@ export const audioInstanceAtom = atom<HTMLAudioElement | null>(createGlobalAudio
 
 export const isPlayingAtom = atom<boolean>(false)
 
+export const currentTimeAtom = atom<number>(0)
+
+export const durationAtom = atom<number>(0)
+
 export const audioControlsAtom = atom<
   null,
   [
@@ -32,6 +36,20 @@ export const audioControlsAtom = atom<
   const audio = get(audioInstanceAtom)
   if (!audio) return
 
+  const setupAudioEventListeners = () => {
+    audio.addEventListener('timeupdate', () => {
+      set(currentTimeAtom, audio.currentTime)
+    })
+
+    audio.addEventListener('loadedmetadata', () => {
+      set(durationAtom, audio.duration || 0)
+    })
+
+    audio.addEventListener('durationchange', () => {
+      set(durationAtom, audio.duration || 0)
+    })
+  }
+
   const playAudio = () => {
     audio
       .play()
@@ -45,6 +63,7 @@ export const audioControlsAtom = atom<
   const findAndPlaySong = (song: TSong) => {
     set(currentSongAtom, song)
     audio.src = song.src
+    setupAudioEventListeners()
     playAudio()
   }
 
@@ -55,6 +74,7 @@ export const audioControlsAtom = atom<
       if (currentSong?.id !== action.song.id) {
         set(currentSongAtom, action.song)
         audio.src = action.song.src
+        setupAudioEventListeners()
       }
       playAudio()
       break

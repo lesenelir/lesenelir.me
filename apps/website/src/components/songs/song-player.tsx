@@ -2,12 +2,23 @@
 
 import { useAtomValue, useSetAtom } from 'jotai'
 
-import { audioControlsAtom, currentSongAtom, isPlayingAtom } from '@/atoms/songs'
+import {
+  audioControlsAtom,
+  currentSongAtom,
+  currentTimeAtom,
+  durationAtom,
+  isPlayingAtom
+} from '@/atoms/songs'
+import { formatTime } from '@/lib/utils'
 
 export function SongPlayer() {
   const currentSong = useAtomValue(currentSongAtom)
   const isPlaying = useAtomValue(isPlayingAtom)
+  const currentTime = useAtomValue(currentTimeAtom)
+  const duration = useAtomValue(durationAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
+
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
 
   const handlePlayPause = () => {
     setAudioControls({ type: isPlaying ? 'pause' : 'continue' })
@@ -36,13 +47,16 @@ export function SongPlayer() {
 
       {/* Progress Section */}
       <div className={'flex flex-wrap items-center gap-3'}>
-        <span className={'text-text-foreground/85 text-xs'}>0:43</span>
+        <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
         <div className={'flex-1'}>
           <div className={'bg-foreground/20 h-1 w-full rounded-full'}>
-            <div className={'bg-foreground h-1 w-1/6 rounded-full'} />
+            <div
+              className={'bg-foreground h-1 rounded-full transition-all duration-300'}
+              style={{ width: `${progressPercentage}%` }}
+            />
           </div>
         </div>
-        <span className={'text-text-foreground/85 text-xs'}>4:13</span>
+        <span className={'text-text-foreground/85 text-xs'}>{formatTime(duration)}</span>
       </div>
 
       {/* Player Controls */}
