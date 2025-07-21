@@ -1,15 +1,16 @@
 'use client'
 
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 
-import { currentSongAtom, isPlayingAtom } from '@/atoms/songs'
+import { audioControlsAtom, currentSongAtom, isPlayingAtom } from '@/atoms/songs'
 
 export function SongPlayer() {
   const currentSong = useAtomValue(currentSongAtom)
-  const [isPlaying, setIsPlaying] = useAtom(isPlayingAtom)
+  const isPlaying = useAtomValue(isPlayingAtom)
+  const setAudioControls = useSetAtom(audioControlsAtom)
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying)
+    setAudioControls({ type: 'pause' })
   }
 
   return (

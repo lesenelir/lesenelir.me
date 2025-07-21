@@ -1,22 +1,26 @@
 'use client'
 
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 
-import { currentSongAtom, isPlayingAtom, songsAtom } from '@/atoms/songs'
+import { audioControlsAtom, audioInstanceAtom, currentSongAtom, songsAtom } from '@/atoms/songs'
 import { SongItem } from '@/components/songs/song-item'
 import type { TSong } from '@/types/songs'
 
 export function SongLists() {
   const songs = useAtomValue(songsAtom)
   const [currentSong, setCurrentSong] = useAtom(currentSongAtom)
-  const [isPlaying, setIsPlaying] = useAtom(isPlayingAtom)
+  const audioInstance = useAtomValue(audioInstanceAtom)
+  const setAudioControls = useSetAtom(audioControlsAtom)
 
   const handlePlay = (song: TSong) => {
     if (currentSong?.id === song.id) {
-      setIsPlaying(!isPlaying)
+      setAudioControls({ type: 'pause' })
     } else {
+      if (audioInstance) {
+        audioInstance.src = song.src
+      }
       setCurrentSong(song)
-      setIsPlaying(true)
+      setAudioControls({ type: 'play' })
     }
   }
 
