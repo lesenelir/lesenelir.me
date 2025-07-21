@@ -1,6 +1,7 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
+import { motion } from 'motion/react'
 import type { MouseEvent } from 'react'
 
 import {
@@ -68,9 +69,10 @@ export function SongPlayer() {
             className={'bg-text-foreground/10 h-1 w-full cursor-pointer rounded-full'}
             onClick={handleProgressClick}
           >
-            <div
+            <motion.div
               className={'bg-text-foreground/50 h-1 rounded-full'}
-              style={{ width: `${progressPercentage}%` }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
             />
           </button>
         </div>
