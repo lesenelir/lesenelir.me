@@ -21,7 +21,7 @@ export function SongItem({ song, onPlay }: SongItemProps) {
   return (
     <button
       className={
-        'hover:bg-foreground flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors duration-200'
+        'hover:bg-foreground flex w-full cursor-pointer items-center gap-3 rounded-lg px-1.5 py-3 transition-colors duration-200'
       }
       aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
       onClick={handlePlay}
