@@ -1,11 +1,12 @@
-import type { TSong } from '@/types'
+'use client'
 
-interface SongListsProps {
-  songs: TSong[]
-}
+import { useAtomValue } from 'jotai'
 
-export function SongLists({ songs }: SongListsProps) {
-  console.log('songs', songs)
+import { songsAtom } from '@/atoms/songs'
+
+export function SongLists() {
+  const songs = useAtomValue(songsAtom)
+  console.log('songs:', songs)
 
   return <>song lists</>
 }
