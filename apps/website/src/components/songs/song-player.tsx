@@ -25,18 +25,6 @@ export function SongPlayer() {
   const baseButtonClass =
     'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
 
-  const handlePlayPause = () => {
-    setAudioControls({ type: isPlaying ? 'pause' : 'continue' })
-  }
-
-  const handlePrevious = () => {
-    setAudioControls({ type: 'previous' })
-  }
-
-  const handleNext = () => {
-    setAudioControls({ type: 'next' })
-  }
-
   const handleProgressClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (duration === 0) return
 
@@ -86,7 +74,7 @@ export function SongPlayer() {
           <button
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Previous'}
-            onClick={handlePrevious}
+            onClick={() => setAudioControls({ type: 'previous' })}
           >
             <span className={'i-mingcute-skip-previous-fill size-6'} />
           </button>
@@ -94,7 +82,7 @@ export function SongPlayer() {
           <button
             className={cn(baseButtonClass, 'size-12')}
             aria-label={isPlaying ? 'Pause' : 'Play'}
-            onClick={handlePlayPause}
+            onClick={() => setAudioControls({ type: isPlaying ? 'pause' : 'continue' })}
           >
             {isPlaying ? (
               <span className={'i-mingcute-pause-fill size-8'} />
@@ -106,7 +94,7 @@ export function SongPlayer() {
           <button
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Next'}
-            onClick={handleNext}
+            onClick={() => setAudioControls({ type: 'next' })}
           >
             <span className={'i-mingcute-skip-forward-fill size-6'} />
           </button>
