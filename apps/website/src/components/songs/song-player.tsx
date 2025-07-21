@@ -81,29 +81,50 @@ export function SongPlayer() {
 
       {/* Player Controls */}
       <div className={'flex flex-wrap items-center justify-between'}>
-        <button
-          className={cn(baseButtonClass, 'size-10')}
-          aria-label={'Previous'}
-          onClick={handlePrevious}
-        >
-          <span className={'i-mingcute-skip-previous-fill size-6'} />
-        </button>
+        {/* play control groups */}
+        <div className={'flex flex-wrap items-center gap-2'}>
+          <button
+            className={cn(baseButtonClass, 'size-10')}
+            aria-label={'Previous'}
+            onClick={handlePrevious}
+          >
+            <span className={'i-mingcute-skip-previous-fill size-6'} />
+          </button>
 
-        <button
-          className={cn(baseButtonClass, 'size-12')}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-          onClick={handlePlayPause}
-        >
-          {isPlaying ? (
-            <span className={'i-mingcute-pause-fill size-8'} />
-          ) : (
-            <span className={'i-mingcute-play-fill size-8'} />
-          )}
-        </button>
+          <button
+            className={cn(baseButtonClass, 'size-12')}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+            onClick={handlePlayPause}
+          >
+            {isPlaying ? (
+              <span className={'i-mingcute-pause-fill size-8'} />
+            ) : (
+              <span className={'i-mingcute-play-fill size-8'} />
+            )}
+          </button>
 
-        <button className={cn(baseButtonClass, 'size-10')} aria-label={'Next'} onClick={handleNext}>
-          <span className={'i-mingcute-skip-forward-fill size-6'} />
-        </button>
+          <button
+            className={cn(baseButtonClass, 'size-10')}
+            aria-label={'Next'}
+            onClick={handleNext}
+          >
+            <span className={'i-mingcute-skip-forward-fill size-6'} />
+          </button>
+        </div>
+
+        {/* repeat and volume control groups */}
+        <div className={'flex flex-wrap items-center gap-2'}>
+          <button className={cn(baseButtonClass, 'size-10')} aria-label={'Repeat-all/Repeat-one'}>
+            <span className={'i-mingcute-repeat-fill size-5'} />
+          </button>
+
+          <button className={cn(baseButtonClass, 'size-10')} aria-label={'Volume'}>
+            <span className={'i-mingcute-volume-fill size-5'} />
+          </button>
+          <div className={'bg-text-foreground/10 h-1 w-16 rounded-full'}>
+            <div className={'bg-text-foreground/50 h-1 w-3/4 rounded-full'} />
+          </div>
+        </div>
       </div>
     </div>
   )
