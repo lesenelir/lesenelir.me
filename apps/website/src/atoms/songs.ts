@@ -18,23 +18,42 @@ export const audioInstanceAtom = atom<HTMLAudioElement | null>(createGlobalAudio
 
 export const isPlayingAtom = atom<boolean>(false)
 
-export const audioControlsAtom = atom<null, [{ type: 'play' | 'pause' }], void>(
+export const audioControlsAtom = atom<
   null,
-  (get, set, action: { type: 'play' | 'pause' }) => {
-    const audio = get(audioInstanceAtom)
-    if (!audio) return
+  [{ type: 'play'; song: TSong } | { type: 'continue' } | { type: 'pause' }],
+  void
+>(null, (get, set, action) => {
+  const audio = get(audioInstanceAtom)
+  if (!audio) return
 
-    switch (action.type) {
-      case 'play': {
-        audio.play().catch(console.error)
-        set(isPlayingAtom, true)
-        break
-      }
-      case 'pause': {
-        audio.pause()
-        set(isPlayingAtom, false)
-        break
-      }
-    }
+  const playAudio = () => {
+    audio
+      .play()
+      .then(() => set(isPlayingAtom, true))
+      .catch(() => set(isPlayingAtom, false))
   }
-)
+
+  const currentSong = get(currentSongAtom)
+
+  switch (action.type) {
+    case 'play':
+      if (!action.song) return
+
+      if (currentSong?.id !== action.song.id) {
+        set(currentSongAtom, action.song)
+        audio.src = action.song.src
+      }
+      playAudio()
+      break
+
+    case 'continue':
+      if (!currentSong) return
+      playAudio()
+      break
+
+    case 'pause':
+      audio.pause()
+      set(isPlayingAtom, false)
+      break
+  }
+})

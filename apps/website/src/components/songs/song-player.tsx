@@ -10,7 +10,7 @@ export function SongPlayer() {
   const setAudioControls = useSetAtom(audioControlsAtom)
 
   const handlePlayPause = () => {
-    setAudioControls({ type: 'pause' })
+    setAudioControls({ type: isPlaying ? 'pause' : 'continue' })
   }
 
   return (

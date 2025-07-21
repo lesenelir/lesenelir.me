@@ -1,21 +1,26 @@
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 
-import { currentSongAtom, isPlayingAtom } from '@/atoms/songs'
+import { audioControlsAtom, currentSongAtom, isPlayingAtom } from '@/atoms/songs'
 import type { TSong } from '@/types/songs'
 
 interface SongItemProps {
   song: TSong
-  onPlay?: (song: TSong) => void
 }
 
-export function SongItem({ song, onPlay }: SongItemProps) {
+export function SongItem({ song }: SongItemProps) {
   const currentSong = useAtomValue(currentSongAtom)
   const isPlaying = useAtomValue(isPlayingAtom)
+  const setAudioControls = useSetAtom(audioControlsAtom)
 
   const isCurrentSong = currentSong?.id === song.id
   const isCurrentlyPlaying = isCurrentSong && isPlaying
+
   const handlePlay = () => {
-    onPlay?.(song)
+    if (isCurrentlyPlaying) {
+      setAudioControls({ type: 'pause' })
+    } else {
+      setAudioControls({ type: 'play', song })
+    }
   }
 
   return (
