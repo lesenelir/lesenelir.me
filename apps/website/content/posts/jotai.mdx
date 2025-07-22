@@ -444,57 +444,72 @@ export default function LoginPage() {
 
 ---
 
-### provider
+### provider & store
 
-上文介绍了 Jotai 是一个状态管理库，而不是一个全局状态管理库。这其中不单单是 Jotai 中的状态是由各个组件内部维护，只是原子是全局，状态值是全局。 还有一个原因是 Jotai 中的 Provider。Provider 是 Jotai 中的一个 React 组件，它的作用是包裹组件树，使得组件树中的所有组件都能访问到 Jotai 的原子。
+上文介绍了 Jotai 是一个状态管理库，而不是一个全局状态管理库。这其中不单单是 Jotai 中的状态是由各个组件内部维护，只是原子是全局，状态值是全局。 还有一个原因是 Jotai 中的 Provider 与 Store。Provider 是 Jotai 中的一个 React 组件，它的作用是包裹组件树，使得组件树中的所有组件都能访问到 Jotai 的原子。
 
-对于 Provider 组件一个比较重要的功能是进行状态作用域的隔离。 默认情况下，一般都会在根组件中使用 Provider 组件，来共享所有原子的状态值。但也可以在组件树的不同部分使用多个 Provider 组件，每个 Provider 组件各自管理子组件树的状态，这样就实现了状态作用域的隔离。
+对于 Provider 组件一个比较重要的功能是实现状态作用域的隔离。
 
-具体的相关代码如下：
+默认情况下，一般都会在根组件中使用 Provider 组件，来共享所有原子的状态值。但也可以在组件树的不同部分使用多个 Provider 组件，使得每个 Provider 组件各自管理子组件树的状态，这样就实现了状态作用域的隔离。
+
+Provider 可以实现状态作用域的隔离原因在于 Store。在 Jotai 中：
+
+- Atoms 是状态定义，本身不存储数据，而是描述状态的结构（定义一种数据结构）
+- Store 是实际存储状态值的地方
+- 每个 Atom 在每个 Store 中都有一个独立的状态实例（同一个 atom 在不同 store 中有不同的值）
+
+对于 Provider 组件而言，如果没有显式创建 store，则会默认创建一个 store，将这个 store 传递给自组件。有三种场景：
+
+- 不用 Provider = 使用默认全局 store
+- 用 Provider 不传 store = 自动创建独立 store
+- 用 Provider 传 store = 使用指定的 store
+
+具体场景下的相关代码如下：
 
 ```
-export const countAtom = atom<number>(0)
+const countAtom = atom(0)
 
-function Counter() {
-  const [count, setCount] = useAtom(countAtom)
-
+// 情况1：共享全局 store
+function GlobalExample() {
   return (
     <>
-      <p>{count}</p>
-      <button
-        className={'bg-blue-500 text-white px-4 py-2 rounded-lg'}
-        onClick={() => setCount((c) => c + 1)}
-      >
-        Add
-      </button>
+      <Counter /> {/* count: 0 -> 1 -> 2 */}
+      <Counter /> {/* count: 0 -> 1 -> 2 (同步变化) */}
     </>
   )
 }
 
-function Component1() {
-  return (
-    <Provider>
-      <Counter />
-    </Provider>
-  )
-}
-
-function Component2() {
-  return (
-    <Provider>
-      <Counter />
-    </Provider>
-  )
-}
-
-export default function Page() {
+// 情况2：独立 store
+function IsolatedExample() {
   return (
     <>
-      <Component1/>
-      <Component2/>
+      <Provider>
+        <Counter /> {/* count: 0 -> 1 (独立) */}
+      </Provider>
+      <Provider>
+        <Counter /> {/* count: 0 (不受影响) */}
+      </Provider>
     </>
   )
 }
+
+// 情况3：手动创建 store 更明确
+function ExplicitExample() {
+  const store1 = createStore()
+  const store2 = createStore()
+
+  return (
+    <>
+      <Provider store={store1}>
+        <Counter />
+      </Provider>
+      <Provider store={store2}>
+        <Counter />
+      </Provider>
+    </>
+  )
+}
+
 ```
 
 上述代码做到了 atom 原子的状态作用域隔离。 Provider 会创建一个新的上下文，所以在不同的 Provider 中使用相同的原子，它们的状态值是不同的， 即 `countAtom` 原子在 `Component1` 和 `Component2` 中的状态值是不同的。
