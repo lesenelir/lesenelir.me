@@ -39,6 +39,26 @@ export default function Page() {
         </p>
 
         <p>Or mail me: hi@lesenelir.me</p>
+
+        <hr className={'border-dividing my-12 w-1/3 border-t'} />
+
+        <a
+          target={'_blank'}
+          href={'https://github.com/lesenelir/lesenelir.me/tree/master/apps/website'}
+          rel={'noopener noreferrer'}
+          className={cn(
+            'text-link inline-flex w-fit items-center gap-1',
+            'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
+            'transition-colors duration-200'
+          )}
+        >
+          View source
+          <span
+            className={
+              'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'
+            }
+          />
+        </a>
       </div>
     </div>
   )
