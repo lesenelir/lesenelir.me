@@ -1,5 +1,5 @@
+import ExternalLink from '@/components/common/external-link'
 import TimeClock from '@/components/common/time-clock'
-import { cn } from '@/lib/utils'
 
 export default function Page() {
   return (
@@ -18,47 +18,21 @@ export default function Page() {
 
         <p className={'flex flex-col gap-0.5'}>
           Find me on:
-          <a
-            target={'_blank'}
+          <ExternalLink
             href={'https://github.com/lesenelir'}
-            rel={'noopener noreferrer'}
-            className={cn(
-              'text-link inline-flex w-fit items-center gap-1',
-              'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
-              'transition-colors duration-200'
-            )}
+            icon={<span className={'i-mingcute-github-line'} />}
           >
-            <span className={'i-mingcute-github-line'} />
             Github
-            <span
-              className={
-                'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'
-              }
-            />
-          </a>
+          </ExternalLink>
         </p>
 
         <p>Or mail me: hi@lesenelir.me</p>
 
         <hr className={'border-dividing my-12 w-1/3 border-t'} />
 
-        <a
-          target={'_blank'}
-          href={'https://github.com/lesenelir/lesenelir.me/tree/master/apps/website'}
-          rel={'noopener noreferrer'}
-          className={cn(
-            'text-link inline-flex w-fit items-center gap-1',
-            'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
-            'transition-colors duration-200'
-          )}
-        >
+        <ExternalLink href={'https://github.com/lesenelir/lesenelir.me/tree/master/apps/website'}>
           View source
-          <span
-            className={
-              'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'
-            }
-          />
-        </a>
+        </ExternalLink>
       </div>
     </div>
   )
