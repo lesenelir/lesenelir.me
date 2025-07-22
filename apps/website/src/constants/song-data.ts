@@ -10,6 +10,7 @@ export const getSongs = async (): Promise<TSong[]> => {
 
       const fileName = obj.Key.replace('songs/', '')
       const id = fileName.replace(/\.[^.]+$/i, '')
+      // Remove track numbers (e.g., "01. ") from the beginning of the filename
       const cleanId = id.replace(/^\d+\.\s*/, '')
 
       const [artist, ...titleParts] = cleanId.split(' - ')
