@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 
-import type { TSong } from '@/types'
+import type { TPlayMode, TSong } from '@/types'
 
 function createGlobalAudio(): HTMLAudioElement | null {
   if (typeof window === 'undefined') return null
@@ -54,6 +54,8 @@ export const audioInitAtom = atom<null, [], void>(null, (get, set) => {
 
 // Track if audio has been initialized
 const audioInitializedAtom = atom<boolean>(false)
+
+export const playModeAtom = atom<TPlayMode>('forward')
 
 export const isPlayingAtom = atom<boolean>(false)
 

@@ -11,9 +11,29 @@ import {
   durationAtom,
   isMutedAtom,
   isPlayingAtom,
+  playModeAtom,
   volumeAtom
 } from '@/atoms/songs'
 import { cn, formatTime } from '@/lib/utils'
+
+const PlayModeIcon = () => {
+  const playMode = useAtomValue(playModeAtom)
+
+  switch (playMode) {
+    case 'forward': {
+      return <span className={'i-mingcute-forward-fill size-5'} />
+    }
+    case 'repeat-all': {
+      return <span className={'i-mingcute-repeat-fill size-5'} />
+    }
+    case 'repeat-one': {
+      return <span className={'i-mingcute-repeat-one-fill size-5'} />
+    }
+    case 'shuffle': {
+      return <span className={'i-mingcute-shuffle-2-fill size-5'} />
+    }
+  }
+}
 
 export function SongPlayer() {
   const currentSong = useAtomValue(currentSongAtom)
@@ -22,6 +42,7 @@ export function SongPlayer() {
   const duration = useAtomValue(durationAtom)
   const volume = useAtomValue(volumeAtom)
   const isMuted = useAtomValue(isMutedAtom)
+  const playMode = useAtomValue(playModeAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
@@ -114,8 +135,8 @@ export function SongPlayer() {
 
         {/* repeat and volume control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
-          <button className={cn(baseButtonClass, 'size-10')} aria-label={'Repeat-all/Repeat-one'}>
-            <span className={'i-mingcute-repeat-fill size-5'} />
+          <button className={cn(baseButtonClass, 'size-10')} aria-label={playMode}>
+            <PlayModeIcon />
           </button>
 
           <button

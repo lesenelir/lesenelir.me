@@ -4,3 +4,5 @@ export type TSong = {
   title: string
   artist: string
 }
+
+export type TPlayMode = 'forward' | 'repeat-all' | 'repeat-one' | 'shuffle'
