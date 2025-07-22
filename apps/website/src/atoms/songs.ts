@@ -37,18 +37,57 @@ export const audioInitAtom = atom<null, [], void>(null, (get, set) => {
   audio.addEventListener('ended', () => {
     const songs = get(songsAtom)
     const currentSong = get(currentSongAtom)
+    const playMode = get(playModeAtom)
+
     if (!currentSong || songs.length === 0) return
 
     const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
-    const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+    let nextSong: TSong | null = null
 
-    // Play the next song
-    set(currentSongAtom, nextSong)
-    audio.src = nextSong.src
-    audio
-      .play()
-      .then(() => set(isPlayingAtom, true))
-      .catch(() => set(isPlayingAtom, false))
+    switch (playMode) {
+      case 'forward': {
+        // Stop at the end of playlists
+        if (currentIndex >= songs.length - 1) {
+          set(isPlayingAtom, false)
+          return
+        }
+        nextSong = songs[currentIndex + 1]
+        break
+      }
+
+      case 'repeat-all': {
+        // Loop to first song after last song
+        nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+        break
+      }
+
+      case 'repeat-one': {
+        // Replay the same song
+        nextSong = currentSong
+        break
+      }
+
+      case 'shuffle': {
+        // Play random next song (avoid current song if possible)
+        if (songs.length === 1) {
+          nextSong = currentSong
+        } else {
+          const availableSongs = songs.filter((_, index) => index !== currentIndex)
+          const randomIndex = Math.floor(Math.random() * availableSongs.length)
+          nextSong = availableSongs[randomIndex]
+        }
+        break
+      }
+    }
+
+    if (nextSong) {
+      set(currentSongAtom, nextSong)
+      audio.src = nextSong.src
+      audio
+        .play()
+        .then(() => set(isPlayingAtom, true))
+        .catch(() => set(isPlayingAtom, false))
+    }
   })
 })
 
@@ -78,6 +117,7 @@ export const audioControlsAtom = atom<
     | { type: 'seek'; time: number }
     | { type: 'setVolume'; volume: number }
     | { type: 'toggleMute' }
+    | { type: 'togglePlayMode' }
   ],
   void
 >(null, (get, set, action) => {
@@ -131,8 +171,25 @@ export const audioControlsAtom = atom<
 
     case 'previous': {
       if (!currentSong || songs.length === 0) return
+
+      const playMode = get(playModeAtom)
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
-      const previousSong = currentIndex <= 0 ? songs[songs.length - 1] : songs[currentIndex - 1]
+      let previousSong: TSong
+
+      if (playMode === 'shuffle') {
+        // In shuffle mode, select random previous song (avoid current if possible)
+        if (songs.length === 1) {
+          previousSong = currentSong
+        } else {
+          const availableSongs = songs.filter((_, index) => index !== currentIndex)
+          const randomIndex = Math.floor(Math.random() * availableSongs.length)
+          previousSong = availableSongs[randomIndex]
+        }
+      } else {
+        // For other modes, use normal previous logic
+        previousSong = currentIndex <= 0 ? songs[songs.length - 1] : songs[currentIndex - 1]
+      }
+
       set(currentSongAtom, previousSong)
       audio.src = previousSong.src
       playAudio()
@@ -141,8 +198,25 @@ export const audioControlsAtom = atom<
 
     case 'next': {
       if (!currentSong || songs.length === 0) return
+
+      const playMode = get(playModeAtom)
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
-      const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+      let nextSong: TSong
+
+      if (playMode === 'shuffle') {
+        // In shuffle mode, select random next song (avoid current if possible)
+        if (songs.length === 1) {
+          nextSong = currentSong
+        } else {
+          const availableSongs = songs.filter((_, index) => index !== currentIndex)
+          const randomIndex = Math.floor(Math.random() * availableSongs.length)
+          nextSong = availableSongs[randomIndex]
+        }
+      } else {
+        // For other modes, use normal next logic
+        nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+      }
+
       set(currentSongAtom, nextSong)
       audio.src = nextSong.src
       playAudio()
@@ -180,6 +254,29 @@ export const audioControlsAtom = atom<
         audio.volume = 0
         set(isMutedAtom, true)
       }
+      break
+    }
+
+    case 'togglePlayMode': {
+      const currentMode = get(playModeAtom)
+      let nextMode: TPlayMode
+
+      switch (currentMode) {
+        case 'forward':
+          nextMode = 'repeat-all'
+          break
+        case 'repeat-all':
+          nextMode = 'repeat-one'
+          break
+        case 'repeat-one':
+          nextMode = 'shuffle'
+          break
+        case 'shuffle':
+          nextMode = 'forward'
+          break
+      }
+
+      set(playModeAtom, nextMode)
       break
     }
   }

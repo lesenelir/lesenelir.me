@@ -135,7 +135,11 @@ export function SongPlayer() {
 
         {/* repeat and volume control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
-          <button className={cn(baseButtonClass, 'size-10')} aria-label={playMode}>
+          <button
+            className={cn(baseButtonClass, 'size-10')}
+            aria-label={playMode}
+            onClick={() => setAudioControls({ type: 'togglePlayMode' })}
+          >
             <PlayModeIcon />
           </button>
 
