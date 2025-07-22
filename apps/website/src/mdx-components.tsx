@@ -44,10 +44,16 @@ const components = {
     <strong className={'text-text-primary font-semibold'} {...props} />
   ),
   ol: (props: ListProps) => (
-    <ol className={'text-text-primary/85 my-4 list-inside list-decimal space-y-4'} {...props} />
+    <ol
+      className={'text-text-primary/85 text-md my-4 list-inside list-decimal space-y-4'}
+      {...props}
+    />
   ),
   ul: (props: ListProps) => (
-    <ul className={'text-text-primary/85 my-4 list-inside list-disc space-y-4'} {...props} />
+    <ul
+      className={'text-text-primary/85 text-md my-4 list-inside list-disc space-y-4'}
+      {...props}
+    />
   ),
   blockquote: (props: BlockquoteProps) => (
     <blockquote
