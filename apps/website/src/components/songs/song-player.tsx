@@ -1,7 +1,6 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
-import { motion } from 'motion/react'
 import type { MouseEvent } from 'react'
 
 import {
@@ -90,10 +89,9 @@ export function SongPlayer() {
             className={'bg-text-foreground/10 h-1 w-full cursor-pointer rounded-full'}
             onClick={handleProgressClick}
           >
-            <motion.div
+            <div
               className={'bg-text-foreground/50 h-1 rounded-full'}
-              animate={{ width: `${progressPercentage}%` }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{ width: `${progressPercentage}%` }}
             />
           </button>
         </div>
@@ -159,10 +157,9 @@ export function SongPlayer() {
             aria-label={'Volume Progress'}
             onClick={handleVolumeClick}
           >
-            <motion.div
+            <div
               className={'bg-text-foreground/50 h-1 rounded-full'}
-              animate={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
             />
           </button>
         </div>
