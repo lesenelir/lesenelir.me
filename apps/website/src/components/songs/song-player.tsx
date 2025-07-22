@@ -47,8 +47,8 @@ export function SongPlayer() {
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
 
-const baseButtonClass =
-  'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200';
+  const baseButtonClass =
+    'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
 
   const handleProgressClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (duration === 0) return
