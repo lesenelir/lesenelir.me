@@ -16,6 +16,45 @@ export const currentSongAtom = atom<TSong | null>(null)
  */
 export const audioInstanceAtom = atom<HTMLAudioElement | null>(createGlobalAudio())
 
+// Audio initialization atom that sets up global listeners
+export const audioInitAtom = atom<null, [], void>(null, (get, set) => {
+  const audio = get(audioInstanceAtom)
+  if (!audio) return
+
+  // Set up global event listeners once
+  audio.addEventListener('timeupdate', () => {
+    set(currentTimeAtom, audio.currentTime)
+  })
+
+  audio.addEventListener('loadedmetadata', () => {
+    set(durationAtom, audio.duration || 0)
+  })
+
+  audio.addEventListener('durationchange', () => {
+    set(durationAtom, audio.duration || 0)
+  })
+
+  audio.addEventListener('ended', () => {
+    const songs = get(songsAtom)
+    const currentSong = get(currentSongAtom)
+    if (!currentSong || songs.length === 0) return
+
+    const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+    const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
+
+    // Play the next song
+    set(currentSongAtom, nextSong)
+    audio.src = nextSong.src
+    audio
+      .play()
+      .then(() => set(isPlayingAtom, true))
+      .catch(() => set(isPlayingAtom, false))
+  })
+})
+
+// Track if audio has been initialized
+const audioInitializedAtom = atom<boolean>(false)
+
 export const isPlayingAtom = atom<boolean>(false)
 
 export const currentTimeAtom = atom<number>(0)
@@ -44,32 +83,8 @@ export const audioControlsAtom = atom<
   if (!audio) return
 
   const songs = get(songsAtom)
-
-  const setupAudioEventListeners = () => {
-    audio.addEventListener('timeupdate', () => {
-      set(currentTimeAtom, audio.currentTime)
-    })
-
-    audio.addEventListener('loadedmetadata', () => {
-      set(durationAtom, audio.duration || 0)
-    })
-
-    audio.addEventListener('durationchange', () => {
-      set(durationAtom, audio.duration || 0)
-    })
-
-    audio.addEventListener('ended', () => {
-      // re-fetch
-      const currentSong = get(currentSongAtom)
-      if (!currentSong || songs.length === 0) return
-
-      console.log('ended', currentSong)
-
-      const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
-      const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
-      findAndPlaySong(nextSong)
-    })
-  }
+  const currentSong = get(currentSongAtom)
+  const isInitialized = get(audioInitializedAtom)
 
   const playAudio = () => {
     audio
@@ -78,23 +93,23 @@ export const audioControlsAtom = atom<
       .catch(() => set(isPlayingAtom, false))
   }
 
-  const findAndPlaySong = (song: TSong) => {
-    set(currentSongAtom, song)
-    audio.src = song.src
-    setupAudioEventListeners()
-    playAudio()
+  const ensureInitialized = () => {
+    if (!isInitialized) {
+      set(audioInitAtom)
+      set(audioInitializedAtom, true)
+    }
   }
-
-  const currentSong = get(currentSongAtom)
 
   switch (action.type) {
     case 'play': {
       if (!action.song) return
 
+      // Auto-initialize on first play
+      ensureInitialized()
+
       if (currentSong?.id !== action.song.id) {
         set(currentSongAtom, action.song)
         audio.src = action.song.src
-        setupAudioEventListeners()
       }
       playAudio()
       break
@@ -116,7 +131,9 @@ export const audioControlsAtom = atom<
       if (!currentSong || songs.length === 0) return
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
       const previousSong = currentIndex <= 0 ? songs[songs.length - 1] : songs[currentIndex - 1]
-      findAndPlaySong(previousSong)
+      set(currentSongAtom, previousSong)
+      audio.src = previousSong.src
+      playAudio()
       break
     }
 
@@ -124,7 +141,9 @@ export const audioControlsAtom = atom<
       if (!currentSong || songs.length === 0) return
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
       const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
-      findAndPlaySong(nextSong)
+      set(currentSongAtom, nextSong)
+      audio.src = nextSong.src
+      playAudio()
       break
     }
 
