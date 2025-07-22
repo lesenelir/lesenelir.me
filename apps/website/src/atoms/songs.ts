@@ -43,6 +43,8 @@ export const audioControlsAtom = atom<
   const audio = get(audioInstanceAtom)
   if (!audio) return
 
+  const songs = get(songsAtom)
+
   const setupAudioEventListeners = () => {
     audio.addEventListener('timeupdate', () => {
       set(currentTimeAtom, audio.currentTime)
@@ -59,8 +61,9 @@ export const audioControlsAtom = atom<
     audio.addEventListener('ended', () => {
       // re-fetch
       const currentSong = get(currentSongAtom)
-      const songs = get(songsAtom)
       if (!currentSong || songs.length === 0) return
+
+      console.log('ended', currentSong)
 
       const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
       const nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
@@ -83,10 +86,9 @@ export const audioControlsAtom = atom<
   }
 
   const currentSong = get(currentSongAtom)
-  const songs = get(songsAtom)
 
   switch (action.type) {
-    case 'play':
+    case 'play': {
       if (!action.song) return
 
       if (currentSong?.id !== action.song.id) {
@@ -96,16 +98,19 @@ export const audioControlsAtom = atom<
       }
       playAudio()
       break
+    }
 
-    case 'continue':
+    case 'continue': {
       if (!currentSong) return
       playAudio()
       break
+    }
 
-    case 'pause':
+    case 'pause': {
       audio.pause()
       set(isPlayingAtom, false)
       break
+    }
 
     case 'previous': {
       if (!currentSong || songs.length === 0) return
