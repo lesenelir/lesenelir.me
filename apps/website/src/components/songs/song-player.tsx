@@ -9,7 +9,9 @@ import {
   currentSongAtom,
   currentTimeAtom,
   durationAtom,
-  isPlayingAtom
+  isMutedAtom,
+  isPlayingAtom,
+  volumeAtom
 } from '@/atoms/songs'
 import { cn, formatTime } from '@/lib/utils'
 
@@ -18,6 +20,8 @@ export function SongPlayer() {
   const isPlaying = useAtomValue(isPlayingAtom)
   const currentTime = useAtomValue(currentTimeAtom)
   const duration = useAtomValue(durationAtom)
+  const volume = useAtomValue(volumeAtom)
+  const isMuted = useAtomValue(isMutedAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
@@ -34,6 +38,14 @@ export function SongPlayer() {
     const newTime = percentage * duration
 
     setAudioControls({ type: 'seek', time: newTime })
+  }
+
+  const handleVolumeClick = (e: MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width))
+
+    setAudioControls({ type: 'setVolume', volume: percentage })
   }
 
   return (
@@ -106,12 +118,28 @@ export function SongPlayer() {
             <span className={'i-mingcute-repeat-fill size-5'} />
           </button>
 
-          <button className={cn(baseButtonClass, 'size-10')} aria-label={'Volume'}>
-            <span className={'i-mingcute-volume-fill size-5'} />
+          <button
+            className={cn(baseButtonClass, 'size-10')}
+            aria-label={'Volume'}
+            onClick={() => setAudioControls({ type: 'toggleMute' })}
+          >
+            {isMuted || volume === 0 ? (
+              <span className={'i-mingcute-volume-mute-fill size-5'} />
+            ) : (
+              <span className={'i-mingcute-volume-fill size-5'} />
+            )}
           </button>
-          <div className={'bg-text-foreground/10 h-1 w-16 rounded-full'}>
-            <div className={'bg-text-foreground/50 h-1 w-3/4 rounded-full'} />
-          </div>
+          <button
+            className={'bg-text-foreground/10 h-1 w-16 cursor-pointer rounded-full'}
+            aria-label={'Volume Progress'}
+            onClick={handleVolumeClick}
+          >
+            <motion.div
+              className={'bg-text-foreground/50 h-1 rounded-full'}
+              animate={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            />
+          </button>
         </div>
       </div>
     </div>

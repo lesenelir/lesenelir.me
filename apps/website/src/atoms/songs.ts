@@ -22,6 +22,10 @@ export const currentTimeAtom = atom<number>(0)
 
 export const durationAtom = atom<number>(0)
 
+export const volumeAtom = atom<number>(0.6)
+
+export const isMutedAtom = atom<boolean>(false)
+
 export const audioControlsAtom = atom<
   null,
   [
@@ -31,6 +35,8 @@ export const audioControlsAtom = atom<
     | { type: 'previous' }
     | { type: 'next' }
     | { type: 'seek'; time: number }
+    | { type: 'setVolume'; volume: number }
+    | { type: 'toggleMute' }
   ],
   void
 >(null, (get, set, action) => {
@@ -122,6 +128,32 @@ export const audioControlsAtom = atom<
       const seekTime = Math.max(0, Math.min(action.time, audio.duration || 0))
       audio.currentTime = seekTime
       set(currentTimeAtom, seekTime)
+      break
+    }
+
+    case 'setVolume': {
+      const volume = Math.max(0, Math.min(1, action.volume))
+      audio.volume = volume
+      set(volumeAtom, volume)
+      if (volume > 0) {
+        set(isMutedAtom, false)
+      } else {
+        set(isMutedAtom, true)
+      }
+      break
+    }
+
+    case 'toggleMute': {
+      const currentVolume = get(volumeAtom)
+      const isMuted = get(isMutedAtom)
+
+      if (isMuted) {
+        audio.volume = currentVolume
+        set(isMutedAtom, false)
+      } else {
+        audio.volume = 0
+        set(isMutedAtom, true)
+      }
       break
     }
   }
