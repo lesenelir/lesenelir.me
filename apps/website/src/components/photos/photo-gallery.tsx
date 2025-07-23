@@ -1,15 +1,27 @@
 'use client'
 
-import { useAtomValue } from 'jotai'
+import { useEffect } from 'react'
+
+import { useAtomValue, useSetAtom } from 'jotai'
 
 import { layoutModeAtom, photosAtom } from '@/atoms/photos'
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
 import { PhotoModal } from '@/components/photos/photo-modal'
+import type { Photo } from '@/types'
 
-export function PhotoGallery() {
+interface PhotoGalleryProps {
+  photos: Photo[]
+}
+
+export function PhotoGallery({ photos: initialPhotos }: PhotoGalleryProps) {
   const layoutMode = useAtomValue(layoutModeAtom)
   const photos = useAtomValue(photosAtom)
+  const setPhotos = useSetAtom(photosAtom)
+
+  useEffect(() => {
+    setPhotos(initialPhotos)
+  }, [initialPhotos, setPhotos])
 
   const getContainerClassName = () => {
     switch (layoutMode) {
