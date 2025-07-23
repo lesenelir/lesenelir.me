@@ -56,7 +56,7 @@ export const getPhotos = async (): Promise<Photo[]> => {
           id,
           src: getPublicUrl(obj.Key),
           alt: id,
-          desc: photoMetadata[id]?.desc
+          desc: photoMetadata[id]?.desc ?? ''
         }
       ]
     })
