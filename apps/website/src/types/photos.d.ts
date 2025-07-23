@@ -1,6 +1,6 @@
 export type LayoutMode = 'grid' | 'row' | 'single'
 
-export interface Photo {
+export interface TPhoto {
   id: string
   src: string
   alt: string

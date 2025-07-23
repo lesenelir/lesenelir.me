@@ -1,5 +1,5 @@
 import { getPublicUrl, listPhotos } from '@/lib/s3'
-import type { Photo } from '@/types'
+import type { TPhoto } from '@/types'
 
 const photoMetadata: Record<string, { desc: string }> = {
   R0000466: { desc: '2025/07/01 (Tues) Nagoya, Japan @ Male Companion' },
@@ -41,11 +41,11 @@ const photoMetadata: Record<string, { desc: string }> = {
   R0000041: { desc: '2024/12/12 (Sun) Beijing, China @ Yummy' }
 }
 
-export const getPhotos = async (): Promise<Photo[]> => {
+export const getPhotos = async (): Promise<TPhoto[]> => {
   try {
     const s3Objects = await listPhotos()
 
-    const photos: Photo[] = s3Objects.flatMap((obj) => {
+    const photos: TPhoto[] = s3Objects.flatMap((obj) => {
       if (!obj.Key) return []
 
       const fileName = obj.Key.replace('photos/', '')

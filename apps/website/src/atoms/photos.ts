@@ -1,17 +1,17 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
-import type { LayoutMode, Photo } from '@/types'
+import type { LayoutMode, TPhoto } from '@/types'
 
 export const layoutModeAtom = atomWithStorage<LayoutMode>('photos-layout-mode', 'single')
 
-export const photosAtom = atom<Photo[]>([])
+export const photosAtom = atom<TPhoto[]>([])
 
-export const selectedPhotoAtom = atom<Photo | null>(null)
+export const selectedPhotoAtom = atom<TPhoto | null>(null)
 
 export const isPhotoModalOpenAtom = atom(false)
 
-export const openPhotoModalAtom = atom(null, (_get, set, photo: Photo) => {
+export const openPhotoModalAtom = atom(null, (_get, set, photo: TPhoto) => {
   set(selectedPhotoAtom, photo)
   set(isPhotoModalOpenAtom, true)
 })

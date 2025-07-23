@@ -4,10 +4,10 @@ import { useHydrateAtoms } from 'jotai/utils'
 import type { ReactNode } from 'react'
 
 import { photosAtom } from '@/atoms/photos'
-import type { Photo } from '@/types'
+import type { TPhoto } from '@/types'
 
 interface PhotoProviderProps {
-  photos: Photo[]
+  photos: TPhoto[]
   children: ReactNode
 }
 

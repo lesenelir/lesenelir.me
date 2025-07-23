@@ -3,10 +3,10 @@ import Image from 'next/image'
 
 import { layoutModeAtom, openPhotoModalAtom } from '@/atoms/photos'
 import { cn } from '@/lib/utils'
-import type { Photo } from '@/types'
+import type { TPhoto } from '@/types'
 
 interface PhotoItemProps {
-  photo: Photo
+  photo: TPhoto
 }
 
 export function PhotoItem({ photo }: PhotoItemProps) {
