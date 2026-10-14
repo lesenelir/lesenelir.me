@@ -18,15 +18,11 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "clear": "pnpm -r exec rm -rf node_modules dist .turbo .next && rm -rf node_modules dist .turbo .next",
-    "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*": "biome check --write --no-errors-on-unmatched"
+    "prepare": "lefthook install"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "lefthook": "^2.2.2"
   },
   "packageManager": "pnpm@11.22.0",
   "engines": {

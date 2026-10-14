@@ -6,5 +6,6 @@ allowBuilds:
   '@swc/core': true
   '@tailwindcss/oxide': true
   esbuild: true
+  lefthook: true
   sharp: true
   unrs-resolver: true
