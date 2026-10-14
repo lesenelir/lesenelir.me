@@ -10,6 +10,7 @@ export function LayoutSelector() {
   return (
     <div className={'mb-8 inline-flex flex-wrap items-center justify-start gap-4 text-text-foreground/55'}>
       <button
+        type='button'
         onClick={() => setLayoutMode('single')}
         className={cn(
           'flex size-6 cursor-pointer items-center justify-center transition-colors duration-200',
@@ -21,6 +22,7 @@ export function LayoutSelector() {
       </button>
 
       <button
+        type='button'
         onClick={() => setLayoutMode('row')}
         className={cn(
           'flex size-6 cursor-pointer items-center justify-center transition-colors duration-200',
@@ -32,6 +34,7 @@ export function LayoutSelector() {
       </button>
 
       <button
+        type='button'
         onClick={() => setLayoutMode('grid')}
         className={cn(
           'flex size-6 cursor-pointer items-center justify-center transition-colors duration-200',

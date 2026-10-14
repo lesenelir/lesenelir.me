@@ -87,6 +87,7 @@ export function SongPlayer() {
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
         <div className={'flex flex-1 items-center'}>
           <button
+            type='button'
             className={'h-1 w-full cursor-pointer rounded-full bg-text-foreground/10'}
             onClick={handleProgressClick}
           >
@@ -101,6 +102,7 @@ export function SongPlayer() {
         {/* play control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Previous'}
             onClick={() => setAudioControls({ type: 'previous' })}
@@ -109,6 +111,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-12')}
             aria-label={isPlaying ? 'Pause' : 'Play'}
             onClick={() => setAudioControls({ type: isPlaying ? 'pause' : 'continue' })}
@@ -121,6 +124,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Next'}
             onClick={() => setAudioControls({ type: 'next' })}
@@ -132,6 +136,7 @@ export function SongPlayer() {
         {/* repeat and volume control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={playMode}
             onClick={() => setAudioControls({ type: 'togglePlayMode' })}
@@ -140,6 +145,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Volume'}
             onClick={() => setAudioControls({ type: 'toggleMute' })}
@@ -151,6 +157,7 @@ export function SongPlayer() {
             )}
           </button>
           <button
+            type='button'
             className={'h-1 w-16 cursor-pointer rounded-full bg-text-foreground/10'}
             aria-label={'Volume Progress'}
             onClick={handleVolumeClick}

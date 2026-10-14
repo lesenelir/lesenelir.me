@@ -26,6 +26,7 @@ export function SongItem({ song }: SongItemProps) {
 
   return (
     <button
+      type='button'
       className={
         'flex w-full cursor-pointer items-center gap-3 rounded-lg px-1.5 py-3 transition-colors duration-200 hover:bg-foreground'
       }

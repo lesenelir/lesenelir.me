@@ -61,7 +61,7 @@ async function main() {
           name: 'overwriteChecker',
           type: values => {
             if (values === false) {
-              throw new Error(red('✖') + ' Operation cancelled')
+              throw new Error(`${red('✖')} Operation cancelled`)
             }
             return null
           },
@@ -76,7 +76,7 @@ async function main() {
       ],
       {
         onCancel: () => {
-          throw new Error(red('✖') + ' Operation cancelled')
+          throw new Error(`${red('✖')} Operation cancelled`)
         },
       }
     )

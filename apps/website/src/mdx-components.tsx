@@ -47,6 +47,7 @@ const components = {
       if (typeof code === 'string') {
         return (
           <pre className={'my-4 overflow-x-auto rounded-lg bg-foreground p-4 font-mono text-sm'} {...props}>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: sugar-high escapes the source before wrapping tokens in spans */}
             <code dangerouslySetInnerHTML={{ __html: highlight(code) }} />
           </pre>
         )
@@ -63,6 +64,7 @@ const components = {
       return (
         <code
           className={'rounded bg-foreground px-1 py-0.5 font-mono text-sm'}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: sugar-high escapes the source before wrapping tokens in spans
           dangerouslySetInnerHTML={{ __html: highlight(children) }}
           {...props}
         />

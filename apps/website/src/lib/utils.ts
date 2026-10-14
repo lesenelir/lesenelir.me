@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatTime(seconds: number): string {
-  if (isNaN(seconds) || seconds < 0) return '0:00'
+  if (Number.isNaN(seconds) || seconds < 0) return '0:00'
 
   const minutes = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
