@@ -1,16 +1,17 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { postsMetadata } from '@/constants'
 import type { TPost, TPostMetadata } from '@/types'
+
+import { postsMetadata } from '@/constants'
 
 const postsDirectory = path.join(process.cwd(), 'content/posts')
 
 export function getAllPosts(): TPost[] {
   const fileNames = fs.readdirSync(postsDirectory)
   return fileNames
-    .filter((name) => name.endsWith('.mdx'))
-    .map((name) => {
+    .filter(name => name.endsWith('.mdx'))
+    .map(name => {
       const id = name.replace(/\.mdx$/, '')
       const metadata = postsMetadata[id]
 
@@ -20,7 +21,7 @@ export function getAllPosts(): TPost[] {
 
       return {
         id,
-        metadata
+        metadata,
       }
     })
     .sort((a, b) => {

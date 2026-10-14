@@ -13,32 +13,21 @@
   "type": "module",
   "scripts": {
     "build:website": "pnpm --filter @lesenelir/website build",
-    "clear": "pnpm -r exec rm -rf node_modules dist .turbo .next && rm -rf node_modules dist .turbo .next",
     "dev:website": "pnpm --filter @lesenelir/website dev",
-    "format:check": "prettier . --check",
-    "format:write": "prettier . --write",
-    "lint:check": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,mdx,js,jsx,cjs,mjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "package.json": "prettier --write",
-    "*.{css,md}": "prettier --write"
+    "typecheck": "pnpm -r typecheck",
+    "check": "biome check --write .",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "clear": "pnpm -r exec rm -rf node_modules dist .turbo .next && rm -rf node_modules dist .turbo .next",
+    "prepare": "lefthook install"
   },
   "devDependencies": {
-    "@lesenelir/eslint-config": "workspace:*",
-    "@lesenelir/prettier-config": "workspace:*",
-    "eslint": "^9.30.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2"
+    "@biomejs/biome": "^2.5.15",
+    "lefthook": "^2.2.2",
+    "typescript": "^7.0.2"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@11.22.0",
   "engines": {
-    "node": ">=20.18.0"
+    "node": ">=24"
   }
 }

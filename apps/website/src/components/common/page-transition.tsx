@@ -10,20 +10,20 @@ interface PageTransitionProps {
 
 const pageVariants = {
   initial: {
-    filter: 'blur(1.5px)'
+    filter: 'blur(1.5px)',
   },
   in: {
-    filter: 'blur(0px)'
+    filter: 'blur(0px)',
   },
   out: {
-    filter: 'blur(1.5px)'
-  }
+    filter: 'blur(1.5px)',
+  },
 }
 
 const pageTransition = {
   type: 'tween' as const,
   ease: 'easeIn' as const,
-  duration: 0.3
+  duration: 0.3,
 }
 
 export function PageTransition({ children }: PageTransitionProps) {

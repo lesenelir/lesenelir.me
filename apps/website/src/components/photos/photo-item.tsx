@@ -1,15 +1,19 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 
-import { layoutModeAtom, openPhotoModalAtom } from '@/atoms/photos'
-import { cn } from '@/lib/utils'
 import type { TPhoto } from '@/types'
+
+import { cn } from '@/lib/utils'
+
+import { layoutModeAtom, openPhotoModalAtom } from '@/atoms/photos'
 
 interface PhotoItemProps {
   photo: TPhoto
+  // Preload the LCP image; next/image lazy-loads the rest by default
+  preload?: boolean
 }
 
-export function PhotoItem({ photo }: PhotoItemProps) {
+export function PhotoItem({ photo, preload = false }: PhotoItemProps) {
   const layoutMode = useAtomValue(layoutModeAtom)
   const openModal = useSetAtom(openPhotoModalAtom)
 
@@ -25,13 +29,7 @@ export function PhotoItem({ photo }: PhotoItemProps) {
   }
 
   return (
-    <div
-      className={cn(
-        'cursor-pointer',
-        layoutMode === 'row' && 'shrink-0',
-        layoutMode === 'grid' && 'relative'
-      )}
-    >
+    <div className={cn('cursor-pointer', layoutMode === 'row' && 'shrink-0', layoutMode === 'grid' && 'relative')}>
       <Image
         src={photo.src}
         alt={photo.alt}
@@ -46,13 +44,12 @@ export function PhotoItem({ photo }: PhotoItemProps) {
               ? '(max-width: 640px) 448px, 600px'
               : '(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
         }
-        priority={false}
-        loading={'lazy'}
+        preload={preload}
       />
       {photo.desc && (
         <p
           className={cn(
-            'text-text-primary/85 mt-2 text-center text-sm',
+            'mt-2 text-center text-sm text-text-primary/85',
             layoutMode === 'single' && 'mx-auto max-w-2xl',
             layoutMode === 'row' && 'max-w-md',
             layoutMode === 'grid' && 'max-w-full'

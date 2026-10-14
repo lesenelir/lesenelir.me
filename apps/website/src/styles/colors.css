@@ -6,7 +6,7 @@
   --lz-text-primary: 0.3092 0 0;
   --lz-link: 0.4972 0.1914 263.21;
 
-  --lz-dividing: theme(colors.zinc.200);
+  --lz-dividing: var(--color-zinc-200);
 
   /* Sugar-high syntax highlighting - Nord theme */
   --sh-class: #5c84ea;
@@ -28,7 +28,7 @@
   --lz-text-primary: 0.9 0.0043 197.08;
   --lz-link: 0.7633 0.1267 248.88;
 
-  --lz-dividing: theme(colors.zinc.800);
+  --lz-dividing: var(--color-zinc-800);
 
   /* Sugar-high syntax highlighting - Nord theme */
   --sh-class: #8fbcbb;

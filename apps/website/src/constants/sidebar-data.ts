@@ -4,21 +4,21 @@ export const sidebarData: TSidebarData[] = [
   {
     id: 0,
     title: 'about',
-    href: '/'
+    href: '/',
   },
   {
     id: 1,
     title: 'posts',
-    href: '/posts'
+    href: '/posts',
   },
   {
     id: 2,
     title: 'photos',
-    href: '/photos'
+    href: '/photos',
   },
   {
     id: 3,
     title: 'songs',
-    href: '/songs'
-  }
+    href: '/songs',
+  },
 ]

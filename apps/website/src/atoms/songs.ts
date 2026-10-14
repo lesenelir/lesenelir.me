@@ -41,7 +41,7 @@ export const audioInitAtom = atom<null, [], void>(null, (get, set) => {
 
     if (!currentSong || songs.length === 0) return
 
-    const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+    const currentIndex = songs.findIndex(song => song.id === currentSong.id)
     let nextSong: TSong | null = null
 
     switch (playMode) {
@@ -117,7 +117,7 @@ export const audioControlsAtom = atom<
     | { type: 'seek'; time: number }
     | { type: 'setVolume'; volume: number }
     | { type: 'toggleMute' }
-    | { type: 'togglePlayMode' }
+    | { type: 'togglePlayMode' },
   ],
   void
 >(null, (get, set, action) => {
@@ -173,7 +173,7 @@ export const audioControlsAtom = atom<
       if (!currentSong || songs.length === 0) return
 
       const playMode = get(playModeAtom)
-      const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+      const currentIndex = songs.findIndex(song => song.id === currentSong.id)
       let previousSong: TSong
 
       if (playMode === 'shuffle') {
@@ -200,7 +200,7 @@ export const audioControlsAtom = atom<
       if (!currentSong || songs.length === 0) return
 
       const playMode = get(playModeAtom)
-      const currentIndex = songs.findIndex((song) => song.id === currentSong.id)
+      const currentIndex = songs.findIndex(song => song.id === currentSong.id)
       let nextSong: TSong
 
       if (playMode === 'shuffle') {

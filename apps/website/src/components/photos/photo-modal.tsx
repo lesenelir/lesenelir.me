@@ -1,36 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import { useAtomValue, useSetAtom } from 'jotai'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import {
-  closePhotoModalAtom,
-  isPhotoModalOpenAtom,
-  navigatePhotoAtom,
-  selectedPhotoAtom
-} from '@/atoms/photos'
+import { closePhotoModalAtom, isPhotoModalOpenAtom, navigatePhotoAtom, selectedPhotoAtom } from '@/atoms/photos'
 
 const backdropVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  exit: { opacity: 0 }
+  exit: { opacity: 0 },
 }
 
 const imageContainerVariants = {
   initial: { scale: 0.8, opacity: 0 },
   animate: { scale: 1, opacity: 1 },
-  exit: { scale: 0.8, opacity: 0 }
+  exit: { scale: 0.8, opacity: 0 },
 }
 
 const transition = {
   type: 'tween' as const,
   ease: 'easeOut' as const,
-  duration: 0.3
+  duration: 0.3,
 }
 
 export function PhotoModal() {
@@ -52,26 +46,24 @@ export function PhotoModal() {
   if (!mounted) return null
 
   return createPortal(
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode='wait'>
       {isOpen && selectedPhoto && (
         <motion.div
           onClick={closeModal}
-          className={
-            'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm'
-          }
+          className={'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm'}
           variants={backdropVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
+          initial='initial'
+          animate='animate'
+          exit='exit'
           transition={transition}
         >
           {/* Photo content */}
           <motion.div
             className={'relative flex size-full items-center justify-center'}
             variants={imageContainerVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            initial='initial'
+            animate='animate'
+            exit='exit'
             transition={transition}
           >
             <Image

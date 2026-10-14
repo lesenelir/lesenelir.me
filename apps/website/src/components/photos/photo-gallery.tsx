@@ -3,9 +3,13 @@
 import { useAtomValue } from 'jotai'
 
 import { layoutModeAtom, photosAtom } from '@/atoms/photos'
+
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
 import { PhotoModal } from '@/components/photos/photo-modal'
+
+// Matches the widest grid row (lg:grid-cols-3), so any first-row photo that becomes LCP is preloaded
+const PRELOAD_COUNT = 3
 
 export function PhotoGallery() {
   const layoutMode = useAtomValue(layoutModeAtom)
@@ -29,8 +33,8 @@ export function PhotoGallery() {
       <LayoutSelector />
 
       <div className={getContainerClassName()}>
-        {photos.map((photo) => (
-          <PhotoItem key={photo.id} photo={photo} />
+        {photos.map((photo, index) => (
+          <PhotoItem key={photo.id} photo={photo} preload={index < PRELOAD_COUNT} />
         ))}
       </div>
 

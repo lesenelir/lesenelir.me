@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-
 import { createStore, Provider } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import type { ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
+
+import type { TSong } from '@/types'
 
 import {
   audioInstanceAtom,
@@ -12,9 +13,8 @@ import {
   currentTimeAtom,
   durationAtom,
   isPlayingAtom,
-  songsAtom
+  songsAtom,
 } from '@/atoms/songs'
-import type { TSong } from '@/types'
 
 interface SongsProviderProps {
   songs: TSong[]

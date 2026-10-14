@@ -15,18 +15,14 @@ export default function ExternalLink({ href, children, icon }: ExternalLinkProps
       href={href}
       rel={'noopener noreferrer'}
       className={cn(
-        'text-link inline-flex w-fit items-center gap-1',
-        'decoration-link/85 hover:decoration-link underline decoration-1 underline-offset-2',
+        'inline-flex w-fit items-center gap-1 text-link',
+        'underline decoration-1 decoration-link/85 underline-offset-2 hover:decoration-link',
         'transition-colors duration-200'
       )}
     >
       {icon}
       {children}
-      <span
-        className={
-          'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'
-        }
-      />
+      <span className={'i-mingcute-right-line relative -top-1.5 -ml-1.5 inline-block size-3.5 -rotate-45'} />
     </a>
   )
 }

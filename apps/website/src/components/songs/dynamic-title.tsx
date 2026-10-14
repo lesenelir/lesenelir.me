@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
-
 import { useAtomValue } from 'jotai'
+import { useEffect } from 'react'
 
 import { currentSongAtom, isPlayingAtom } from '@/atoms/songs'
 

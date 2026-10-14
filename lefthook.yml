@@ -1,0 +1,6 @@
+# https://lefthook.dev/configuration/
+pre-commit:
+  jobs:
+    - name: biome check
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true

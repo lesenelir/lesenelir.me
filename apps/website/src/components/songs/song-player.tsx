@@ -3,6 +3,8 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import type { MouseEvent } from 'react'
 
+import { cn, formatTime } from '@/lib/utils'
+
 import {
   audioControlsAtom,
   currentSongAtom,
@@ -11,9 +13,8 @@ import {
   isMutedAtom,
   isPlayingAtom,
   playModeAtom,
-  volumeAtom
+  volumeAtom,
 } from '@/atoms/songs'
-import { cn, formatTime } from '@/lib/utils'
 
 const PlayModeIcon = () => {
   const playMode = useAtomValue(playModeAtom)
@@ -69,15 +70,15 @@ export function SongPlayer() {
   }
 
   return (
-    <div className={'bg-background mb-4 w-full space-y-4 px-2 py-4'}>
+    <div className={'mb-4 w-full space-y-4 bg-background px-2 py-4'}>
       {/* Song Info Row */}
       <div className={'flex flex-wrap items-center gap-3'}>
-        <div className={'bg-foreground flex size-12 items-center justify-center rounded-lg'}>
-          <span className={'i-mingcute-music-2-fill text-text-foreground size-6'} />
+        <div className={'flex size-12 items-center justify-center rounded-lg bg-foreground'}>
+          <span className={'i-mingcute-music-2-fill size-6 text-text-foreground'} />
         </div>
         <div className={'min-w-0 flex-1 space-y-0.5'}>
-          <p className={'text-text-primary truncate text-sm font-medium'}>{currentSong?.title}</p>
-          <p className={'text-text-foreground/85 truncate text-xs'}>{currentSong?.artist}</p>
+          <p className={'truncate font-medium text-sm text-text-primary'}>{currentSong?.title}</p>
+          <p className={'truncate text-text-foreground/85 text-xs'}>{currentSong?.artist}</p>
         </div>
       </div>
 
@@ -86,13 +87,11 @@ export function SongPlayer() {
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
         <div className={'flex flex-1 items-center'}>
           <button
-            className={'bg-text-foreground/10 h-1 w-full cursor-pointer rounded-full'}
+            type='button'
+            className={'h-1 w-full cursor-pointer rounded-full bg-text-foreground/10'}
             onClick={handleProgressClick}
           >
-            <div
-              className={'bg-text-foreground/50 h-1 rounded-full'}
-              style={{ width: `${progressPercentage}%` }}
-            />
+            <div className={'h-1 rounded-full bg-text-foreground/50'} style={{ width: `${progressPercentage}%` }} />
           </button>
         </div>
         <span className={'text-text-foreground/85 text-xs'}>{formatTime(duration)}</span>
@@ -103,6 +102,7 @@ export function SongPlayer() {
         {/* play control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Previous'}
             onClick={() => setAudioControls({ type: 'previous' })}
@@ -111,6 +111,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-12')}
             aria-label={isPlaying ? 'Pause' : 'Play'}
             onClick={() => setAudioControls({ type: isPlaying ? 'pause' : 'continue' })}
@@ -123,6 +124,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Next'}
             onClick={() => setAudioControls({ type: 'next' })}
@@ -134,6 +136,7 @@ export function SongPlayer() {
         {/* repeat and volume control groups */}
         <div className={'flex flex-wrap items-center gap-2'}>
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={playMode}
             onClick={() => setAudioControls({ type: 'togglePlayMode' })}
@@ -142,6 +145,7 @@ export function SongPlayer() {
           </button>
 
           <button
+            type='button'
             className={cn(baseButtonClass, 'size-10')}
             aria-label={'Volume'}
             onClick={() => setAudioControls({ type: 'toggleMute' })}
@@ -153,12 +157,13 @@ export function SongPlayer() {
             )}
           </button>
           <button
-            className={'bg-text-foreground/10 h-1 w-16 cursor-pointer rounded-full'}
+            type='button'
+            className={'h-1 w-16 cursor-pointer rounded-full bg-text-foreground/10'}
             aria-label={'Volume Progress'}
             onClick={handleVolumeClick}
           >
             <div
-              className={'bg-text-foreground/50 h-1 rounded-full'}
+              className={'h-1 rounded-full bg-text-foreground/50'}
               style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
             />
           </button>

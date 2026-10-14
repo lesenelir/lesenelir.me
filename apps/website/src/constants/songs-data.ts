@@ -1,11 +1,12 @@
-import { getPublicUrl, listSongs } from '@/lib/s3'
 import type { TSong } from '@/types'
+
+import { getPublicUrl, listSongs } from '@/lib/s3'
 
 export const getSongs = async (): Promise<TSong[]> => {
   try {
     const s3Objects = await listSongs()
 
-    return s3Objects.flatMap((obj) => {
+    return s3Objects.flatMap(obj => {
       if (!obj.Key) return []
 
       const fileName = obj.Key.replace('songs/', '')
@@ -21,8 +22,8 @@ export const getSongs = async (): Promise<TSong[]> => {
           id,
           src: getPublicUrl(obj.Key),
           title: title || cleanId,
-          artist: artist || 'Unknown'
-        }
+          artist: artist || 'Unknown',
+        },
       ]
     })
   } catch (error) {

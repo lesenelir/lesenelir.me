@@ -2,9 +2,8 @@ packages:
   - packages/*
   - apps/*
 
-onlyBuiltDependencies:
-  - '@swc/core'
-  - '@tailwindcss/oxide'
-  - esbuild
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  '@swc/core': true
+  '@tailwindcss/oxide': true
+  lefthook: true
+  sharp: true
