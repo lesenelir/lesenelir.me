@@ -4,6 +4,9 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
   images: {
+    // In dev, let the browser fetch photos straight from the CDN. Proxies in fake-ip mode (e.g. Clash) resolve it
+    // to 198.18.x.x, which Next 16's optimizer rejects as a private IP. Production keeps optimization.
+    unoptimized: process.env.NODE_ENV === 'development',
     remotePatterns: [
       ...(process.env.S3_PUBLIC_URL
         ? [
