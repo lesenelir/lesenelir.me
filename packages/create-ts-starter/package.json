@@ -22,7 +22,8 @@
     "build": "bunchee src/index.ts",
     "dev": "bunchee src/index.ts -w",
     "release:patch": "npm version patch && npm publish",
-    "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules"
+    "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "fs-extra": "^11.2.0",
@@ -31,9 +32,10 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.8.8",
+    "@types/node": "^26.6.4",
     "@types/prompts": "^2.4.9",
-    "bunchee": "^4.4.8",
-    "typescript": "^5.2.2"
+    "@typescript/typescript6": "^6.0.2",
+    "bunchee": "^7.0.1",
+    "typescript": "^7.0.2"
   }
 }

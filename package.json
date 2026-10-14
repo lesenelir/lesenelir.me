@@ -14,6 +14,7 @@
   "scripts": {
     "build:website": "pnpm --filter @lesenelir/website build",
     "dev:website": "pnpm --filter @lesenelir/website dev",
+    "typecheck": "pnpm -r typecheck",
     "check": "biome check --write .",
     "lint": "biome check .",
     "format": "biome format --write .",
@@ -22,7 +23,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "lefthook": "^2.2.2"
+    "lefthook": "^2.2.2",
+    "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@11.22.0",
   "engines": {
