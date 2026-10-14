@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { useTheme } from 'next-themes'
-import Image from 'next/image'
 import type { ImageProps } from 'next/image'
+import Image from 'next/image'
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 interface ImageMdxProps extends Omit<ImageProps, 'src'> {
   lightSrc: string
@@ -24,14 +23,5 @@ export function ImageMdx(props: ImageMdxProps) {
 
   if (!mounted) return null
 
-  return (
-    <Image
-      src={imageSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      {...restProps}
-    />
-  )
+  return <Image src={imageSrc} alt={alt} width={width} height={height} className={className} {...restProps} />
 }

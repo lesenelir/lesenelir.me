@@ -5,16 +5,16 @@ const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? ''
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
   },
-  forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true'
+  forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
 })
 
 export const listSongs = async () => {
   try {
     const command = new ListObjectsV2Command({
       Bucket: process.env.S3_BUCKET_NAME,
-      Prefix: 'songs/'
+      Prefix: 'songs/',
     })
 
     const response = await s3Client.send(command)
@@ -29,7 +29,7 @@ export const listPhotos = async () => {
   try {
     const command = new ListObjectsV2Command({
       Bucket: process.env.S3_BUCKET_NAME,
-      Prefix: 'photos/'
+      Prefix: 'photos/',
     })
 
     const response = await s3Client.send(command)

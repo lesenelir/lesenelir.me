@@ -1,17 +1,14 @@
 import { useAtom } from 'jotai'
 
-import { layoutModeAtom } from '@/atoms/photos'
 import { cn } from '@/lib/utils'
+
+import { layoutModeAtom } from '@/atoms/photos'
 
 export function LayoutSelector() {
   const [layoutMode, setLayoutMode] = useAtom(layoutModeAtom)
 
   return (
-    <div
-      className={
-        'text-text-foreground/55 mb-8 inline-flex flex-wrap items-center justify-start gap-4'
-      }
-    >
+    <div className={'mb-8 inline-flex flex-wrap items-center justify-start gap-4 text-text-foreground/55'}>
       <button
         onClick={() => setLayoutMode('single')}
         className={cn(

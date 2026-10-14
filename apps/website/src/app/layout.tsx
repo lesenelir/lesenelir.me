@@ -1,67 +1,61 @@
-import React from 'react'
-
 import { Analytics } from '@vercel/analytics/next'
-import { Geist, Geist_Mono } from 'next/font/google'
 import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import type React from 'react'
 
 import '@/styles/main.css'
+
+import { cn } from '@/lib/utils'
 
 import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
-import { cn } from '@/lib/utils'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
-  subsets: ['latin']
+  subsets: ['latin'],
 })
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-  subsets: ['latin']
+  subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
   title: {
     default: 'Lesenelir Zhou',
-    template: '%s - Lesenelir Zhou'
+    template: '%s - Lesenelir Zhou',
   },
   description: "Lesenelir Zhou's personal website",
   authors: [
     {
       name: 'Lesenelir Zhou',
-      url: 'https://lesenelir.me'
+      url: 'https://lesenelir.me',
     },
     {
       name: 'Lesenelir Zhou',
-      url: 'https://github.com/lesenelir'
-    }
+      url: 'https://github.com/lesenelir',
+    },
   ],
   creator: 'Lesenelir Zhou',
-  publisher: 'Lesenelir Zhou'
+  publisher: 'Lesenelir Zhou',
 }
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <body
-        className={cn(
-          geistSans.variable,
-          geistMono.variable,
-          'bg-background antialiased max-sm:p-6 sm:p-16'
-        )}
+        className={cn(geistSans.variable, geistMono.variable, 'bg-background antialiased max-sm:p-6 sm:p-16')}
         suppressHydrationWarning
       >
         <Providers>
           <Sidebar />
           <main
-            className={
-              'border-dividing/70 max-sm:mt-12 max-sm:border-t max-sm:pt-16 sm:ml-24 sm:border-l sm:pl-16'
-            }
+            className={'border-dividing/70 max-sm:mt-12 max-sm:border-t max-sm:pt-16 sm:ml-24 sm:border-l sm:pl-16'}
           >
             <PageTransition>{children}</PageTransition>
           </main>

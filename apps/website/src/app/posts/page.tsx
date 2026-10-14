@@ -1,11 +1,11 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 import { getAllPosts } from '@/lib/mdx'
 
 export const metadata: Metadata = {
   title: 'Posts',
-  description: "Lesenelir Zhou's personal website - Posts"
+  description: "Lesenelir Zhou's personal website - Posts",
 }
 
 export default function Page() {
@@ -13,32 +13,28 @@ export default function Page() {
 
   return (
     <>
-      <h3 className={'font-comic text-text-primary mb-11'}>Posts</h3>
+      <h3 className={'mb-11 font-comic text-text-primary'}>Posts</h3>
 
-      <div className={'text-text-primary/85 text-md flex flex-col gap-3'}>
-        {posts.map((post) => (
-          <Link
-            key={post.id}
-            href={`/posts/${post.id}`}
-            className={'group flex items-start justify-between gap-4'}
-          >
+      <div className={'flex flex-col gap-3 text-md text-text-primary/85'}>
+        {posts.map(post => (
+          <Link key={post.id} href={`/posts/${post.id}`} className={'group flex items-start justify-between gap-4'}>
             <span
               className={
-                'group-hover:text-text-primary wrap-break-word min-w-0 flex-1 leading-relaxed transition-all duration-200'
+                'wrap-break-word min-w-0 flex-1 leading-relaxed transition-all duration-200 group-hover:text-text-primary'
               }
             >
               {post.metadata.title}
             </span>
             <div
               className={
-                'text-text-primary/60 group-hover:text-text-primary flex shrink-0 items-center gap-1.5 text-[13px] transition-all duration-200'
+                'flex shrink-0 items-center gap-1.5 text-[13px] text-text-primary/60 transition-all duration-200 group-hover:text-text-primary'
               }
             >
               <time dateTime={post.metadata.date}>
                 {new Date(post.metadata.date).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
-                  year: 'numeric'
+                  year: 'numeric',
                 })}
               </time>
               <span>·</span>
@@ -49,7 +45,7 @@ export default function Page() {
       </div>
 
       {posts.length === 0 && (
-        <div className={'text-text-primary/85 p-12 text-center'}>
+        <div className={'p-12 text-center text-text-primary/85'}>
           <p>No posts yet. Coming soon!</p>
         </div>
       )}

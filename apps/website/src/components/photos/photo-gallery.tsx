@@ -3,6 +3,7 @@
 import { useAtomValue } from 'jotai'
 
 import { layoutModeAtom, photosAtom } from '@/atoms/photos'
+
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
 import { PhotoModal } from '@/components/photos/photo-modal'
@@ -29,7 +30,7 @@ export function PhotoGallery() {
       <LayoutSelector />
 
       <div className={getContainerClassName()}>
-        {photos.map((photo) => (
+        {photos.map(photo => (
           <PhotoItem key={photo.id} photo={photo} />
         ))}
       </div>

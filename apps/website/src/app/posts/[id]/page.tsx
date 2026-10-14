@@ -1,5 +1,5 @@
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
 import { getPostComponent, getPostMetadata } from '@/lib/mdx'
 
@@ -13,12 +13,12 @@ export async function generateMetadata({ params }: TProps): Promise<Metadata> {
 
   if (!metadata) {
     return {
-      title: 'Post Not Found'
+      title: 'Post Not Found',
     }
   }
 
   return {
-    title: metadata.title
+    title: metadata.title,
   }
 }
 
@@ -34,14 +34,14 @@ export default async function Page({ params }: TProps) {
   return (
     <article className={'text-text-primary/85'}>
       <header className={'mb-8 space-y-4'}>
-        <h1 className={'font-comic text-text-primary text-2xl'}>{metadata.title}</h1>
+        <h1 className={'font-comic text-2xl text-text-primary'}>{metadata.title}</h1>
 
-        <div className={'text-text-primary/60 flex items-center gap-3 text-sm'}>
+        <div className={'flex items-center gap-3 text-sm text-text-primary/60'}>
           <time dateTime={metadata.date}>
             {new Date(metadata.date).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </time>
           <span>·</span>

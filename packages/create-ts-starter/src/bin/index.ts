@@ -2,7 +2,6 @@
 import { existsSync, readdirSync } from 'node:fs'
 import fsPromises from 'node:fs/promises'
 import path from 'node:path'
-
 import fse from 'fs-extra'
 import { bold, green, red } from 'kolorist'
 import prompts from 'prompts'
@@ -51,34 +50,34 @@ async function main() {
           name: 'projectName',
           message: 'What is your project named?',
           initial: defaultProjectName,
-          onState: (state) => (targetDir = String(state.value).trim() || defaultProjectName)
+          onState: state => (targetDir = String(state.value).trim() || defaultProjectName),
         },
         {
           type: () => (canSafelyOverwrite(targetDir) ? null : 'confirm'),
           name: 'shouldOverwrite',
-          message: `${targetDir} is not empty. Remove existing files and continue?`
+          message: `${targetDir} is not empty. Remove existing files and continue?`,
         },
         {
           name: 'overwriteChecker',
-          type: (values) => {
+          type: values => {
             if (values === false) {
               throw new Error(red('✖') + ' Operation cancelled')
             }
             return null
-          }
+          },
         },
         {
           type: () => (isValidPackageName(targetDir) ? null : 'text'),
           name: 'packageName',
           message: 'Package name',
           initial: () => toValidPackageName(targetDir),
-          validate: (dir: string) => isValidPackageName(dir) || 'Invalid package.json name'
-        }
+          validate: (dir: string) => isValidPackageName(dir) || 'Invalid package.json name',
+        },
       ],
       {
         onCancel: () => {
           throw new Error(red('✖') + ' Operation cancelled')
-        }
+        },
       }
     )
   } catch (e) {
@@ -99,7 +98,7 @@ async function main() {
 
   const pkg = {
     name: packageName ?? toValidPackageName(targetDir),
-    version: '0.0.0'
+    version: '0.0.0',
   }
 
   console.log('Setting up project ...')
@@ -112,9 +111,7 @@ async function main() {
 
   // read new package.json from the template directory
   const templatePackageJsonPath = path.join(templateDir, 'package.json')
-  const templatePackageJson = JSON.parse(
-    await fsPromises.readFile(templatePackageJsonPath, 'utf-8')
-  )
+  const templatePackageJson = JSON.parse(await fsPromises.readFile(templatePackageJsonPath, 'utf-8'))
 
   fse.copySync(templateDir, root)
 
@@ -127,7 +124,7 @@ async function main() {
     JSON.stringify(
       {
         ...templatePackageJson,
-        ...pkg
+        ...pkg,
       },
       null,
       2
@@ -142,13 +139,13 @@ async function main() {
     install: {
       pnpm: 'pnpm install',
       yarn: 'yarn',
-      npm: 'npm install'
+      npm: 'npm install',
     },
     dev: {
       pnpm: 'pnpm start',
       yarn: 'yarn start',
-      npm: 'npm run start'
-    }
+      npm: 'npm run start',
+    },
   }
 
   console.log(`\nDone. Now run:\n`)

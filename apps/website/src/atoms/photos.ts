@@ -27,7 +27,7 @@ export const navigatePhotoAtom = atom(null, (get, set, direction: 'prev' | 'next
 
   if (!selectedPhoto || photos.length === 0) return
 
-  const currentIndex = photos.findIndex((photo) => photo.id === selectedPhoto.id)
+  const currentIndex = photos.findIndex(photo => photo.id === selectedPhoto.id)
   if (currentIndex === -1) return
 
   let nextIndex: number
