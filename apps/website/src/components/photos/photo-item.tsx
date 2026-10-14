@@ -9,9 +9,11 @@ import { layoutModeAtom, openPhotoModalAtom } from '@/atoms/photos'
 
 interface PhotoItemProps {
   photo: TPhoto
+  // Preload the LCP image; next/image lazy-loads the rest by default
+  preload?: boolean
 }
 
-export function PhotoItem({ photo }: PhotoItemProps) {
+export function PhotoItem({ photo, preload = false }: PhotoItemProps) {
   const layoutMode = useAtomValue(layoutModeAtom)
   const openModal = useSetAtom(openPhotoModalAtom)
 
@@ -42,8 +44,7 @@ export function PhotoItem({ photo }: PhotoItemProps) {
               ? '(max-width: 640px) 448px, 600px'
               : '(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw'
         }
-        priority={false}
-        loading={'lazy'}
+        preload={preload}
       />
       {photo.desc && (
         <p
