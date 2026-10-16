@@ -78,5 +78,11 @@
   "sectionRewrite": "整理与翻译",
   "sectionTargets": "可切换的目标语言",
   "dictionaryNote": "词典里的名字和术语会按原样拼写。",
-  "autoSaveNote": "修改会自动保存。"
+  "autoSaveNote": "修改会自动保存。",
+  "fieldShowTimings": "在语音条上显示耗时",
+  "showTimingsNote": "每次结束后显示转写和整理各用了多久。",
+  "timingsDictate": "转写 {asr} · 整理 {llm}",
+  "timingsTranslate": "转写 {asr} · 翻译 {llm}",
+  "lastTimingsDictate": "转写 {asr}，整理 {llm}",
+  "lastTimingsTranslate": "转写 {asr}，翻译 {llm}"
 }

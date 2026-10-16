@@ -10,7 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"strings"
 )
 
@@ -48,31 +50,83 @@ type Transcription struct {
 	Cost    float64
 }
 
-// Transcribe turns WAV audio into text. An empty language lets the model
-// detect it, which mixed Chinese and English speech needs.
-func (c *Client) Transcribe(ctx context.Context, model string, wav []byte, language string) (Transcription, error) {
+// Audio is a recording in one of the formats OpenRouter takes: "wav",
+// "flac", "mp3", "m4a", "ogg", "webm" or "aac".
+type Audio struct {
+	Data   []byte
+	Format string
+}
+
+type transcriptionResponse struct {
+	Text  string `json:"text"`
+	Usage struct {
+		Seconds float64 `json:"seconds"`
+		Cost    float64 `json:"cost"`
+	} `json:"usage"`
+}
+
+func (r transcriptionResponse) result() Transcription {
+	return Transcription{Text: strings.TrimSpace(r.Text), Seconds: r.Usage.Seconds, Cost: r.Usage.Cost}
+}
+
+// Transcribe turns audio into text, sent base64 in JSON, which every model
+// takes. An empty language lets the model detect it, which mixed Chinese
+// and English speech needs.
+func (c *Client) Transcribe(ctx context.Context, model string, audio Audio, language string) (Transcription, error) {
 	body := map[string]any{
 		"model": model,
 		"input_audio": map[string]string{
-			"data":   base64.StdEncoding.EncodeToString(wav),
-			"format": "wav",
+			"data":   base64.StdEncoding.EncodeToString(audio.Data),
+			"format": audio.Format,
 		},
 		"temperature": 0,
 	}
 	if language != "" {
 		body["language"] = language
 	}
-	var res struct {
-		Text  string `json:"text"`
-		Usage struct {
-			Seconds float64 `json:"seconds"`
-			Cost    float64 `json:"cost"`
-		} `json:"usage"`
-	}
-	if err := c.post(ctx, "/audio/transcriptions", body, &res); err != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
 		return Transcription{}, err
 	}
-	return Transcription{Text: strings.TrimSpace(res.Text), Seconds: res.Usage.Seconds, Cost: res.Usage.Cost}, nil
+	var res transcriptionResponse
+	if err := c.post(ctx, "/audio/transcriptions", "application/json", b, &res); err != nil {
+		return Transcription{}, err
+	}
+	return res.result(), nil
+}
+
+// TranscribeFile is Transcribe with the audio uploaded as a file, the
+// OpenAI way: a third fewer bytes than base64, up to 25 MB.
+func (c *Client) TranscribeFile(ctx context.Context, model string, audio Audio, language string) (Transcription, error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	fields := [][2]string{{"model", model}, {"temperature", "0"}}
+	if language != "" {
+		fields = append(fields, [2]string{"language", language})
+	}
+	for _, f := range fields {
+		if err := w.WriteField(f[0], f[1]); err != nil {
+			return Transcription{}, err
+		}
+	}
+	part, err := w.CreatePart(textproto.MIMEHeader{
+		"Content-Disposition": {`form-data; name="file"; filename="audio.` + audio.Format + `"`},
+		"Content-Type":        {"audio/" + audio.Format},
+	})
+	if err != nil {
+		return Transcription{}, err
+	}
+	if _, err := part.Write(audio.Data); err != nil {
+		return Transcription{}, err
+	}
+	if err := w.Close(); err != nil {
+		return Transcription{}, err
+	}
+	var res transcriptionResponse
+	if err := c.post(ctx, "/audio/transcriptions", w.FormDataContentType(), buf.Bytes(), &res); err != nil {
+		return Transcription{}, err
+	}
+	return res.result(), nil
 }
 
 // Message is one chat message.
@@ -118,7 +172,11 @@ func (c *Client) Chat(ctx context.Context, r ChatRequest) (string, error) {
 			} `json:"message"`
 		} `json:"choices"`
 	}
-	if err := c.post(ctx, "/chat/completions", body, &res); err != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+	if err := c.post(ctx, "/chat/completions", "application/json", b, &res); err != nil {
 		return "", err
 	}
 	if len(res.Choices) == 0 {
@@ -127,7 +185,7 @@ func (c *Client) Chat(ctx context.Context, r ChatRequest) (string, error) {
 	return res.Choices[0].Message.Content, nil
 }
 
-func (c *Client) post(ctx context.Context, path string, body, out any) error {
+func (c *Client) post(ctx context.Context, path, contentType string, body []byte, out any) error {
 	key := ""
 	if c.Key != nil {
 		key = c.Key()
@@ -135,20 +193,16 @@ func (c *Client) post(ctx context.Context, path string, body, out any) error {
 	if key == "" {
 		return ErrNoKey
 	}
-	b, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
 	base := c.BaseURL
 	if base == "" {
 		base = DefaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+path, bytes.NewReader(b))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+path, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("HTTP-Referer", "https://lesenelir.me")
 	req.Header.Set("X-Title", "Voice")
 	hc := c.HTTP

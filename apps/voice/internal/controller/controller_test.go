@@ -36,9 +36,11 @@ type fakeASR struct {
 	text  string
 	err   error
 	block chan struct{}
+	delay time.Duration
 }
 
-func (a *fakeASR) Transcribe(ctx context.Context, wav []byte) (string, error) {
+func (a *fakeASR) Transcribe(ctx context.Context, pcm []byte) (string, error) {
+	time.Sleep(a.delay)
 	if a.block != nil {
 		select {
 		case <-a.block:
@@ -46,8 +48,8 @@ func (a *fakeASR) Transcribe(ctx context.Context, wav []byte) (string, error) {
 			return "", ctx.Err()
 		}
 	}
-	if len(wav) != 44+len(speech) {
-		return "", fmt.Errorf("wav of %d bytes", len(wav))
+	if len(pcm) != len(speech) {
+		return "", fmt.Errorf("recording of %d bytes", len(pcm))
 	}
 	return a.text, a.err
 }
@@ -139,6 +141,7 @@ func (h *harness) until(t *testing.T, state State) Status {
 
 func TestDictation(t *testing.T) {
 	h := newHarness(t)
+	h.asr.delay = 5 * time.Millisecond
 	h.c.Handle(hotkey.Dictate)
 	if s := h.until(t, Recording); s.Mode != prompt.Dictate {
 		t.Fatalf("recording %+v", s)
@@ -152,6 +155,9 @@ func TestDictation(t *testing.T) {
 	s := h.until(t, Idle)
 	if s.Text != "我们周四开会。" || s.Note != NoteNone {
 		t.Fatalf("done %+v", s)
+	}
+	if s.Timings.Transcribe < 5*time.Millisecond || s.Timings.Rewrite <= 0 {
+		t.Fatalf("timings %+v", s.Timings)
 	}
 	if got := h.paster.pasted(); len(got) != 1 || got[0] != "我们周四开会。" {
 		t.Fatalf("pasted %q", got)

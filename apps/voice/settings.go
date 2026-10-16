@@ -11,6 +11,7 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
@@ -54,18 +55,19 @@ var (
 // settingsForm holds the settings window's fields, which are saved as they
 // change.
 type settingsForm struct {
-	apiKey     string
-	asrModel   string
-	asrLang    string
-	llmModel   string
-	providers  string
-	timeout    string
-	targets    []bool // by prompt.Languages
-	defaultTo  string // language labels, as the selects show them
-	zhTo       string
-	enTo       string
-	remember   bool
-	dictionary string
+	apiKey      string
+	asrModel    string
+	asrLang     string
+	llmModel    string
+	providers   string
+	timeout     string
+	targets     []bool // by prompt.Languages
+	defaultTo   string // language labels, as the selects show them
+	zhTo        string
+	enTo        string
+	remember    bool
+	dictionary  string
+	showTimings bool
 }
 
 type permissions struct {
@@ -76,18 +78,19 @@ type permissions struct {
 
 func formFrom(s store.Settings, key string) settingsForm {
 	f := settingsForm{
-		apiKey:     key,
-		asrModel:   s.ASRModel,
-		asrLang:    s.ASRLanguage,
-		llmModel:   s.LLMModel,
-		providers:  strings.Join(s.Providers, ", "),
-		timeout:    strconv.FormatFloat(s.LLMTimeout, 'f', -1, 64),
-		targets:    make([]bool, len(prompt.Languages)),
-		defaultTo:  prompt.LanguageFor(s.DefaultTarget).Label,
-		zhTo:       prompt.LanguageFor(s.TargetFor("zh")).Label,
-		enTo:       prompt.LanguageFor(s.TargetFor("en")).Label,
-		remember:   s.RememberTarget,
-		dictionary: strings.Join(s.Dictionary, "\n"),
+		apiKey:      key,
+		asrModel:    s.ASRModel,
+		asrLang:     s.ASRLanguage,
+		llmModel:    s.LLMModel,
+		providers:   strings.Join(s.Providers, ", "),
+		timeout:     strconv.FormatFloat(s.LLMTimeout, 'f', -1, 64),
+		targets:     make([]bool, len(prompt.Languages)),
+		defaultTo:   prompt.LanguageFor(s.DefaultTarget).Label,
+		zhTo:        prompt.LanguageFor(s.TargetFor("zh")).Label,
+		enTo:        prompt.LanguageFor(s.TargetFor("en")).Label,
+		remember:    s.RememberTarget,
+		dictionary:  strings.Join(s.Dictionary, "\n"),
+		showTimings: !s.HideTimings,
 	}
 	for i, l := range prompt.Languages {
 		f.targets[i] = slices.Contains(s.Targets, l.Code)
@@ -144,6 +147,7 @@ func (f settingsForm) apply(s *store.Settings) {
 	s.Rules["en"] = codeFor(f.enTo)
 	s.RememberTarget = f.remember
 	s.Dictionary = splitList(f.dictionary, func(r rune) bool { return r == '\n' })
+	s.HideTimings = !f.showTimings
 }
 
 // saveResult is the outcome of the last save that failed, if any.
@@ -355,6 +359,9 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 				m.AppearanceSystem(), m.AppearanceLight(), m.AppearanceDark()).
 				OnChange(func() { a.setAppearance(a.appearance) })
 		})
+		g.row(c, m.FieldShowTimings(), m.ShowTimingsNote(), func() {
+			ui.Switch(c.Key("show-timings"), &a.form.showTimings).Label(m.FieldShowTimings()).OnChange(a.commit)
+		})
 	})
 	group(c, pal, m.SectionShortcuts(), func(g *rows) {
 		g.row(c, m.ShortcutDictate(), "", func() { keycaps(c, pal, "fn") })
@@ -368,6 +375,9 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 				ui.Column(c).Gap(6).Children(func() {
 					if note != "" {
 						ui.Text(c, note).FontSize(12).TextColor(pal.muted)
+					}
+					if s.Timings != (controller.Timings{}) {
+						ui.Text(c, lastTimingsText(m, s)).FontSize(12).TextColor(pal.muted)
 					}
 					if s.Text != "" {
 						ui.Text(c, s.Text).Selectable()
@@ -571,6 +581,15 @@ func keycaps(c *ui.Context, pal palette, keys ...string) {
 func pill(c *ui.Context, text string, color ui.Color) {
 	ui.Text(c, text).FontSize(11.5).Padding(2, 9).Radius(999).
 		Background(ui.RGBA(color.R, color.G, color.B, 0.14)).TextColor(color).SingleLine()
+}
+
+// lastTimingsText says how long the last session's requests took.
+func lastTimingsText(m locales.Messages, s controller.Status) string {
+	asr, llm := formatDuration(s.Timings.Transcribe), formatDuration(s.Timings.Rewrite)
+	if s.Mode == prompt.Translate {
+		return m.LastTimingsTranslate(asr, llm)
+	}
+	return m.LastTimingsDictate(asr, llm)
 }
 
 func micText(m locales.Messages, s darwin.MicStatus) string {

@@ -835,3 +835,69 @@ func AutoSaveNote() string { return In(i18n.Locale()).AutoSaveNote() }
 func (msgs Messages) AutoSaveNote() string {
 	return Catalog.Format(msgs.locale, "autoSaveNote", nil)
 }
+
+// FieldShowTimings says "Show timings on the voice bar"
+// in the language the app shows.
+func FieldShowTimings() string { return In(i18n.Locale()).FieldShowTimings() }
+
+// FieldShowTimings says "Show timings on the voice bar"
+// in the language of msgs.
+func (msgs Messages) FieldShowTimings() string {
+	return Catalog.Format(msgs.locale, "fieldShowTimings", nil)
+}
+
+// ShowTimingsNote says "After each dictation, how long transcription and cleanup took."
+// in the language the app shows.
+func ShowTimingsNote() string { return In(i18n.Locale()).ShowTimingsNote() }
+
+// ShowTimingsNote says "After each dictation, how long transcription and cleanup took."
+// in the language of msgs.
+func (msgs Messages) ShowTimingsNote() string {
+	return Catalog.Format(msgs.locale, "showTimingsNote", nil)
+}
+
+// TimingsDictate says "Transcribed {asr} · Cleaned up {llm}"
+// in the language the app shows.
+func TimingsDictate(asr string, llm string) string { return In(i18n.Locale()).TimingsDictate(asr, llm) }
+
+// TimingsDictate says "Transcribed {asr} · Cleaned up {llm}"
+// in the language of msgs.
+func (msgs Messages) TimingsDictate(asr string, llm string) string {
+	return Catalog.Format(msgs.locale, "timingsDictate", map[string]any{"asr": asr, "llm": llm})
+}
+
+// TimingsTranslate says "Transcribed {asr} · Translated {llm}"
+// in the language the app shows.
+func TimingsTranslate(asr string, llm string) string {
+	return In(i18n.Locale()).TimingsTranslate(asr, llm)
+}
+
+// TimingsTranslate says "Transcribed {asr} · Translated {llm}"
+// in the language of msgs.
+func (msgs Messages) TimingsTranslate(asr string, llm string) string {
+	return Catalog.Format(msgs.locale, "timingsTranslate", map[string]any{"asr": asr, "llm": llm})
+}
+
+// LastTimingsDictate says "Transcription {asr}, cleanup {llm}"
+// in the language the app shows.
+func LastTimingsDictate(asr string, llm string) string {
+	return In(i18n.Locale()).LastTimingsDictate(asr, llm)
+}
+
+// LastTimingsDictate says "Transcription {asr}, cleanup {llm}"
+// in the language of msgs.
+func (msgs Messages) LastTimingsDictate(asr string, llm string) string {
+	return Catalog.Format(msgs.locale, "lastTimingsDictate", map[string]any{"asr": asr, "llm": llm})
+}
+
+// LastTimingsTranslate says "Transcription {asr}, translation {llm}"
+// in the language the app shows.
+func LastTimingsTranslate(asr string, llm string) string {
+	return In(i18n.Locale()).LastTimingsTranslate(asr, llm)
+}
+
+// LastTimingsTranslate says "Transcription {asr}, translation {llm}"
+// in the language of msgs.
+func (msgs Messages) LastTimingsTranslate(asr string, llm string) string {
+	return Catalog.Format(msgs.locale, "lastTimingsTranslate", map[string]any{"asr": asr, "llm": llm})
+}

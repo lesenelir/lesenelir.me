@@ -4,6 +4,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -24,8 +25,10 @@ const (
 	// overlayMargin keeps the voice bar above the Dock.
 	overlayMargin = 56
 	capsuleHeight = 40
-	// noteTime is how long a note stays on the voice bar.
-	noteTime = 2500 * time.Millisecond
+	// noteTime is how long a note stays on the voice bar, timingsTime how
+	// long the timings of a session that went well do.
+	noteTime    = 2500 * time.Millisecond
+	timingsTime = 1800 * time.Millisecond
 
 	waveBars = 20
 	// waveStep is how often the waveform moves on by a bar.
@@ -39,7 +42,33 @@ var (
 	barText       = ui.RGBA(255, 255, 255, 0.92)
 	barMuted      = ui.RGBA(255, 255, 255, 0.5)
 	recordingRed  = ui.Hex("#ff453a")
+	doneGreen     = ui.Hex("#32d74b")
+
+	iconCheck = icon(`<path d="M3.5 8.5l3 3 6-7"/>`)
 )
+
+// showsTimings reports whether the voice bar shows the timings of a session
+// that went well.
+func showsTimings(s controller.Status, hidden bool) bool {
+	return !hidden && s.State == controller.Idle && s.Note == controller.NoteNone && s.Timings != (controller.Timings{})
+}
+
+// formatDuration writes a duration as seconds: 0.8s, 1.2s, 14s.
+func formatDuration(d time.Duration) string {
+	if d < 10*time.Second {
+		return fmt.Sprintf("%.1fs", d.Seconds())
+	}
+	return fmt.Sprintf("%.0fs", d.Seconds())
+}
+
+// timingsText says how long a session's requests took, on the voice bar.
+func timingsText(m locales.Messages, s controller.Status) string {
+	asr, llm := formatDuration(s.Timings.Transcribe), formatDuration(s.Timings.Rewrite)
+	if s.Mode == prompt.Translate {
+		return m.TimingsTranslate(asr, llm)
+	}
+	return m.TimingsDictate(asr, llm)
+}
 
 // onStatus shows the controller's status on the voice bar. It runs on the
 // controller's goroutine.
@@ -57,12 +86,16 @@ func (a *app) onStatus(s controller.Status) {
 				a.placeOverlay()
 				a.overlay.ShowInactive()
 			}
-		case s.Note != controller.NoteNone:
+		case s.Note != controller.NoteNone || showsTimings(s, a.store.Get().HideTimings):
 			if !a.overlay.IsVisible() {
 				a.placeOverlay()
 				a.overlay.ShowInactive()
 			}
-			time.AfterFunc(noteTime, func() {
+			linger := noteTime
+			if s.Note == controller.NoteNone {
+				linger = timingsTime
+			}
+			time.AfterFunc(linger, func() {
 				a.overlay.Update(func() {
 					if a.hideSeq == seq {
 						a.overlay.Hide()
@@ -105,6 +138,18 @@ func (a *app) overlayView(c *ui.Context) {
 			case controller.Transcribing, controller.Rewriting, controller.Pasting:
 				thinkingDots(c)
 				ui.Text(c, stageText(m, s)).FontSize(12.5).TextColor(barText).NoWrap()
+				if !s.Since.IsZero() {
+					ui.Text(c, formatDuration(time.Since(s.Since))).FontSize(12.5).TextColor(barMuted).
+						FontFeatures("tnum").NoWrap()
+					c.After(100 * time.Millisecond)
+				}
+			case controller.Idle:
+				if s.Note == controller.NoteNone {
+					ui.Icon(c, iconCheck).Size(14, 14).TextColor(doneGreen)
+					ui.Text(c, timingsText(m, s)).FontSize(12.5).TextColor(barText).NoWrap()
+					return
+				}
+				fallthrough
 			default:
 				ui.Text(c, noteText(m, s)).FontSize(12.5).TextColor(barText).MaxWidth(280).
 					MaxLines(1).Ellipsis("…")

@@ -87,5 +87,11 @@
   "sectionRewrite": "Cleanup and translation",
   "sectionTargets": "Languages to switch between",
   "dictionaryNote": "Names and terms here are spelled exactly as written.",
-  "autoSaveNote": "Changes are saved automatically."
+  "autoSaveNote": "Changes are saved automatically.",
+  "fieldShowTimings": "Show timings on the voice bar",
+  "showTimingsNote": "After each dictation, how long transcription and cleanup took.",
+  "timingsDictate": "Transcribed {asr} · Cleaned up {llm}",
+  "timingsTranslate": "Transcribed {asr} · Translated {llm}",
+  "lastTimingsDictate": "Transcription {asr}, cleanup {llm}",
+  "lastTimingsTranslate": "Transcription {asr}, translation {llm}"
 }

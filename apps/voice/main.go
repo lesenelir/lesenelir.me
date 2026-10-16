@@ -93,7 +93,7 @@ func (a *app) ready() {
 	client := &openrouter.Client{Key: a.apiKey, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	a.ctrl = controller.New(context.Background(), controller.Deps{
 		Recorder:    a.rec,
-		Transcriber: transcriber{client: client, store: a.store},
+		Transcriber: &transcriber{client: client, store: a.store},
 		Rewriter:    rewriter{client: client, store: a.store},
 		Paster:      darwin.Paster{},
 		Settings:    a.store.Get,

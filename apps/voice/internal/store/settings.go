@@ -22,6 +22,9 @@ type Settings struct {
 	UILanguage string `json:"uiLanguage"`
 	// Appearance is "light", "dark", or "" to follow the system.
 	Appearance string `json:"appearance"`
+	// HideTimings keeps how long transcription and cleanup took off the
+	// voice bar.
+	HideTimings bool `json:"hideTimings"`
 
 	// ASRModel is the OpenRouter speech-to-text model; ASRLanguage an
 	// ISO 639-1 hint, "" to detect it.

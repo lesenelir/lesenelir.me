@@ -44,9 +44,9 @@ type Recorder interface {
 	Cancel()
 }
 
-// Transcriber turns WAV audio into text.
+// Transcriber turns a recording, 16 kHz mono 16-bit PCM, into text.
 type Transcriber interface {
-	Transcribe(ctx context.Context, wav []byte) (string, error)
+	Transcribe(ctx context.Context, pcm []byte) (string, error)
 }
 
 // Rewriter cleans up or translates a transcript.
@@ -87,6 +87,15 @@ type Status struct {
 	Err  error
 	// Text is the last text pasted.
 	Text string
+	// Since is when the current stage began.
+	Since time.Time
+	// Timings are how long the last session's requests took.
+	Timings Timings
+}
+
+// Timings are the durations of a session's stages after recording.
+type Timings struct {
+	Transcribe, Rewrite time.Duration
 }
 
 // Note is what the voice bar tells the user after a session. The UI words
@@ -118,6 +127,7 @@ type Controller struct {
 	session int
 	cancel  context.CancelFunc
 	manual  bool
+	timings Timings
 }
 
 type action struct {
@@ -259,8 +269,10 @@ func (c *Controller) start(mode prompt.Mode) {
 	if mode == prompt.Translate {
 		target = c.d.Settings().InitialTarget()
 	}
+	c.timings = Timings{}
 	c.set(func(s *Status) {
 		s.State, s.Mode, s.Target, s.Note, s.Err = Recording, mode, target, NoteNone, nil
+		s.Since, s.Timings = time.Now(), Timings{}
 	})
 }
 
@@ -290,17 +302,19 @@ func (c *Controller) stop(ctx context.Context) {
 	run, cancel := context.WithCancel(ctx)
 	c.cancel = cancel
 	session := c.session
-	c.set(func(s *Status) { s.State = Transcribing })
+	c.set(func(s *Status) { s.State, s.Since = Transcribing, time.Now() })
 	go func() {
-		text, err := c.d.Transcriber.Transcribe(run, audio.WAV(pcm))
+		text, err := c.d.Transcriber.Transcribe(run, pcm)
 		c.send(ctx, transcribed{session: session, text: text, err: err})
 	}()
 }
 
 func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
-	if m.session != c.session || c.Status().State != Transcribing {
+	st := c.Status()
+	if m.session != c.session || st.State != Transcribing {
 		return
 	}
+	c.timings.Transcribe = time.Since(st.Since)
 	switch {
 	case errors.Is(m.err, ErrNoKey):
 		c.abort(NoteNoKey, nil)
@@ -312,7 +326,6 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		c.abort(NoteNothing, nil)
 		return
 	}
-	st := c.Status()
 	settings := c.d.Settings()
 	req := prompt.Request{Mode: st.Mode, Transcript: m.text, Dictionary: settings.Dictionary}
 	if st.Mode == prompt.Translate {
@@ -323,7 +336,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 	}
 	run, cancel := context.WithTimeout(ctx, settings.Timeout())
 	c.cancel = cancel
-	c.set(func(s *Status) { s.State, s.Target = Rewriting, req.Target })
+	c.set(func(s *Status) { s.State, s.Target, s.Since = Rewriting, req.Target, time.Now() })
 	go func() {
 		defer cancel()
 		out, err := c.d.Rewriter.Rewrite(run, req)
@@ -337,16 +350,20 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 }
 
 func (c *Controller) onRewritten(m rewritten) {
-	if m.session != c.session || c.Status().State != Rewriting {
+	st := c.Status()
+	if m.session != c.session || st.State != Rewriting {
 		return
 	}
+	c.timings.Rewrite = time.Since(st.Since)
 	c.cancel = nil
-	c.set(func(s *Status) { s.State = Pasting })
+	c.set(func(s *Status) { s.State, s.Since = Pasting, time.Now() })
 	note, err := m.note, c.d.Paster.Paste(m.text)
 	if err != nil {
 		note = NotePasteFailed
 	}
-	c.set(func(s *Status) { s.State, s.Text, s.Note, s.Err = Idle, m.text, note, err })
+	c.set(func(s *Status) {
+		s.State, s.Text, s.Note, s.Err, s.Timings = Idle, m.text, note, err, c.timings
+	})
 }
 
 // abort ends the session: the pipeline's results are ignored from now on.

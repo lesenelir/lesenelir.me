@@ -4,13 +4,20 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
@@ -193,5 +200,123 @@ func TestFormRoundTrip(t *testing.T) {
 	}
 	if !slices.Equal(s.Targets, []string{"en"}) {
 		t.Errorf("no targets ticked should keep the default: %q", s.Targets)
+	}
+}
+
+func TestOverlayTimings(t *testing.T) {
+	a := testApp(t)
+	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
+	tt.SetLocale("zh-Hans")
+	a.status = controller.Status{State: controller.Rewriting, Since: time.Now().Add(-1200 * time.Millisecond)}
+	tt.Frame()
+	if !tt.HasText("整理中…") || !tt.HasText("1.2s") {
+		t.Errorf("rewriting bar %q", tt.Texts())
+	}
+	a.status = controller.Status{
+		State:   controller.Idle,
+		Text:    "我们周四开会。",
+		Timings: controller.Timings{Transcribe: 1340 * time.Millisecond, Rewrite: 620 * time.Millisecond},
+	}
+	tt.Frame()
+	if !tt.HasText("转写 1.3s · 整理 0.6s") {
+		t.Errorf("done bar %q", tt.Texts())
+	}
+	if !showsTimings(a.status, false) || showsTimings(a.status, true) {
+		t.Error("the setting does not decide whether timings show")
+	}
+	if showsTimings(controller.Status{State: controller.Idle, Note: controller.NoteCancelled}, false) {
+		t.Error("a cancelled session shows timings")
+	}
+}
+
+func TestFormatDuration(t *testing.T) {
+	for d, want := range map[time.Duration]string{
+		80 * time.Millisecond:   "0.1s",
+		1240 * time.Millisecond: "1.2s",
+		14 * time.Second:        "14s",
+	} {
+		if got := formatDuration(d); got != want {
+			t.Errorf("formatDuration(%v) = %q, want %q", d, got, want)
+		}
+	}
+}
+
+func TestSettingsTimingsSwitch(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), "")
+	if !a.form.showTimings {
+		t.Fatal("timings are hidden by default")
+	}
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	tt.SetLocale("zh-Hans")
+	if !tt.HasText("在语音条上显示耗时") {
+		t.Fatalf("no timings switch in %q", tt.Texts())
+	}
+	s := store.Defaults()
+	a.form.showTimings = false
+	a.form.apply(&s)
+	if !s.HideTimings {
+		t.Fatal("turning the switch off kept timings shown")
+	}
+}
+
+// A model that refuses FLAC gets the WAV every model takes, from then on
+// directly.
+func TestTranscriberFallsBackToWAV(t *testing.T) {
+	var calls []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/") {
+			calls = append(calls, "flac")
+			w.WriteHeader(400)
+			_, _ = w.Write([]byte(`{"error":{"code":400,"message":"unsupported audio format"}}`))
+			return
+		}
+		var body struct {
+			InputAudio struct{ Format string } `json:"input_audio"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		calls = append(calls, body.InputAudio.Format)
+		_, _ = w.Write([]byte(`{"text":"你好"}`))
+	}))
+	t.Cleanup(srv.Close)
+	a := testApp(t)
+	tr := &transcriber{client: &openrouter.Client{BaseURL: srv.URL, Key: func() string { return "sk" }}, store: a.store}
+	pcm := make([]byte, 32000)
+	for i := range pcm {
+		pcm[i] = byte(i * 7)
+	}
+	for range 2 {
+		if text, err := tr.Transcribe(context.Background(), pcm); err != nil || text != "你好" {
+			t.Fatalf("got %q, %v", text, err)
+		}
+	}
+	if want := []string{"flac", "wav", "wav"}; !slices.Equal(calls, want) {
+		t.Fatalf("requests %q, want %q", calls, want)
+	}
+}
+
+func TestTranscriberUploadsFLAC(t *testing.T) {
+	var size int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		f, h, err := r.FormFile("file")
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, _ := io.ReadAll(f)
+		size = len(data)
+		if h.Filename != "audio.flac" || string(data[:4]) != "fLaC" {
+			t.Errorf("uploaded %q starting %q", h.Filename, data[:4])
+		}
+		_, _ = w.Write([]byte(`{"text":"ok"}`))
+	}))
+	t.Cleanup(srv.Close)
+	a := testApp(t)
+	tr := &transcriber{client: &openrouter.Client{BaseURL: srv.URL, Key: func() string { return "sk" }}, store: a.store}
+	pcm := make([]byte, 64000) // 2 s of silence compresses to almost nothing
+	if _, err := tr.Transcribe(context.Background(), pcm); err != nil {
+		t.Fatal(err)
+	}
+	if size == 0 || size >= len(pcm)/4 {
+		t.Fatalf("uploaded %d bytes for %d of PCM", size, len(pcm))
 	}
 }
