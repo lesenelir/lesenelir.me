@@ -63,6 +63,7 @@ type Recorder struct {
 	queue   uintptr
 	pcm     []byte
 	running bool
+	onChunk func([]byte)
 	level   atomic.Uint32 // float32 bits
 }
 
@@ -73,19 +74,20 @@ var (
 	activeRecorder *Recorder
 )
 
-// Start begins a recording. macOS asks for the microphone permission the
+// Start begins a recording, handing every 100 ms of it to onChunk on the
+// main thread as it comes. macOS asks for the microphone permission the
 // first time.
-func (r *Recorder) Start() error {
+func (r *Recorder) Start(onChunk func(pcm []byte)) error {
 	if err := load(); err != nil {
 		return err
 	}
 	recorderCallbackOnce.Do(func() { recorderCallback = purego.NewCallback(onInputBuffer) })
 	var err error
-	mygo.RunOnMain(func() { err = r.startOnMain() })
+	mygo.RunOnMain(func() { err = r.startOnMain(onChunk) })
 	return err
 }
 
-func (r *Recorder) startOnMain() error {
+func (r *Recorder) startOnMain(onChunk func([]byte)) error {
 	if r.queue != 0 {
 		return errors.New("already recording")
 	}
@@ -112,7 +114,7 @@ func (r *Recorder) startOnMain() error {
 		audioQueueEnqueueBuffer(queue, buf, 0, 0)
 	}
 	r.mu.Lock()
-	r.queue, r.pcm, r.running = queue, r.pcm[:0], true
+	r.queue, r.pcm, r.running, r.onChunk = queue, r.pcm[:0], true, onChunk
 	r.mu.Unlock()
 	r.level.Store(0)
 	activeRecorder = r
@@ -170,15 +172,20 @@ func onInputBuffer(userData, queue, buffer, startTime, packets, descriptions uin
 		return
 	}
 	buf := (*queueBuffer)(*(*unsafe.Pointer)(unsafe.Pointer(&buffer)))
-	data := bytesAt(buf.Data, int(buf.Size))
+	// The queue reuses the buffer: keep a copy.
+	data := append([]byte(nil), bytesAt(buf.Data, int(buf.Size))...)
 	r.mu.Lock()
 	running := r.running && r.queue == queue
+	onChunk := r.onChunk
 	if running {
 		r.pcm = append(r.pcm, data...)
 	}
 	r.mu.Unlock()
 	if !running {
 		return
+	}
+	if onChunk != nil && len(data) > 0 {
+		onChunk(data)
 	}
 	r.level.Store(math.Float32bits(audio.Level(data)))
 	audioQueueEnqueueBuffer(queue, buffer, 0, 0)

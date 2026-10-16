@@ -30,8 +30,7 @@
   "openKeyboardSettings": "Open Keyboard Settings",
   "sectionOpenRouter": "OpenRouter",
   "fieldApiKey": "API key",
-  "apiKeyNote": "Stored in the macOS Keychain.",
-  "fieldAsrModel": "Speech-to-text model",
+  "fieldAsrModel": "Speech model",
   "asrModelNote": "Also: openai/gpt-4o-mini-transcribe",
   "fieldAsrLanguage": "Speech language hint",
   "asrLanguagePlaceholder": "Empty to detect automatically",
@@ -93,5 +92,15 @@
   "timingsDictate": "Transcribed {asr} · Cleaned up {llm}",
   "timingsTranslate": "Transcribed {asr} · Translated {llm}",
   "lastTimingsDictate": "Transcription {asr}, cleanup {llm}",
-  "lastTimingsTranslate": "Transcription {asr}, translation {llm}"
+  "lastTimingsTranslate": "Transcription {asr}, translation {llm}",
+  "fieldAsrService": "Speech-to-text service",
+  "asrServiceNote": "Soniox transcribes while you speak; OpenRouter once you stop.",
+  "fieldSonioxKey": "API key",
+  "sonioxKeyNote": "Create one at console.soniox.com. Stored in the Keychain.",
+  "fieldSonioxModel": "Model",
+  "fieldSonioxLanguages": "Language hints",
+  "sonioxLanguagesNote": "Codes of the languages you speak, such as zh, en.",
+  "asrFallbackNote": "Used when Soniox can’t be reached.",
+  "openRouterKeyNote": "For cleanup, translation and backup transcription. Stored in the Keychain.",
+  "noteStreamFallback": "Soniox wasn’t available; transcribed with OpenRouter"
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -28,7 +29,14 @@ type fakeRecorder struct {
 	cancelled bool
 }
 
-func (r *fakeRecorder) Start() error          { return r.startErr }
+// Start hands the whole recording over as one chunk, as if it was spoken
+// at once.
+func (r *fakeRecorder) Start(onChunk func([]byte)) error {
+	if r.startErr == nil {
+		onChunk(r.pcm)
+	}
+	return r.startErr
+}
 func (r *fakeRecorder) Stop() ([]byte, error) { return r.pcm, nil }
 func (r *fakeRecorder) Cancel()               { r.cancelled = true }
 
@@ -37,9 +45,11 @@ type fakeASR struct {
 	err   error
 	block chan struct{}
 	delay time.Duration
+	calls atomic.Int32
 }
 
 func (a *fakeASR) Transcribe(ctx context.Context, pcm []byte) (string, error) {
+	a.calls.Add(1)
 	time.Sleep(a.delay)
 	if a.block != nil {
 		select {
@@ -318,5 +328,117 @@ func TestMicFailure(t *testing.T) {
 	h.c.Handle(hotkey.Dictate)
 	if s := h.until(t, Idle); s.Note != NoteMicFailed || s.Err == nil || s.Err.Error() != "no input device" {
 		t.Fatalf("status %+v", s)
+	}
+}
+
+type fakeStream struct {
+	text    string
+	err     error
+	mu      sync.Mutex
+	written int
+	closed  bool
+}
+
+func (s *fakeStream) Write(pcm []byte) {
+	s.mu.Lock()
+	s.written += len(pcm)
+	s.mu.Unlock()
+}
+
+func (s *fakeStream) Finish(ctx context.Context) (string, error) { return s.text, s.err }
+
+func (s *fakeStream) Close() {
+	s.mu.Lock()
+	s.closed = true
+	s.mu.Unlock()
+}
+
+type fakeStreamer struct{ stream *fakeStream }
+
+func (f fakeStreamer) Open(context.Context) Stream {
+	if f.stream == nil {
+		return nil
+	}
+	return f.stream
+}
+
+func newStreamingHarness(t *testing.T, stream *fakeStream) *harness {
+	t.Helper()
+	h := newHarness(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	h.c = New(ctx, Deps{
+		Recorder:    h.rec,
+		Streamer:    fakeStreamer{stream},
+		Transcriber: h.asr,
+		Rewriter:    h.llm,
+		Paster:      h.paster,
+		Settings:    store.Defaults,
+		OnChange:    func(s Status) { h.changes <- s },
+	})
+	return h
+}
+
+func TestStreamingDictation(t *testing.T) {
+	stream := &fakeStream{text: "嗯我们周四开会"}
+	h := newStreamingHarness(t, stream)
+	h.c.Handle(hotkey.Dictate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Dictate)
+	s := h.until(t, Idle)
+	if s.Note != NoteNone || s.Text != "我们周四开会。" {
+		t.Fatalf("status %+v", s)
+	}
+	if n := h.asr.calls.Load(); n != 0 {
+		t.Fatalf("the whole recording was transcribed too (%d calls)", n)
+	}
+	if h.llm.got[0].Transcript != "嗯我们周四开会" {
+		t.Fatalf("rewrote %q", h.llm.got[0].Transcript)
+	}
+	stream.mu.Lock()
+	defer stream.mu.Unlock()
+	if stream.written != len(speech) {
+		t.Fatalf("streamed %d bytes, recorded %d", stream.written, len(speech))
+	}
+}
+
+func TestStreamFailureFallsBack(t *testing.T) {
+	h := newStreamingHarness(t, &fakeStream{err: errors.New("soniox: connect: refused")})
+	h.c.Handle(hotkey.Dictate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Dictate)
+	s := h.until(t, Idle)
+	if s.Note != NoteStreamFallback || s.Text != "我们周四开会。" {
+		t.Fatalf("status %+v", s)
+	}
+	if n := h.asr.calls.Load(); n != 1 {
+		t.Fatalf("whole-recording transcriptions %d, want 1", n)
+	}
+}
+
+func TestEscClosesStream(t *testing.T) {
+	stream := &fakeStream{text: "x"}
+	h := newStreamingHarness(t, stream)
+	h.c.Handle(hotkey.Dictate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Cancel)
+	h.until(t, Idle)
+	stream.mu.Lock()
+	defer stream.mu.Unlock()
+	if !stream.closed {
+		t.Fatal("Esc left the stream open")
+	}
+}
+
+func TestStreamingOffUsesTranscriber(t *testing.T) {
+	h := newStreamingHarness(t, nil)
+	h.c.Handle(hotkey.Dictate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Dictate)
+	if s := h.until(t, Idle); s.Note != NoteNone {
+		t.Fatalf("status %+v", s)
+	}
+	if n := h.asr.calls.Load(); n != 1 {
+		t.Fatalf("transcriptions %d, want 1", n)
 	}
 }

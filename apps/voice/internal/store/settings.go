@@ -26,6 +26,15 @@ type Settings struct {
 	// voice bar.
 	HideTimings bool `json:"hideTimings"`
 
+	// ASRService is "soniox", to transcribe while recording, or
+	// "openrouter", to transcribe the recording after it ends. Without a
+	// Soniox API key, or when Soniox fails, OpenRouter does it.
+	ASRService string `json:"asrService"`
+	// SonioxModel is the real-time model; SonioxLanguages hint at the
+	// languages spoken, as ISO 639-1 codes.
+	SonioxModel     string   `json:"sonioxModel"`
+	SonioxLanguages []string `json:"sonioxLanguages"`
+
 	// ASRModel is the OpenRouter speech-to-text model; ASRLanguage an
 	// ISO 639-1 hint, "" to detect it.
 	ASRModel    string `json:"asrModel"`
@@ -54,13 +63,16 @@ type Settings struct {
 // Defaults are the settings of a new install.
 func Defaults() Settings {
 	return Settings{
-		ASRModel:      "qwen/qwen3-asr-1.7b",
-		LLMModel:      "openai/gpt-oss-120b",
-		Providers:     []string{"cerebras", "groq"},
-		LLMTimeout:    5,
-		Targets:       []string{"en", "zh", "ja"},
-		DefaultTarget: "en",
-		Rules:         map[string]string{"zh": "en", "en": "zh"},
+		ASRService:      "soniox",
+		SonioxModel:     "stt-rt-v5",
+		SonioxLanguages: []string{"zh", "en"},
+		ASRModel:        "qwen/qwen3-asr-1.7b",
+		LLMModel:        "openai/gpt-oss-120b",
+		Providers:       []string{"cerebras", "groq"},
+		LLMTimeout:      5,
+		Targets:         []string{"en", "zh", "ja"},
+		DefaultTarget:   "en",
+		Rules:           map[string]string{"zh": "en", "en": "zh"},
 	}
 }
 
@@ -141,6 +153,7 @@ func (st *Store) Get() Settings {
 	defer st.mu.Unlock()
 	s := st.s
 	s.Providers = slices.Clone(s.Providers)
+	s.SonioxLanguages = slices.Clone(s.SonioxLanguages)
 	s.Targets = slices.Clone(s.Targets)
 	s.Dictionary = slices.Clone(s.Dictionary)
 	s.Rules = maps.Clone(s.Rules)

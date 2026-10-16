@@ -14,8 +14,41 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/soniox"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
 )
+
+// streamer streams recordings to Soniox while they are made, when the
+// settings pick Soniox and its key is set.
+type streamer struct {
+	client *soniox.Client
+	store  *store.Store
+	key    func() string
+}
+
+func (s *streamer) Open(ctx context.Context) controller.Stream {
+	st := s.store.Get()
+	if st.ASRService != "soniox" || s.key() == "" {
+		return nil
+	}
+	cfg := soniox.Config{Model: st.SonioxModel, LanguageHints: st.SonioxLanguages, Terms: st.Dictionary}
+	return &loggedStream{Session: s.client.Open(ctx, cfg), model: cfg.Model, opened: time.Now()}
+}
+
+// loggedStream logs how long the transcript took once the user stopped.
+type loggedStream struct {
+	*soniox.Session
+	model  string
+	opened time.Time
+}
+
+func (l *loggedStream) Finish(ctx context.Context) (string, error) {
+	start := time.Now()
+	text, err := l.Session.Finish(ctx)
+	log.Printf("asr soniox %s: %v after the recording ended (%v long), err=%v",
+		l.model, time.Since(start).Round(time.Millisecond), start.Sub(l.opened).Round(100*time.Millisecond), err)
+	return text, err
+}
 
 // transcriber sends recordings to the speech model in the settings: as a
 // FLAC file, about half the bytes of the base64 WAV that every model takes,

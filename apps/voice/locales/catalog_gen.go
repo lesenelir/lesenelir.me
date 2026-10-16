@@ -256,21 +256,11 @@ func (msgs Messages) FieldApiKey() string {
 	return Catalog.Format(msgs.locale, "fieldApiKey", nil)
 }
 
-// ApiKeyNote says "Stored in the macOS Keychain."
-// in the language the app shows.
-func ApiKeyNote() string { return In(i18n.Locale()).ApiKeyNote() }
-
-// ApiKeyNote says "Stored in the macOS Keychain."
-// in the language of msgs.
-func (msgs Messages) ApiKeyNote() string {
-	return Catalog.Format(msgs.locale, "apiKeyNote", nil)
-}
-
-// FieldAsrModel says "Speech-to-text model"
+// FieldAsrModel says "Speech model"
 // in the language the app shows.
 func FieldAsrModel() string { return In(i18n.Locale()).FieldAsrModel() }
 
-// FieldAsrModel says "Speech-to-text model"
+// FieldAsrModel says "Speech model"
 // in the language of msgs.
 func (msgs Messages) FieldAsrModel() string {
 	return Catalog.Format(msgs.locale, "fieldAsrModel", nil)
@@ -900,4 +890,104 @@ func LastTimingsTranslate(asr string, llm string) string {
 // in the language of msgs.
 func (msgs Messages) LastTimingsTranslate(asr string, llm string) string {
 	return Catalog.Format(msgs.locale, "lastTimingsTranslate", map[string]any{"asr": asr, "llm": llm})
+}
+
+// FieldAsrService says "Speech-to-text service"
+// in the language the app shows.
+func FieldAsrService() string { return In(i18n.Locale()).FieldAsrService() }
+
+// FieldAsrService says "Speech-to-text service"
+// in the language of msgs.
+func (msgs Messages) FieldAsrService() string {
+	return Catalog.Format(msgs.locale, "fieldAsrService", nil)
+}
+
+// AsrServiceNote says "Soniox transcribes while you speak; OpenRouter once you stop."
+// in the language the app shows.
+func AsrServiceNote() string { return In(i18n.Locale()).AsrServiceNote() }
+
+// AsrServiceNote says "Soniox transcribes while you speak; OpenRouter once you stop."
+// in the language of msgs.
+func (msgs Messages) AsrServiceNote() string {
+	return Catalog.Format(msgs.locale, "asrServiceNote", nil)
+}
+
+// FieldSonioxKey says "API key"
+// in the language the app shows.
+func FieldSonioxKey() string { return In(i18n.Locale()).FieldSonioxKey() }
+
+// FieldSonioxKey says "API key"
+// in the language of msgs.
+func (msgs Messages) FieldSonioxKey() string {
+	return Catalog.Format(msgs.locale, "fieldSonioxKey", nil)
+}
+
+// SonioxKeyNote says "Create one at console.soniox.com. Stored in the Keychain."
+// in the language the app shows.
+func SonioxKeyNote() string { return In(i18n.Locale()).SonioxKeyNote() }
+
+// SonioxKeyNote says "Create one at console.soniox.com. Stored in the Keychain."
+// in the language of msgs.
+func (msgs Messages) SonioxKeyNote() string {
+	return Catalog.Format(msgs.locale, "sonioxKeyNote", nil)
+}
+
+// FieldSonioxModel says "Model"
+// in the language the app shows.
+func FieldSonioxModel() string { return In(i18n.Locale()).FieldSonioxModel() }
+
+// FieldSonioxModel says "Model"
+// in the language of msgs.
+func (msgs Messages) FieldSonioxModel() string {
+	return Catalog.Format(msgs.locale, "fieldSonioxModel", nil)
+}
+
+// FieldSonioxLanguages says "Language hints"
+// in the language the app shows.
+func FieldSonioxLanguages() string { return In(i18n.Locale()).FieldSonioxLanguages() }
+
+// FieldSonioxLanguages says "Language hints"
+// in the language of msgs.
+func (msgs Messages) FieldSonioxLanguages() string {
+	return Catalog.Format(msgs.locale, "fieldSonioxLanguages", nil)
+}
+
+// SonioxLanguagesNote says "Codes of the languages you speak, such as zh, en."
+// in the language the app shows.
+func SonioxLanguagesNote() string { return In(i18n.Locale()).SonioxLanguagesNote() }
+
+// SonioxLanguagesNote says "Codes of the languages you speak, such as zh, en."
+// in the language of msgs.
+func (msgs Messages) SonioxLanguagesNote() string {
+	return Catalog.Format(msgs.locale, "sonioxLanguagesNote", nil)
+}
+
+// AsrFallbackNote says "Used when Soniox can’t be reached."
+// in the language the app shows.
+func AsrFallbackNote() string { return In(i18n.Locale()).AsrFallbackNote() }
+
+// AsrFallbackNote says "Used when Soniox can’t be reached."
+// in the language of msgs.
+func (msgs Messages) AsrFallbackNote() string {
+	return Catalog.Format(msgs.locale, "asrFallbackNote", nil)
+}
+
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Stored in the Keychain."
+// in the language the app shows.
+func OpenRouterKeyNote() string { return In(i18n.Locale()).OpenRouterKeyNote() }
+
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Stored in the Keychain."
+// in the language of msgs.
+func (msgs Messages) OpenRouterKeyNote() string {
+	return Catalog.Format(msgs.locale, "openRouterKeyNote", nil)
+}
+
+// NoteStreamFallback says "Soniox wasn’t available; transcribed with OpenRouter"
+// in the language the app shows.
+func NoteStreamFallback() string { return In(i18n.Locale()).NoteStreamFallback() }
+
+// NoteStreamFallback says "Soniox wasn’t available; transcribed with OpenRouter"
+// in the language of msgs.
+func (msgs Messages) NoteStreamFallback() string {
+	return Catalog.Format(msgs.locale, "noteStreamFallback", nil)
 }

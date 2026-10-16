@@ -13,8 +13,10 @@ The interface is in English or Simplified Chinese, light or dark: Settings → G
 switch them at once, or follow the system. Strings live in `locales/en.json` and `locales/zh-Hans.json`; `go tool mygo generate` (also run by
 `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
-Speech to text and the rewrite both go through [OpenRouter](https://openrouter.ai/). Set the API key in Settings
-(stored in the Keychain) or export `OPENROUTER_API_KEY` for development.
+Speech is transcribed while you talk by [Soniox](https://soniox.com/) real-time speech to text, so the text is
+nearly ready when you stop. The cleanup and translation go through [OpenRouter](https://openrouter.ai/), which also
+transcribes the whole recording when Soniox has no key or fails. Set both API keys in Settings → Models (stored in
+the Keychain), or export `SONIOX_API_KEY` and `OPENROUTER_API_KEY` for development.
 
 ## Development
 
@@ -42,6 +44,7 @@ pipeline.go                                 OpenRouter speech-to-text and rewrit
 internal/controller                         record → transcribe → rewrite → paste state machine
 internal/hotkey                             Fn / Fn+Left Shift / Esc / Tab decisions
 internal/platform/darwin                    CGEventTap, AudioQueue, Cmd+V, permissions (purego)
+internal/soniox                             Soniox real-time streaming client
 internal/openrouter                         OpenRouter client
 internal/prompt                             prompts and spoken-language detection
 internal/store                              settings JSON

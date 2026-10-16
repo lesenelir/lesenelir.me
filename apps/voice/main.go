@@ -8,13 +8,10 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"slices"
-	"sync"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -23,12 +20,10 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/soniox"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
-
-// secretKey names the OpenRouter API key in the Keychain.
-const secretKey = "openrouter-api-key"
 
 type app struct {
 	store *store.Store
@@ -41,8 +36,8 @@ type app struct {
 	tray     *mygo.Tray
 	quitting bool
 
-	keyMu sync.RWMutex
-	key   string
+	openrouterKey *secret
+	sonioxKey     *secret
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
@@ -51,11 +46,10 @@ type app struct {
 	form            settingsForm
 	perms           permissions
 	saved           saveResult
-	uiLanguage      string // "" follows the system
-	appearance      int    // index in appearances, bound to its control
-	uiLanguageLabel string // bound to the language select
-	page            string // the settings page shown
-	keyTimer        *time.Timer
+	uiLanguage      string            // "" follows the system
+	appearance      int               // index in appearances, bound to its control
+	uiLanguageLabel string            // bound to the language select
+	page            string            // the settings page shown
 	levels          [waveBars]float32 // the voice bar's waveform, oldest first
 	levelAt         time.Time         // when levels last moved
 }
@@ -64,7 +58,12 @@ func main() {
 	if !mygo.App.RequestSingleInstanceLock() {
 		return
 	}
-	a := &app{rec: &darwin.Recorder{}, tap: &darwin.EventTap{}}
+	a := &app{
+		rec:           &darwin.Recorder{},
+		tap:           &darwin.EventTap{},
+		openrouterKey: newSecret("openrouter-api-key", "OPENROUTER_API_KEY"),
+		sonioxKey:     newSecret("soniox-api-key", "SONIOX_API_KEY"),
+	}
 	mygo.App.SetActivationPolicy(mygo.ActivationPolicyAccessory)
 	mygo.App.OnWindowAllClosed(func() {})
 	mygo.App.OnSecondInstance(func([]string, string) { a.showSettings() })
@@ -84,15 +83,18 @@ func (a *app) ready() {
 	if err != nil {
 		log.Printf("settings: %v; using defaults", err)
 	}
-	a.loadKey()
+	a.openrouterKey.load()
+	a.sonioxKey.load()
 	settings := a.store.Get()
 	a.uiLanguage = settings.UILanguage
 	mygo.App.SetLocale(a.uiLanguage)
 	a.appearance = max(0, slices.Index(appearances, settings.Appearance))
 
-	client := &openrouter.Client{Key: a.apiKey, HTTP: &http.Client{Timeout: 60 * time.Second}}
+	client := &openrouter.Client{Key: a.openrouterKey.Get, HTTP: &http.Client{Timeout: 60 * time.Second}}
+	sonioxClient := &soniox.Client{Key: a.sonioxKey.Get}
 	a.ctrl = controller.New(context.Background(), controller.Deps{
 		Recorder:    a.rec,
+		Streamer:    &streamer{client: sonioxClient, store: a.store, key: a.sonioxKey.Get},
 		Transcriber: &transcriber{client: client, store: a.store},
 		Rewriter:    rewriter{client: client, store: a.store},
 		Paster:      darwin.Paster{},
@@ -122,7 +124,7 @@ func (a *app) ready() {
 	})
 	a.overlay.SetIgnoreMouseEvents(false)
 
-	a.form = formFrom(a.store.Get(), a.apiKey())
+	a.form = formFrom(a.store.Get(), a.keys())
 	a.settings = mygo.NewWindow(mygo.WindowOptions{
 		Title:     locales.SettingsTitle(),
 		Hidden:    true,
@@ -137,7 +139,7 @@ func (a *app) ready() {
 		Vibrancy:      mygo.VibrancySidebar,
 		Content:       ui.View(a.settingsView),
 	})
-	a.settings.OnBlur(a.flushKey)
+	a.settings.OnBlur(a.flushKeys)
 	a.settings.OnClose(func(e *mygo.CloseEvent) {
 		if !a.quitting {
 			e.PreventDefault()
@@ -158,7 +160,7 @@ func (a *app) ready() {
 	// Ask for Accessibility once; macOS shows its own dialog.
 	darwin.AccessibilityTrusted(true)
 	go a.watchPermissions()
-	if a.apiKey() == "" || !darwin.AccessibilityTrusted(false) {
+	if a.openrouterKey.Get() == "" || !darwin.AccessibilityTrusted(false) {
 		a.showSettings()
 	}
 }
@@ -186,44 +188,15 @@ func (a *app) watchPermissions() {
 	}
 }
 
-func (a *app) loadKey() {
-	key, err := mygo.Secrets.Get(secretKey)
-	if err != nil && !errors.Is(err, mygo.ErrSecretNotFound) {
-		log.Printf("keychain: %v", err)
-	}
-	k := string(key)
-	if k == "" {
-		k = os.Getenv("OPENROUTER_API_KEY")
-	}
-	a.keyMu.Lock()
-	a.key = k
-	a.keyMu.Unlock()
-}
-
-func (a *app) apiKey() string {
-	a.keyMu.RLock()
-	defer a.keyMu.RUnlock()
-	return a.key
-}
-
-func (a *app) setKey(k string) error {
-	if k == "" {
-		if err := mygo.Secrets.Delete(secretKey); err != nil {
-			return err
-		}
-	} else if err := mygo.Secrets.Set(secretKey, []byte(k)); err != nil {
-		return err
-	}
-	a.keyMu.Lock()
-	a.key = k
-	a.keyMu.Unlock()
-	return nil
+// keys are the API keys, as the settings show them.
+func (a *app) keys() apiKeys {
+	return apiKeys{openrouter: a.openrouterKey.Get(), soniox: a.sonioxKey.Get()}
 }
 
 func (a *app) showSettings() {
 	a.settings.Update(func() {
-		a.flushKey()
-		a.form = formFrom(a.store.Get(), a.apiKey())
+		a.flushKeys()
+		a.form = formFrom(a.store.Get(), a.keys())
 	})
 	a.settings.Show()
 	a.settings.Focus()

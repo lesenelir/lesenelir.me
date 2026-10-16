@@ -20,6 +20,7 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/soniox"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
 )
 
@@ -108,7 +109,7 @@ func TestOverlayCapsule(t *testing.T) {
 
 func TestSettingsPages(t *testing.T) {
 	a := testApp(t)
-	a.form = formFrom(a.store.Get(), "")
+	a.form = formFrom(a.store.Get(), apiKeys{})
 	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
 	tt.SetLocale("zh-Hans")
 	for _, want := range []string{"通用", "权限", "模型", "翻译", "词典", "界面语言", "外观", "快捷键", "fn", "esc"} {
@@ -133,7 +134,7 @@ func TestSettingsPages(t *testing.T) {
 
 func TestSettingsFollowLanguage(t *testing.T) {
 	a := testApp(t)
-	a.form = formFrom(a.store.Get(), "")
+	a.form = formFrom(a.store.Get(), apiKeys{})
 	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
 	tt.SetLocale("en")
 	for _, want := range []string{"General", "Language", "System default", "Appearance", "Light", "Dark", "Shortcuts"} {
@@ -150,9 +151,10 @@ func TestSettingsFollowLanguage(t *testing.T) {
 // Settings save as they change: there is no Save button.
 func TestSettingsSaveAsTheyChange(t *testing.T) {
 	a := testApp(t)
-	a.form = formFrom(a.store.Get(), "")
+	a.form = formFrom(a.store.Get(), apiKeys{})
 	a.page = pageModels
-	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	// Tall enough that the timeout row shows without scrolling.
+	tt := ui.NewTester(a.settingsView, settingsWidth, 1000)
 	tt.SetLocale("en")
 	// The timeout's field sits at the right of its row, level with the
 	// middle of the label and the note under it.
@@ -171,7 +173,7 @@ func TestSettingsSaveAsTheyChange(t *testing.T) {
 
 func TestFormRoundTrip(t *testing.T) {
 	s := store.Defaults()
-	f := formFrom(s, "sk-or-1")
+	f := formFrom(s, apiKeys{openrouter: "sk-or-1"})
 	if f.zhTo != "English" || f.enTo != "简体中文" || f.providers != "cerebras, groq" {
 		t.Fatalf("form %+v", f)
 	}
@@ -243,7 +245,7 @@ func TestFormatDuration(t *testing.T) {
 
 func TestSettingsTimingsSwitch(t *testing.T) {
 	a := testApp(t)
-	a.form = formFrom(a.store.Get(), "")
+	a.form = formFrom(a.store.Get(), apiKeys{})
 	if !a.form.showTimings {
 		t.Fatal("timings are hidden by default")
 	}
@@ -318,5 +320,61 @@ func TestTranscriberUploadsFLAC(t *testing.T) {
 	}
 	if size == 0 || size >= len(pcm)/4 {
 		t.Fatalf("uploaded %d bytes for %d of PCM", size, len(pcm))
+	}
+}
+
+func TestModelsPageFollowsService(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), apiKeys{})
+	a.page = pageModels
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	tt.SetLocale("zh-Hans")
+	for _, want := range []string{"转写服务", "Soniox", "语言提示", "Soniox 不可用时改用它。"} {
+		if !tt.HasText(want) {
+			t.Errorf("Soniox: no %q in %q", want, tt.Texts())
+		}
+	}
+	if err := tt.Click("OpenRouter"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got := a.store.Get().ASRService; got != "openrouter" {
+		t.Fatalf("service saved as %q", got)
+	}
+	if tt.HasText("你会说的语言代码") || !tt.HasText("转写语言提示") {
+		t.Errorf("OpenRouter: %q", tt.Texts())
+	}
+}
+
+func TestFormSonioxFields(t *testing.T) {
+	s := store.Defaults()
+	f := formFrom(s, apiKeys{soniox: "sx"})
+	if f.asrService != 0 || f.sonioxLangs != "zh, en" || f.sonioxModel != "stt-rt-v5" || f.sonioxKey != "sx" {
+		t.Fatalf("form %+v", f)
+	}
+	f.asrService = 1
+	f.sonioxLangs = "zh,en, ja"
+	f.apply(&s)
+	if s.ASRService != "openrouter" || !slices.Equal(s.SonioxLanguages, []string{"zh", "en", "ja"}) {
+		t.Fatalf("settings %+v", s)
+	}
+}
+
+func TestStreamerNeedsSonioxAndAKey(t *testing.T) {
+	a := testApp(t)
+	key := ""
+	s := &streamer{client: &soniox.Client{URL: "ws://127.0.0.1:1"}, store: a.store, key: func() string { return key }}
+	if s.Open(context.Background()) != nil {
+		t.Fatal("streams without a key")
+	}
+	key = "sx"
+	st := s.Open(context.Background())
+	if st == nil {
+		t.Fatal("no stream with Soniox and a key")
+	}
+	st.Close()
+	_ = a.store.Update(func(x *store.Settings) { x.ASRService = "openrouter" })
+	if s.Open(context.Background()) != nil {
+		t.Fatal("streams with OpenRouter picked")
 	}
 }

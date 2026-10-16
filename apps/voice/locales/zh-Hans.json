@@ -21,8 +21,7 @@
   "openKeyboardSettings": "打开键盘设置",
   "sectionOpenRouter": "OpenRouter",
   "fieldApiKey": "API Key",
-  "apiKeyNote": "保存在 macOS 钥匙串里。",
-  "fieldAsrModel": "语音转写模型",
+  "fieldAsrModel": "转写模型",
   "asrModelNote": "也可用 openai/gpt-4o-mini-transcribe",
   "fieldAsrLanguage": "转写语言提示",
   "asrLanguagePlaceholder": "留空自动识别（中英混说建议留空）",
@@ -84,5 +83,15 @@
   "timingsDictate": "转写 {asr} · 整理 {llm}",
   "timingsTranslate": "转写 {asr} · 翻译 {llm}",
   "lastTimingsDictate": "转写 {asr}，整理 {llm}",
-  "lastTimingsTranslate": "转写 {asr}，翻译 {llm}"
+  "lastTimingsTranslate": "转写 {asr}，翻译 {llm}",
+  "fieldAsrService": "转写服务",
+  "asrServiceNote": "Soniox 边说边转；OpenRouter 说完再转。",
+  "fieldSonioxKey": "API Key",
+  "sonioxKeyNote": "在 console.soniox.com 创建，保存在钥匙串里。",
+  "fieldSonioxModel": "模型",
+  "fieldSonioxLanguages": "语言提示",
+  "sonioxLanguagesNote": "你会说的语言代码，如 zh, en。",
+  "asrFallbackNote": "Soniox 不可用时改用它。",
+  "openRouterKeyNote": "整理、翻译和备用转写都用它，保存在钥匙串里。",
+  "noteStreamFallback": "Soniox 暂不可用，已改用 OpenRouter 转写"
 }

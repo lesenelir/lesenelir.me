@@ -37,7 +37,9 @@ const MinRecording = 300 * time.Millisecond
 
 // Recorder captures the microphone as 16 kHz mono 16-bit PCM.
 type Recorder interface {
-	Start() error
+	// Start begins a recording, handing each chunk to onChunk as it comes,
+	// on whatever thread records; onChunk must not block.
+	Start(onChunk func(pcm []byte)) error
 	// Stop ends the recording and returns it.
 	Stop() ([]byte, error)
 	// Cancel ends the recording and drops it.
@@ -48,6 +50,27 @@ type Recorder interface {
 type Transcriber interface {
 	Transcribe(ctx context.Context, pcm []byte) (string, error)
 }
+
+// Stream is a recording sent to a speech service while it is being made,
+// so that its text is nearly ready when the recording ends.
+type Stream interface {
+	// Write sends a chunk of PCM; it never blocks.
+	Write(pcm []byte)
+	// Finish ends the audio and returns the transcript.
+	Finish(ctx context.Context) (string, error)
+	// Close drops the stream.
+	Close()
+}
+
+// Streamer opens a Stream for a session, or returns nil when streaming is
+// off, as without an API key for it.
+type Streamer interface {
+	Open(ctx context.Context) Stream
+}
+
+// streamFinishTimeout is how long a stream may take to finish before the
+// recording is transcribed in one piece instead.
+const streamFinishTimeout = 15 * time.Second
 
 // Rewriter cleans up or translates a transcript.
 type Rewriter interface {
@@ -61,7 +84,10 @@ type Paster interface {
 
 // Deps are what the controller drives.
 type Deps struct {
-	Recorder    Recorder
+	Recorder Recorder
+	// Streamer, if set, transcribes while recording; Transcriber does the
+	// whole recording after it, and stands in when a stream fails.
+	Streamer    Streamer
 	Transcriber Transcriber
 	Rewriter    Rewriter
 	Paster      Paster
@@ -113,6 +139,9 @@ const (
 	NoteASRFailed
 	NotePasteFailed
 	NoteMicFailed
+	// NoteStreamFallback: streaming failed, and the recording was
+	// transcribed in one piece instead.
+	NoteStreamFallback
 )
 
 // Controller is safe for concurrent use.
@@ -123,11 +152,15 @@ type Controller struct {
 	mu     sync.Mutex
 	status Status
 
-	// Owned by the run goroutine.
-	session int
-	cancel  context.CancelFunc
-	manual  bool
-	timings Timings
+	// Owned by the run goroutine: the session's context, which Esc
+	// cancels, its stream, if any, and what happened in it.
+	session  int
+	sess     context.Context
+	cancel   context.CancelFunc
+	stream   Stream
+	manual   bool
+	fellBack bool
+	timings  Timings
 }
 
 type action struct {
@@ -136,9 +169,10 @@ type action struct {
 }
 
 type transcribed struct {
-	session int
-	text    string
-	err     error
+	session  int
+	text     string
+	err      error
+	fellBack bool
 }
 
 type rewritten struct {
@@ -192,9 +226,7 @@ func (c *Controller) run(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			if c.cancel != nil {
-				c.cancel()
-			}
+			c.endSession()
 			return
 		case m := <-c.inbox:
 			switch m := m.(type) {
@@ -235,9 +267,9 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 	case Idle:
 		switch a {
 		case hotkey.Dictate:
-			c.start(prompt.Dictate)
+			c.start(ctx, prompt.Dictate)
 		case hotkey.Translate:
-			c.start(prompt.Translate)
+			c.start(ctx, prompt.Translate)
 		}
 	case Recording:
 		switch a {
@@ -258,11 +290,25 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 	}
 }
 
-func (c *Controller) start(mode prompt.Mode) {
-	if err := c.d.Recorder.Start(); err != nil {
+func (c *Controller) start(ctx context.Context, mode prompt.Mode) {
+	sess, cancel := context.WithCancel(ctx)
+	var stream Stream
+	if c.d.Streamer != nil {
+		stream = c.d.Streamer.Open(sess)
+	}
+	onChunk := func([]byte) {}
+	if stream != nil {
+		onChunk = stream.Write
+	}
+	if err := c.d.Recorder.Start(onChunk); err != nil {
+		if stream != nil {
+			stream.Close()
+		}
+		cancel()
 		c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, NoteMicFailed, err })
 		return
 	}
+	c.sess, c.cancel, c.stream, c.fellBack = sess, cancel, stream, false
 	c.session++
 	c.manual = false
 	target := ""
@@ -299,14 +345,28 @@ func (c *Controller) stop(ctx context.Context) {
 		c.abort(NoteSilent, nil)
 		return
 	}
-	run, cancel := context.WithCancel(ctx)
-	c.cancel = cancel
-	session := c.session
+	run, stream, session := c.sess, c.stream, c.session
+	c.stream = nil
 	c.set(func(s *Status) { s.State, s.Since = Transcribing, time.Now() })
 	go func() {
-		text, err := c.d.Transcriber.Transcribe(run, pcm)
-		c.send(ctx, transcribed{session: session, text: text, err: err})
+		text, fellBack, err := c.transcribe(run, stream, pcm)
+		c.send(ctx, transcribed{session: session, text: text, err: err, fellBack: fellBack})
 	}()
+}
+
+// transcribe finishes the stream, if any, or transcribes the whole
+// recording, as it also does when the stream fails.
+func (c *Controller) transcribe(ctx context.Context, stream Stream, pcm []byte) (text string, fellBack bool, err error) {
+	if stream != nil {
+		finish, cancel := context.WithTimeout(ctx, streamFinishTimeout)
+		text, err = stream.Finish(finish)
+		cancel()
+		if err == nil || ctx.Err() != nil {
+			return text, false, err
+		}
+	}
+	text, err = c.d.Transcriber.Transcribe(ctx, pcm)
+	return text, stream != nil, err
 }
 
 func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
@@ -315,6 +375,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		return
 	}
 	c.timings.Transcribe = time.Since(st.Since)
+	c.fellBack = m.fellBack
 	switch {
 	case errors.Is(m.err, ErrNoKey):
 		c.abort(NoteNoKey, nil)
@@ -334,8 +395,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 			req.Target = settings.TargetFor(prompt.DetectLanguage(m.text))
 		}
 	}
-	run, cancel := context.WithTimeout(ctx, settings.Timeout())
-	c.cancel = cancel
+	run, cancel := context.WithTimeout(c.sess, settings.Timeout())
 	c.set(func(s *Status) { s.State, s.Target, s.Since = Rewriting, req.Target, time.Now() })
 	go func() {
 		defer cancel()
@@ -355,11 +415,14 @@ func (c *Controller) onRewritten(m rewritten) {
 		return
 	}
 	c.timings.Rewrite = time.Since(st.Since)
-	c.cancel = nil
+	c.endSession()
 	c.set(func(s *Status) { s.State, s.Since = Pasting, time.Now() })
 	note, err := m.note, c.d.Paster.Paste(m.text)
-	if err != nil {
+	switch {
+	case err != nil:
 		note = NotePasteFailed
+	case note == NoteNone && c.fellBack:
+		note = NoteStreamFallback
 	}
 	c.set(func(s *Status) {
 		s.State, s.Text, s.Note, s.Err, s.Timings = Idle, m.text, note, err, c.timings
@@ -368,12 +431,21 @@ func (c *Controller) onRewritten(m rewritten) {
 
 // abort ends the session: the pipeline's results are ignored from now on.
 func (c *Controller) abort(note Note, err error) {
+	c.endSession()
+	c.session++
+	c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, note, err })
+}
+
+// endSession drops the session's stream and cancels its requests.
+func (c *Controller) endSession() {
+	if c.stream != nil {
+		c.stream.Close()
+		c.stream = nil
+	}
 	if c.cancel != nil {
 		c.cancel()
 		c.cancel = nil
 	}
-	c.session++
-	c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, note, err })
 }
 
 // ErrNoKey is what a Transcriber returns, or wraps, without an API key.

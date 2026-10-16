@@ -14,6 +14,7 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/soniox"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
@@ -52,10 +53,19 @@ var (
 	iconDictionary  = icon(`<path d="M3 2.5h7.5a1.5 1.5 0 0 1 1.5 1.5v10H4.5A1.5 1.5 0 0 1 3 12.5z"/><path d="M3 12.5A1.5 1.5 0 0 1 4.5 11H12"/><path d="M6 5.5h3.5"/>`)
 )
 
+// apiKeys are the keys the settings show.
+type apiKeys struct {
+	openrouter, soniox string
+}
+
 // settingsForm holds the settings window's fields, which are saved as they
 // change.
 type settingsForm struct {
-	apiKey      string
+	apiKey      string // OpenRouter's
+	sonioxKey   string
+	asrService  int // index in asrServices
+	sonioxModel string
+	sonioxLangs string
 	asrModel    string
 	asrLang     string
 	llmModel    string
@@ -76,9 +86,17 @@ type permissions struct {
 	tapRunning    bool
 }
 
-func formFrom(s store.Settings, key string) settingsForm {
+// asrServices are the speech-to-text services, as the settings keep them,
+// in the order the segmented control shows them.
+var asrServices = []string{"soniox", "openrouter"}
+
+func formFrom(s store.Settings, keys apiKeys) settingsForm {
 	f := settingsForm{
-		apiKey:      key,
+		apiKey:      keys.openrouter,
+		sonioxKey:   keys.soniox,
+		asrService:  max(0, slices.Index(asrServices, s.ASRService)),
+		sonioxModel: s.SonioxModel,
+		sonioxLangs: strings.Join(s.SonioxLanguages, ", "),
 		asrModel:    s.ASRModel,
 		asrLang:     s.ASRLanguage,
 		llmModel:    s.LLMModel,
@@ -133,6 +151,9 @@ func (f settingsForm) apply(s *store.Settings) {
 	if len(targets) == 0 {
 		targets = []string{defaultTo}
 	}
+	s.ASRService = asrServices[f.asrService]
+	s.SonioxModel = strings.TrimSpace(f.sonioxModel)
+	s.SonioxLanguages = splitList(f.sonioxLangs, func(r rune) bool { return r == ',' || r == ' ' })
 	s.ASRModel = strings.TrimSpace(f.asrModel)
 	s.ASRLanguage = strings.TrimSpace(f.asrLang)
 	s.LLMModel = strings.TrimSpace(f.llmModel)
@@ -185,24 +206,28 @@ func (a *app) commit() {
 	}
 }
 
-// commitKey writes the API key to the Keychain once typing pauses.
-func (a *app) commitKey() {
-	if a.keyTimer != nil {
-		a.keyTimer.Stop()
+// commitKey writes a key to the Keychain once typing pauses.
+func (a *app) commitKey(sec *secret, value string) {
+	if sec.timer != nil {
+		sec.timer.Stop()
 	}
-	key := strings.TrimSpace(a.form.apiKey)
-	a.keyTimer = time.AfterFunc(keyDelay, func() { a.storeKey(key) })
+	sec.timer = time.AfterFunc(keyDelay, func() { a.storeKey(sec, value) })
 }
 
-// flushKey writes a key still waiting for typing to pause.
-func (a *app) flushKey() {
-	if a.keyTimer != nil && a.keyTimer.Stop() {
-		a.storeKey(strings.TrimSpace(a.form.apiKey))
+// flushKeys writes the keys still waiting for typing to pause.
+func (a *app) flushKeys() {
+	for _, k := range []struct {
+		sec   *secret
+		value string
+	}{{a.openrouterKey, a.form.apiKey}, {a.sonioxKey, a.form.sonioxKey}} {
+		if k.sec.timer != nil && k.sec.timer.Stop() {
+			a.storeKey(k.sec, k.value)
+		}
 	}
 }
 
-func (a *app) storeKey(key string) {
-	err := a.setKey(key)
+func (a *app) storeKey(sec *secret, value string) {
+	err := sec.set(value)
 	a.settings.Update(func() {
 		switch {
 		case err != nil:
@@ -448,21 +473,47 @@ func (a *app) permissionsPage(c *ui.Context, m locales.Messages, pal palette) {
 
 func (a *app) modelsPage(c *ui.Context, m locales.Messages, pal palette) {
 	const fieldWidth = 240
-	group(c, pal, m.SectionOpenRouter(), func(g *rows) {
-		g.row(c, m.FieldApiKey(), m.ApiKeyNote(), func() {
-			ui.TextInput(c.Key("api-key"), &a.form.apiKey).Password().Placeholder("sk-or-…").
-				Width(fieldWidth).OnChange(a.commitKey)
+	streaming := asrServices[a.form.asrService] == "soniox"
+	group(c, pal, m.SectionSpeech(), func(g *rows) {
+		g.row(c, m.FieldAsrService(), m.AsrServiceNote(), func() {
+			ui.Segmented(c.Key("asr-service"), &a.form.asrService, "Soniox", "OpenRouter").OnChange(a.commit)
 		})
 	})
-	group(c, pal, m.SectionSpeech(), func(g *rows) {
-		g.row(c, m.FieldAsrModel(), m.AsrModelNote(), func() {
+	if streaming {
+		group(c, pal, "Soniox", func(g *rows) {
+			g.row(c, m.FieldSonioxKey(), m.SonioxKeyNote(), func() {
+				ui.TextInput(c.Key("soniox-key"), &a.form.sonioxKey).Password().Placeholder("Soniox API key").
+					Width(fieldWidth).OnChange(func() { a.commitKey(a.sonioxKey, a.form.sonioxKey) })
+			})
+			g.row(c, m.FieldSonioxModel(), "", func() {
+				ui.TextInput(c.Key("soniox-model"), &a.form.sonioxModel).Placeholder(soniox.DefaultModel).
+					Width(fieldWidth).OnChange(a.commit)
+			})
+			g.row(c, m.FieldSonioxLanguages(), m.SonioxLanguagesNote(), func() {
+				ui.TextInput(c.Key("soniox-langs"), &a.form.sonioxLangs).Placeholder("zh, en").
+					Width(fieldWidth).OnChange(a.commit)
+			})
+		})
+	}
+	group(c, pal, m.SectionOpenRouter(), func(g *rows) {
+		g.row(c, m.FieldApiKey(), m.OpenRouterKeyNote(), func() {
+			ui.TextInput(c.Key("api-key"), &a.form.apiKey).Password().Placeholder("sk-or-…").
+				Width(fieldWidth).OnChange(func() { a.commitKey(a.openrouterKey, a.form.apiKey) })
+		})
+		note := m.AsrModelNote()
+		if streaming {
+			note = m.AsrFallbackNote()
+		}
+		g.row(c, m.FieldAsrModel(), note, func() {
 			ui.TextInput(c.Key("asr-model"), &a.form.asrModel).Placeholder("qwen/qwen3-asr-1.7b").
 				Width(fieldWidth).OnChange(a.commit)
 		})
-		g.row(c, m.FieldAsrLanguage(), m.AsrLanguagePlaceholder(), func() {
-			ui.TextInput(c.Key("asr-lang"), &a.form.asrLang).Placeholder("zh, en…").
-				Width(fieldWidth).OnChange(a.commit)
-		})
+		if !streaming {
+			g.row(c, m.FieldAsrLanguage(), m.AsrLanguagePlaceholder(), func() {
+				ui.TextInput(c.Key("asr-lang"), &a.form.asrLang).Placeholder("zh, en…").
+					Width(fieldWidth).OnChange(a.commit)
+			})
+		}
 	})
 	group(c, pal, m.SectionRewrite(), func(g *rows) {
 		g.row(c, m.FieldLlmModel(), m.LlmModelNote(), func() {

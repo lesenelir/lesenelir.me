@@ -263,6 +263,8 @@ func noteText(m locales.Messages, s controller.Status) string {
 		return m.NotePasteFailed(detail)
 	case controller.NoteMicFailed:
 		return m.NoteMicFailed(detail)
+	case controller.NoteStreamFallback:
+		return m.NoteStreamFallback()
 	}
 	return ""
 }
