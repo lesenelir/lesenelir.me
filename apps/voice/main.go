@@ -18,6 +18,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/history"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/soniox"
@@ -38,6 +39,7 @@ type app struct {
 
 	openrouterKey *secret
 	sonioxKey     *secret
+	history       *history.Store
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
@@ -46,10 +48,11 @@ type app struct {
 	form            settingsForm
 	perms           permissions
 	saved           saveResult
-	uiLanguage      string            // "" follows the system
-	appearance      int               // index in appearances, bound to its control
-	uiLanguageLabel string            // bound to the language select
-	page            string            // the settings page shown
+	uiLanguage      string // "" follows the system
+	appearance      int    // index in appearances, bound to its control
+	uiLanguageLabel string // bound to the language select
+	page            string // the settings page shown
+	hist            historyView
 	levels          [waveBars]float32 // the voice bar's waveform, oldest first
 	levelAt         time.Time         // when levels last moved
 }
@@ -83,6 +86,8 @@ func (a *app) ready() {
 	if err != nil {
 		log.Printf("settings: %v; using defaults", err)
 	}
+	a.history = history.Open(filepath.Join(dir, "history.jsonl"))
+	a.loadHistory()
 	quiet := &quieter{store: a.store, path: filepath.Join(dir, "output-to-restore.json")}
 	quiet.recover()
 	a.openrouterKey.load()
@@ -104,6 +109,7 @@ func (a *app) ready() {
 		Capture:     a.tap.Detector.Capture,
 		OnChange:    a.onStatus,
 		Recording:   quiet.Recording,
+		OnResult:    a.onResult,
 		OnTargetPicked: func(target string) {
 			if a.store.Get().RememberTarget {
 				_ = a.store.Update(func(s *store.Settings) { s.LastTarget = target })

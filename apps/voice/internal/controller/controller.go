@@ -99,6 +99,9 @@ type Deps struct {
 	OnChange func(Status)
 	// OnTargetPicked receives a target chosen with Tab or on the voice bar.
 	OnTargetPicked func(target string)
+	// OnResult receives every text pasted, or put on the clipboard when
+	// pasting failed, once, on the controller's goroutine.
+	OnResult func(Result)
 	// Recording is told true just before the microphone opens, and false
 	// once it closes, however the recording ends: to quiet the computer's
 	// own sound meanwhile.
@@ -121,6 +124,17 @@ type Status struct {
 	Since time.Time
 	// Timings are how long the last session's requests took.
 	Timings Timings
+}
+
+// Result is one session's outcome, for the history.
+type Result struct {
+	Time   time.Time
+	Mode   prompt.Mode
+	Target string
+	// Transcript is what speech to text heard; Text what was pasted.
+	Transcript string
+	Text       string
+	Timings    Timings
 }
 
 // Timings are the durations of a session's stages after recording.
@@ -181,9 +195,10 @@ type transcribed struct {
 }
 
 type rewritten struct {
-	session int
-	text    string
-	note    Note
+	session    int
+	transcript string
+	text       string
+	note       Note
 }
 
 // New starts a controller; it stops when ctx is done.
@@ -199,6 +214,9 @@ func New(ctx context.Context, d Deps) *Controller {
 	}
 	if d.Recording == nil {
 		d.Recording = func(bool) {}
+	}
+	if d.OnResult == nil {
+		d.OnResult = func(Result) {}
 	}
 	c := &Controller{d: d, inbox: make(chan any, 16)}
 	go c.run(ctx)
@@ -413,7 +431,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		defer cancel()
 		out, err := c.d.Rewriter.Rewrite(run, req)
 		out = prompt.Clean(out)
-		r := rewritten{session: m.session, text: out}
+		r := rewritten{session: m.session, transcript: m.text, text: out}
 		if err != nil || !prompt.Plausible(req, out) {
 			r.text, r.note = m.text, NoteRawPasted
 		}
@@ -438,6 +456,14 @@ func (c *Controller) onRewritten(m rewritten) {
 	}
 	c.set(func(s *Status) {
 		s.State, s.Text, s.Note, s.Err, s.Timings = Idle, m.text, note, err, c.timings
+	})
+	c.d.OnResult(Result{
+		Time:       time.Now(),
+		Mode:       st.Mode,
+		Target:     st.Target,
+		Transcript: m.transcript,
+		Text:       m.text,
+		Timings:    c.timings,
 	})
 }
 

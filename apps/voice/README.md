@@ -18,6 +18,10 @@ nearly ready when you stop. The cleanup and translation go through [OpenRouter](
 transcribes the whole recording when Soniox has no key or fails. Set both API keys in Settings → Models (stored in
 the Keychain), or export `SONIOX_API_KEY` and `OPENROUTER_API_KEY` for development.
 
+The text of each dictation and translation is kept in `~/Library/Application Support/Voice/history.jsonl` (text
+only, never audio; the latest 1,000). Settings → History shows it, and can copy, delete, clear it all, or stop keeping
+it.
+
 ## Development
 
 ```sh
@@ -48,6 +52,7 @@ internal/soniox                             Soniox real-time streaming client
 internal/openrouter                         OpenRouter client
 internal/prompt                             prompts and spoken-language detection
 internal/store                              settings JSON
+internal/history                            local history of pasted text
 internal/audio                              WAV encoding and levels
 locales                                     interface strings (en, zh-Hans) and their generated accessors
 ```

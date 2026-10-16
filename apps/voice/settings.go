@@ -79,6 +79,7 @@ type settingsForm struct {
 	dictionary  string
 	showTimings bool
 	whileRec    int // index in whileRecording
+	saveHistory bool
 }
 
 type permissions struct {
@@ -115,6 +116,7 @@ func formFrom(s store.Settings, keys apiKeys) settingsForm {
 		dictionary:  strings.Join(s.Dictionary, "\n"),
 		showTimings: !s.HideTimings,
 		whileRec:    max(0, slices.Index(whileRecording, s.WhileRecording)),
+		saveHistory: !s.NoHistory,
 	}
 	for i, l := range prompt.Languages {
 		f.targets[i] = slices.Contains(s.Targets, l.Code)
@@ -176,6 +178,7 @@ func (f settingsForm) apply(s *store.Settings) {
 	s.Dictionary = splitList(f.dictionary, func(r rune) bool { return r == '\n' })
 	s.HideTimings = !f.showTimings
 	s.WhileRecording = whileRecording[f.whileRec]
+	s.NoHistory = !f.saveHistory
 }
 
 // saveResult is the outcome of the last save that failed, if any.
@@ -334,6 +337,8 @@ func (a *app) settingsView(c *ui.Context) {
 			ui.Scroll(c.Key("page-" + a.page)).Grow(1).Children(func() {
 				ui.Column(c).Padding(4, 28, 28, 28).Gap(22).Children(func() {
 					switch a.page {
+					case pageHistory:
+						a.historyPage(c, m, pal)
 					case pagePermissions:
 						a.permissionsPage(c, m, pal)
 					case pageModels:
@@ -359,6 +364,7 @@ func (a *app) settingsSidebar(c *ui.Context, m locales.Messages, vibrant bool) {
 	ui.Box(c).Height(headerHeight).Shrink(0).DragWindow()
 	list := ui.Sidebar(c, &a.page, func() {
 		ui.SidebarItem(c, pageGeneral, iconGeneral, m.NavGeneral())
+		ui.SidebarItem(c, pageHistory, iconHistory, m.NavHistory())
 		ui.SidebarItem(c, pagePermissions, iconPermissions, m.NavPermissions())
 		ui.SidebarItem(c, pageModels, iconModels, m.NavModels())
 		ui.SidebarItem(c, pageTranslation, iconTranslation, m.NavTranslation())
@@ -371,6 +377,8 @@ func (a *app) settingsSidebar(c *ui.Context, m locales.Messages, vibrant bool) {
 
 func pageTitle(m locales.Messages, page string) string {
 	switch page {
+	case pageHistory:
+		return m.NavHistory()
 	case pagePermissions:
 		return m.NavPermissions()
 	case pageModels:

@@ -1041,3 +1041,177 @@ func WhileRecordingNone() string { return In(i18n.Locale()).WhileRecordingNone()
 func (msgs Messages) WhileRecordingNone() string {
 	return Catalog.Format(msgs.locale, "whileRecordingNone", nil)
 }
+
+// NavHistory says "History"
+// in the language the app shows.
+func NavHistory() string { return In(i18n.Locale()).NavHistory() }
+
+// NavHistory says "History"
+// in the language of msgs.
+func (msgs Messages) NavHistory() string {
+	return Catalog.Format(msgs.locale, "navHistory", nil)
+}
+
+// FieldSaveHistory says "Keep history"
+// in the language the app shows.
+func FieldSaveHistory() string { return In(i18n.Locale()).FieldSaveHistory() }
+
+// FieldSaveHistory says "Keep history"
+// in the language of msgs.
+func (msgs Messages) FieldSaveHistory() string {
+	return Catalog.Format(msgs.locale, "fieldSaveHistory", nil)
+}
+
+// SaveHistoryNote says "Text only, never audio. Keeps the latest 1,000."
+// in the language the app shows.
+func SaveHistoryNote() string { return In(i18n.Locale()).SaveHistoryNote() }
+
+// SaveHistoryNote says "Text only, never audio. Keeps the latest 1,000."
+// in the language of msgs.
+func (msgs Messages) SaveHistoryNote() string {
+	return Catalog.Format(msgs.locale, "saveHistoryNote", nil)
+}
+
+// HistoryUsage says "{count, plural, one {# entry} other {# entries}} · {size}"
+// in the language the app shows.
+//
+// Entries kept and the space they take, under the history switch.
+func HistoryUsage(count int, size string) string { return In(i18n.Locale()).HistoryUsage(count, size) }
+
+// HistoryUsage says "{count, plural, one {# entry} other {# entries}} · {size}"
+// in the language of msgs.
+//
+// Entries kept and the space they take, under the history switch.
+func (msgs Messages) HistoryUsage(count int, size string) string {
+	return Catalog.Format(msgs.locale, "historyUsage", map[string]any{"count": count, "size": size})
+}
+
+// ButtonClearHistory says "Clear All"
+// in the language the app shows.
+func ButtonClearHistory() string { return In(i18n.Locale()).ButtonClearHistory() }
+
+// ButtonClearHistory says "Clear All"
+// in the language of msgs.
+func (msgs Messages) ButtonClearHistory() string {
+	return Catalog.Format(msgs.locale, "buttonClearHistory", nil)
+}
+
+// ClearHistoryTitle says "Clear all history?"
+// in the language the app shows.
+func ClearHistoryTitle() string { return In(i18n.Locale()).ClearHistoryTitle() }
+
+// ClearHistoryTitle says "Clear all history?"
+// in the language of msgs.
+func (msgs Messages) ClearHistoryTitle() string {
+	return Catalog.Format(msgs.locale, "clearHistoryTitle", nil)
+}
+
+// ClearHistoryMessage says "This deletes the saved text from this Mac. You can’t undo it."
+// in the language the app shows.
+func ClearHistoryMessage() string { return In(i18n.Locale()).ClearHistoryMessage() }
+
+// ClearHistoryMessage says "This deletes the saved text from this Mac. You can’t undo it."
+// in the language of msgs.
+func (msgs Messages) ClearHistoryMessage() string {
+	return Catalog.Format(msgs.locale, "clearHistoryMessage", nil)
+}
+
+// ButtonCancel says "Cancel"
+// in the language the app shows.
+func ButtonCancel() string { return In(i18n.Locale()).ButtonCancel() }
+
+// ButtonCancel says "Cancel"
+// in the language of msgs.
+func (msgs Messages) ButtonCancel() string {
+	return Catalog.Format(msgs.locale, "buttonCancel", nil)
+}
+
+// HistoryEmpty says "Nothing yet. What you dictate or translate shows here."
+// in the language the app shows.
+func HistoryEmpty() string { return In(i18n.Locale()).HistoryEmpty() }
+
+// HistoryEmpty says "Nothing yet. What you dictate or translate shows here."
+// in the language of msgs.
+func (msgs Messages) HistoryEmpty() string {
+	return Catalog.Format(msgs.locale, "historyEmpty", nil)
+}
+
+// ButtonCopy says "Copy"
+// in the language the app shows.
+func ButtonCopy() string { return In(i18n.Locale()).ButtonCopy() }
+
+// ButtonCopy says "Copy"
+// in the language of msgs.
+func (msgs Messages) ButtonCopy() string {
+	return Catalog.Format(msgs.locale, "buttonCopy", nil)
+}
+
+// Copied says "Copied"
+// in the language the app shows.
+func Copied() string { return In(i18n.Locale()).Copied() }
+
+// Copied says "Copied"
+// in the language of msgs.
+func (msgs Messages) Copied() string {
+	return Catalog.Format(msgs.locale, "copied", nil)
+}
+
+// ButtonDelete says "Delete"
+// in the language the app shows.
+func ButtonDelete() string { return In(i18n.Locale()).ButtonDelete() }
+
+// ButtonDelete says "Delete"
+// in the language of msgs.
+func (msgs Messages) ButtonDelete() string {
+	return Catalog.Format(msgs.locale, "buttonDelete", nil)
+}
+
+// HistoryTranscript says "Raw transcript"
+// in the language the app shows.
+func HistoryTranscript() string { return In(i18n.Locale()).HistoryTranscript() }
+
+// HistoryTranscript says "Raw transcript"
+// in the language of msgs.
+func (msgs Messages) HistoryTranscript() string {
+	return Catalog.Format(msgs.locale, "historyTranscript", nil)
+}
+
+// HistoryDictate says "Dictation"
+// in the language the app shows.
+func HistoryDictate() string { return In(i18n.Locale()).HistoryDictate() }
+
+// HistoryDictate says "Dictation"
+// in the language of msgs.
+func (msgs Messages) HistoryDictate() string {
+	return Catalog.Format(msgs.locale, "historyDictate", nil)
+}
+
+// HistoryTranslate says "Translation → {language}"
+// in the language the app shows.
+func HistoryTranslate(language string) string { return In(i18n.Locale()).HistoryTranslate(language) }
+
+// HistoryTranslate says "Translation → {language}"
+// in the language of msgs.
+func (msgs Messages) HistoryTranslate(language string) string {
+	return Catalog.Format(msgs.locale, "historyTranslate", map[string]any{"language": language})
+}
+
+// ShowMore says "Show more"
+// in the language the app shows.
+func ShowMore() string { return In(i18n.Locale()).ShowMore() }
+
+// ShowMore says "Show more"
+// in the language of msgs.
+func (msgs Messages) ShowMore() string {
+	return Catalog.Format(msgs.locale, "showMore", nil)
+}
+
+// HistoryFailed says "Couldn’t update the history: {error}"
+// in the language the app shows.
+func HistoryFailed(error string) string { return In(i18n.Locale()).HistoryFailed(error) }
+
+// HistoryFailed says "Couldn’t update the history: {error}"
+// in the language of msgs.
+func (msgs Messages) HistoryFailed(error string) string {
+	return Catalog.Format(msgs.locale, "historyFailed", map[string]any{"error": error})
+}

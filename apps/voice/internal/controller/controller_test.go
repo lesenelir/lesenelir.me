@@ -496,3 +496,36 @@ func TestRecordingHook(t *testing.T) {
 		})
 	}
 }
+
+func TestOnResult(t *testing.T) {
+	h := newHarness(t)
+	results := make(chan Result, 4)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	h.c = New(ctx, Deps{
+		Recorder:    h.rec,
+		Transcriber: h.asr,
+		Rewriter:    h.llm,
+		Paster:      h.paster,
+		Settings:    store.Defaults,
+		OnChange:    func(s Status) { h.changes <- s },
+		OnResult:    func(r Result) { results <- r },
+	})
+	h.c.Handle(hotkey.Dictate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Cancel)
+	h.until(t, Idle)
+	h.c.Handle(hotkey.Translate)
+	h.until(t, Recording)
+	h.c.Handle(hotkey.Translate)
+	h.until(t, Idle)
+	r := <-results
+	if r.Mode != prompt.Translate || r.Target != "en" || r.Transcript != "嗯我们周三，不对，周四开会" || r.Text != "我们周四开会。" || r.Time.IsZero() {
+		t.Fatalf("result %+v", r)
+	}
+	select {
+	case extra := <-results:
+		t.Fatalf("a cancelled session gave a result: %+v", extra)
+	default:
+	}
+}

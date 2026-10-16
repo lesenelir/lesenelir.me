@@ -18,6 +18,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/history"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
@@ -34,9 +35,10 @@ func testApp(t *testing.T) *app {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 	return &app{
-		store: st,
-		rec:   &darwin.Recorder{},
-		ctrl:  controller.New(ctx, controller.Deps{Settings: st.Get}),
+		store:   st,
+		rec:     &darwin.Recorder{},
+		ctrl:    controller.New(ctx, controller.Deps{Settings: st.Get}),
+		history: history.Open(filepath.Join(t.TempDir(), "history.jsonl")),
 	}
 }
 
@@ -432,6 +434,78 @@ func TestWhileRecordingSetting(t *testing.T) {
 	for _, want := range []string{"录音时的其他声音", "静音", "调低", "不处理"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
+		}
+	}
+}
+
+func TestHistoryPage(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), apiKeys{})
+	a.page = pageHistory
+	for _, e := range []history.Entry{
+		{Mode: "dictate", Transcript: "嗯我们周三，不对，周四开会", Text: "我们周四开会。"},
+		{Mode: "translate", Target: "en", Transcript: "明天发布", Text: "We ship tomorrow."},
+	} {
+		if _, err := a.history.Add(e); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a.loadHistory()
+	tt := ui.NewTester(a.settingsView, settingsWidth, 900)
+	tt.SetLocale("zh-Hans")
+	for _, want := range []string{"历史", "保存历史", "共 2 条", "We ship tomorrow.", "翻译 → English", "我们周四开会。", "听写", "原始转写"} {
+		if !tt.HasText(want) {
+			t.Errorf("no %q in %q", want, tt.Texts())
+		}
+	}
+
+	// Delete the newest: the translation.
+	if err := tt.Click("删除"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if tt.HasText("We ship tomorrow.") || !tt.HasText("共 1 条") {
+		t.Fatalf("after delete: %q", tt.Texts())
+	}
+	if got, _ := a.history.List(); len(got) != 1 || got[0].Text != "我们周四开会。" {
+		t.Fatalf("file after delete: %+v", got)
+	}
+
+	// Clear all asks first; Enter picks the alert's default, clearing.
+	if err := tt.Click("清除全部"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if !tt.HasText("清除全部历史？") {
+		t.Fatalf("no confirmation: %q", tt.Texts())
+	}
+	tt.Key(0, ui.KeyEnter)
+	tt.Frame()
+	if got, _ := a.history.List(); len(got) != 0 || a.history.Size() != 0 {
+		t.Fatalf("history left after clearing: %+v", got)
+	}
+	if !tt.HasText("还没有记录。听写或翻译的文字会显示在这里。") {
+		t.Fatalf("after clear: %q", tt.Texts())
+	}
+}
+
+func TestHistoryOff(t *testing.T) {
+	a := testApp(t)
+	_ = a.store.Update(func(s *store.Settings) { s.NoHistory = true })
+	a.onResult(controller.Result{Text: "secret"})
+	if got, _ := a.history.List(); len(got) != 0 {
+		t.Fatalf("kept %+v with history off", got)
+	}
+	f := formFrom(a.store.Get(), apiKeys{})
+	if f.saveHistory {
+		t.Fatal("form shows history on")
+	}
+}
+
+func TestFormatSize(t *testing.T) {
+	for n, want := range map[int64]string{0: "0 B", 900: "900 B", 12700: "12.4 KB", 3 << 20: "3.0 MB"} {
+		if got := formatSize(n); got != want {
+			t.Errorf("formatSize(%d) = %q, want %q", n, got, want)
 		}
 	}
 }

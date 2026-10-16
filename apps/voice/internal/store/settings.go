@@ -25,6 +25,8 @@ type Settings struct {
 	// HideTimings keeps how long transcription and cleanup took off the
 	// voice bar.
 	HideTimings bool `json:"hideTimings"`
+	// NoHistory keeps pasted text out of the local history.
+	NoHistory bool `json:"noHistory"`
 	// WhileRecording is what happens to the computer's own sound while the
 	// microphone records, so that music and videos stay out of the text:
 	// "mute", "lower" or "none".
