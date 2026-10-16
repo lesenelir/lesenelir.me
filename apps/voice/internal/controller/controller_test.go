@@ -104,6 +104,15 @@ type harness struct {
 	changes chan Status
 	capture chan [2]bool
 	picked  chan string
+
+	recMu     sync.Mutex
+	recording []bool
+}
+
+func (h *harness) recordingCalls() []bool {
+	h.recMu.Lock()
+	defer h.recMu.Unlock()
+	return append([]bool(nil), h.recording...)
 }
 
 func newHarness(t *testing.T) *harness {
@@ -129,6 +138,11 @@ func newHarness(t *testing.T) *harness {
 		Capture:        func(esc, tab bool) { h.capture <- [2]bool{esc, tab} },
 		OnChange:       func(s Status) { h.changes <- s },
 		OnTargetPicked: func(target string) { h.picked <- target },
+		Recording: func(on bool) {
+			h.recMu.Lock()
+			h.recording = append(h.recording, on)
+			h.recMu.Unlock()
+		},
 	})
 	return h
 }
@@ -440,5 +454,45 @@ func TestStreamingOffUsesTranscriber(t *testing.T) {
 	}
 	if n := h.asr.calls.Load(); n != 1 {
 		t.Fatalf("transcriptions %d, want 1", n)
+	}
+}
+
+func TestRecordingHook(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		run  func(h *harness)
+	}{
+		{"finished with Fn", func(h *harness) {
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Recording)
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Idle)
+		}},
+		{"cancelled with Esc", func(h *harness) {
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Recording)
+			h.c.Handle(hotkey.Cancel)
+			h.until(t, Idle)
+		}},
+		{"too short", func(h *harness) {
+			h.rec.pcm = make([]byte, 3200)
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Recording)
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Idle)
+		}},
+		{"microphone failed", func(h *harness) {
+			h.rec.startErr = errors.New("no input")
+			h.c.Handle(hotkey.Dictate)
+			h.until(t, Idle)
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := newHarness(t)
+			tc.run(h)
+			if got := h.recordingCalls(); len(got) != 2 || !got[0] || got[1] {
+				t.Fatalf("Recording calls %v, want [true false]", got)
+			}
+		})
 	}
 }

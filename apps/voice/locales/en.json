@@ -102,5 +102,10 @@
   "sonioxLanguagesNote": "Codes of the languages you speak, such as zh, en.",
   "asrFallbackNote": "Used when Soniox can’t be reached.",
   "openRouterKeyNote": "For cleanup, translation and backup transcription. Stored in the Keychain.",
-  "noteStreamFallback": "Soniox wasn’t available; transcribed with OpenRouter"
+  "noteStreamFallback": "Soniox wasn’t available; transcribed with OpenRouter",
+  "fieldWhileRecording": "Other sound while recording",
+  "whileRecordingNote": "Keeps music and videos out of the text; it comes back when you stop.",
+  "whileRecordingMute": "Mute",
+  "whileRecordingLower": "Lower",
+  "whileRecordingNone": "Leave"
 }

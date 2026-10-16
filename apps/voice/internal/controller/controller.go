@@ -99,6 +99,10 @@ type Deps struct {
 	OnChange func(Status)
 	// OnTargetPicked receives a target chosen with Tab or on the voice bar.
 	OnTargetPicked func(target string)
+	// Recording is told true just before the microphone opens, and false
+	// once it closes, however the recording ends: to quiet the computer's
+	// own sound meanwhile.
+	Recording func(on bool)
 }
 
 // Status is what the voice bar and the settings show.
@@ -154,13 +158,14 @@ type Controller struct {
 
 	// Owned by the run goroutine: the session's context, which Esc
 	// cancels, its stream, if any, and what happened in it.
-	session  int
-	sess     context.Context
-	cancel   context.CancelFunc
-	stream   Stream
-	manual   bool
-	fellBack bool
-	timings  Timings
+	session   int
+	recording bool
+	sess      context.Context
+	cancel    context.CancelFunc
+	stream    Stream
+	manual    bool
+	fellBack  bool
+	timings   Timings
 }
 
 type action struct {
@@ -191,6 +196,9 @@ func New(ctx context.Context, d Deps) *Controller {
 	}
 	if d.OnTargetPicked == nil {
 		d.OnTargetPicked = func(string) {}
+	}
+	if d.Recording == nil {
+		d.Recording = func(bool) {}
 	}
 	c := &Controller{d: d, inbox: make(chan any, 16)}
 	go c.run(ctx)
@@ -277,6 +285,7 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 			c.stop(ctx)
 		case hotkey.Cancel:
 			c.d.Recorder.Cancel()
+			c.setRecording(false)
 			c.abort(NoteCancelled, nil)
 		case hotkey.CycleTarget:
 			if st.Mode == prompt.Translate {
@@ -300,7 +309,9 @@ func (c *Controller) start(ctx context.Context, mode prompt.Mode) {
 	if stream != nil {
 		onChunk = stream.Write
 	}
+	c.setRecording(true)
 	if err := c.d.Recorder.Start(onChunk); err != nil {
+		c.setRecording(false)
 		if stream != nil {
 			stream.Close()
 		}
@@ -334,6 +345,7 @@ func (c *Controller) pickTarget(target string) {
 
 func (c *Controller) stop(ctx context.Context) {
 	pcm, err := c.d.Recorder.Stop()
+	c.setRecording(false)
 	switch {
 	case err != nil:
 		c.abort(NoteMicFailed, err)
@@ -436,8 +448,20 @@ func (c *Controller) abort(note Note, err error) {
 	c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, note, err })
 }
 
+// setRecording tells Deps.Recording of a change.
+func (c *Controller) setRecording(on bool) {
+	if c.recording != on {
+		c.recording = on
+		c.d.Recording(on)
+	}
+}
+
 // endSession drops the session's stream and cancels its requests.
 func (c *Controller) endSession() {
+	if c.recording {
+		c.d.Recorder.Cancel()
+		c.setRecording(false)
+	}
 	if c.stream != nil {
 		c.stream.Close()
 		c.stream = nil

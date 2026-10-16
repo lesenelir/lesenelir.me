@@ -25,6 +25,10 @@ type Settings struct {
 	// HideTimings keeps how long transcription and cleanup took off the
 	// voice bar.
 	HideTimings bool `json:"hideTimings"`
+	// WhileRecording is what happens to the computer's own sound while the
+	// microphone records, so that music and videos stay out of the text:
+	// "mute", "lower" or "none".
+	WhileRecording string `json:"whileRecording"`
 
 	// ASRService is "soniox", to transcribe while recording, or
 	// "openrouter", to transcribe the recording after it ends. Without a
@@ -63,6 +67,7 @@ type Settings struct {
 // Defaults are the settings of a new install.
 func Defaults() Settings {
 	return Settings{
+		WhileRecording:  "mute",
 		ASRService:      "soniox",
 		SonioxModel:     "stt-rt-v5",
 		SonioxLanguages: []string{"zh", "en"},

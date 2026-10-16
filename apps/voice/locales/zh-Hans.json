@@ -93,5 +93,10 @@
   "sonioxLanguagesNote": "你会说的语言代码，如 zh, en。",
   "asrFallbackNote": "Soniox 不可用时改用它。",
   "openRouterKeyNote": "整理、翻译和备用转写都用它，保存在钥匙串里。",
-  "noteStreamFallback": "Soniox 暂不可用，已改用 OpenRouter 转写"
+  "noteStreamFallback": "Soniox 暂不可用，已改用 OpenRouter 转写",
+  "fieldWhileRecording": "录音时的其他声音",
+  "whileRecordingNote": "避免音乐和视频被录进文字，停止录音后恢复。",
+  "whileRecordingMute": "静音",
+  "whileRecordingLower": "调低",
+  "whileRecordingNone": "不处理"
 }

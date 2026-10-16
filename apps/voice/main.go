@@ -83,6 +83,8 @@ func (a *app) ready() {
 	if err != nil {
 		log.Printf("settings: %v; using defaults", err)
 	}
+	quiet := &quieter{store: a.store, path: filepath.Join(dir, "output-to-restore.json")}
+	quiet.recover()
 	a.openrouterKey.load()
 	a.sonioxKey.load()
 	settings := a.store.Get()
@@ -101,6 +103,7 @@ func (a *app) ready() {
 		Settings:    a.store.Get,
 		Capture:     a.tap.Detector.Capture,
 		OnChange:    a.onStatus,
+		Recording:   quiet.Recording,
 		OnTargetPicked: func(target string) {
 			if a.store.Get().RememberTarget {
 				_ = a.store.Update(func(s *store.Settings) { s.LastTarget = target })

@@ -60,3 +60,21 @@ func TestDictionaryCreate(t *testing.T) {
 	}
 	cfRelease(d)
 }
+
+// Reading the output device works; nothing is changed, so that running the
+// tests does not silence the machine.
+func TestOutputStatus(t *testing.T) {
+	device, _, volume, err := OutputStatus()
+	if err != nil {
+		t.Skipf("no output device to read: %v", err)
+	}
+	if device == 0 || volume < 0 || volume > 1 {
+		t.Fatalf("device %d volume %v", device, volume)
+	}
+}
+
+func TestRestoreNothing(t *testing.T) {
+	if err := RestoreOutput(OutputState{}); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -376,5 +377,61 @@ func TestStreamerNeedsSonioxAndAKey(t *testing.T) {
 	_ = a.store.Update(func(x *store.Settings) { x.ASRService = "openrouter" })
 	if s.Open(context.Background()) != nil {
 		t.Fatal("streams with OpenRouter picked")
+	}
+}
+
+// With "none" the computer's sound is left alone and nothing is saved.
+func TestQuieterLeaveAlone(t *testing.T) {
+	a := testApp(t)
+	_ = a.store.Update(func(s *store.Settings) { s.WhileRecording = "none" })
+	q := &quieter{store: a.store, path: filepath.Join(t.TempDir(), "restore.json")}
+	q.Recording(true)
+	if _, err := os.Stat(q.path); !os.IsNotExist(err) {
+		t.Fatalf("saved a restore file: %v", err)
+	}
+	q.Recording(false)
+}
+
+// What a crashed run left is undone, and the file goes either way. The
+// device here does not exist, so nothing real changes.
+func TestQuieterRecovers(t *testing.T) {
+	a := testApp(t)
+	path := filepath.Join(t.TempDir(), "restore.json")
+	for _, content := range []string{
+		`{"kind":"volume","device":4294967000,"volume":0.5,"set":0.1}`,
+		`{`,
+	} {
+		_ = os.WriteFile(path, []byte(content), 0o644)
+		q := &quieter{store: a.store, path: path}
+		q.recover()
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatalf("%s: restore file kept", content)
+		}
+	}
+	(&quieter{store: a.store, path: path}).recover() // no file: nothing to do
+}
+
+func TestWhileRecordingSetting(t *testing.T) {
+	s := store.Defaults()
+	if s.WhileRecording != "mute" {
+		t.Fatalf("default %q", s.WhileRecording)
+	}
+	f := formFrom(s, apiKeys{})
+	if f.whileRec != 0 {
+		t.Fatalf("form index %d", f.whileRec)
+	}
+	f.whileRec = 1
+	f.apply(&s)
+	if s.WhileRecording != "lower" {
+		t.Fatalf("saved %q", s.WhileRecording)
+	}
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), apiKeys{})
+	tt := ui.NewTester(a.settingsView, settingsWidth, 900)
+	tt.SetLocale("zh-Hans")
+	for _, want := range []string{"录音时的其他声音", "静音", "调低", "不处理"} {
+		if !tt.HasText(want) {
+			t.Errorf("no %q in %q", want, tt.Texts())
+		}
 	}
 }

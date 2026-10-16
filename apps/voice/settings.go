@@ -78,6 +78,7 @@ type settingsForm struct {
 	remember    bool
 	dictionary  string
 	showTimings bool
+	whileRec    int // index in whileRecording
 }
 
 type permissions struct {
@@ -85,6 +86,10 @@ type permissions struct {
 	microphone    darwin.MicStatus
 	tapRunning    bool
 }
+
+// whileRecording are the choices for the computer's sound while recording,
+// as the settings keep them, in the order the control shows them.
+var whileRecording = []string{"mute", "lower", "none"}
 
 // asrServices are the speech-to-text services, as the settings keep them,
 // in the order the segmented control shows them.
@@ -109,6 +114,7 @@ func formFrom(s store.Settings, keys apiKeys) settingsForm {
 		remember:    s.RememberTarget,
 		dictionary:  strings.Join(s.Dictionary, "\n"),
 		showTimings: !s.HideTimings,
+		whileRec:    max(0, slices.Index(whileRecording, s.WhileRecording)),
 	}
 	for i, l := range prompt.Languages {
 		f.targets[i] = slices.Contains(s.Targets, l.Code)
@@ -169,6 +175,7 @@ func (f settingsForm) apply(s *store.Settings) {
 	s.RememberTarget = f.remember
 	s.Dictionary = splitList(f.dictionary, func(r rune) bool { return r == '\n' })
 	s.HideTimings = !f.showTimings
+	s.WhileRecording = whileRecording[f.whileRec]
 }
 
 // saveResult is the outcome of the last save that failed, if any.
@@ -383,6 +390,10 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 			ui.Segmented(c.Key("appearance"), &a.appearance,
 				m.AppearanceSystem(), m.AppearanceLight(), m.AppearanceDark()).
 				OnChange(func() { a.setAppearance(a.appearance) })
+		})
+		g.row(c, m.FieldWhileRecording(), m.WhileRecordingNote(), func() {
+			ui.Segmented(c.Key("while-recording"), &a.form.whileRec,
+				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).OnChange(a.commit)
 		})
 		g.row(c, m.FieldShowTimings(), m.ShowTimingsNote(), func() {
 			ui.Switch(c.Key("show-timings"), &a.form.showTimings).Label(m.FieldShowTimings()).OnChange(a.commit)

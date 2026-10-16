@@ -991,3 +991,53 @@ func NoteStreamFallback() string { return In(i18n.Locale()).NoteStreamFallback()
 func (msgs Messages) NoteStreamFallback() string {
 	return Catalog.Format(msgs.locale, "noteStreamFallback", nil)
 }
+
+// FieldWhileRecording says "Other sound while recording"
+// in the language the app shows.
+func FieldWhileRecording() string { return In(i18n.Locale()).FieldWhileRecording() }
+
+// FieldWhileRecording says "Other sound while recording"
+// in the language of msgs.
+func (msgs Messages) FieldWhileRecording() string {
+	return Catalog.Format(msgs.locale, "fieldWhileRecording", nil)
+}
+
+// WhileRecordingNote says "Keeps music and videos out of the text; it comes back when you stop."
+// in the language the app shows.
+func WhileRecordingNote() string { return In(i18n.Locale()).WhileRecordingNote() }
+
+// WhileRecordingNote says "Keeps music and videos out of the text; it comes back when you stop."
+// in the language of msgs.
+func (msgs Messages) WhileRecordingNote() string {
+	return Catalog.Format(msgs.locale, "whileRecordingNote", nil)
+}
+
+// WhileRecordingMute says "Mute"
+// in the language the app shows.
+func WhileRecordingMute() string { return In(i18n.Locale()).WhileRecordingMute() }
+
+// WhileRecordingMute says "Mute"
+// in the language of msgs.
+func (msgs Messages) WhileRecordingMute() string {
+	return Catalog.Format(msgs.locale, "whileRecordingMute", nil)
+}
+
+// WhileRecordingLower says "Lower"
+// in the language the app shows.
+func WhileRecordingLower() string { return In(i18n.Locale()).WhileRecordingLower() }
+
+// WhileRecordingLower says "Lower"
+// in the language of msgs.
+func (msgs Messages) WhileRecordingLower() string {
+	return Catalog.Format(msgs.locale, "whileRecordingLower", nil)
+}
+
+// WhileRecordingNone says "Leave"
+// in the language the app shows.
+func WhileRecordingNone() string { return In(i18n.Locale()).WhileRecordingNone() }
+
+// WhileRecordingNone says "Leave"
+// in the language of msgs.
+func (msgs Messages) WhileRecordingNone() string {
+	return Catalog.Format(msgs.locale, "whileRecordingNone", nil)
+}
