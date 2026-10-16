@@ -51,8 +51,9 @@ const (
 	queueBufferSize = audio.SampleRate * audio.BitsPerSample / 8 / 10
 
 	// tail is how long Stop keeps recording, so that the last syllable,
-	// still in a buffer, is not cut off.
-	tail = 150 * time.Millisecond
+	// still in a buffer, is not cut off, and the stream ends on the 200 ms
+	// of silence Soniox asks for before it finalizes.
+	tail = 200 * time.Millisecond
 )
 
 // Recorder captures the default microphone as 16 kHz mono 16-bit PCM,
