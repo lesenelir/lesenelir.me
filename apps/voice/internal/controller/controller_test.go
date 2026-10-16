@@ -150,7 +150,7 @@ func TestDictation(t *testing.T) {
 	h.until(t, Transcribing)
 	h.until(t, Rewriting)
 	s := h.until(t, Idle)
-	if s.Text != "我们周四开会。" || s.Message != "" {
+	if s.Text != "我们周四开会。" || s.Note != NoteNone {
 		t.Fatalf("done %+v", s)
 	}
 	if got := h.paster.pasted(); len(got) != 1 || got[0] != "我们周四开会。" {
@@ -216,7 +216,7 @@ func TestEscWhileRecording(t *testing.T) {
 	h.c.Handle(hotkey.Dictate)
 	h.until(t, Recording)
 	h.c.Handle(hotkey.Cancel)
-	if s := h.until(t, Idle); s.Message != MsgCancelled {
+	if s := h.until(t, Idle); s.Note != NoteCancelled {
 		t.Fatalf("status %+v", s)
 	}
 	if !h.rec.cancelled {
@@ -235,7 +235,7 @@ func TestEscWhileTranscribingPastesNothing(t *testing.T) {
 	h.c.Handle(hotkey.Dictate)
 	h.until(t, Transcribing)
 	h.c.Handle(hotkey.Cancel)
-	if s := h.until(t, Idle); s.Message != MsgCancelled {
+	if s := h.until(t, Idle); s.Note != NoteCancelled {
 		t.Fatalf("status %+v", s)
 	}
 	// The cancelled session's transcript arrives late and is ignored; a new
@@ -257,7 +257,7 @@ func TestRewriteFailurePastesTranscript(t *testing.T) {
 	h.until(t, Recording)
 	h.c.Handle(hotkey.Dictate)
 	s := h.until(t, Idle)
-	if s.Message != MsgRawPasted || s.Text != h.asr.text {
+	if s.Note != NoteRawPasted || s.Text != h.asr.text {
 		t.Fatalf("status %+v", s)
 	}
 }
@@ -279,18 +279,18 @@ func TestRewriteThatAnswersIsRejected(t *testing.T) {
 func TestShortAndSilentRecordings(t *testing.T) {
 	for _, tc := range []struct {
 		pcm  []byte
-		want string
+		want Note
 	}{
-		{make([]byte, 3200), MsgTooShort},
-		{make([]byte, 32000), MsgSilent},
+		{make([]byte, 3200), NoteTooShort},
+		{make([]byte, 32000), NoteSilent},
 	} {
 		h := newHarness(t)
 		h.rec.pcm = tc.pcm
 		h.c.Handle(hotkey.Dictate)
 		h.until(t, Recording)
 		h.c.Handle(hotkey.Dictate)
-		if s := h.until(t, Idle); s.Message != tc.want {
-			t.Errorf("message %q, want %q", s.Message, tc.want)
+		if s := h.until(t, Idle); s.Note != tc.want {
+			t.Errorf("note %v, want %v", s.Note, tc.want)
 		}
 	}
 }
@@ -301,8 +301,8 @@ func TestNoKey(t *testing.T) {
 	h.c.Handle(hotkey.Dictate)
 	h.until(t, Recording)
 	h.c.Handle(hotkey.Dictate)
-	if s := h.until(t, Idle); s.Message != MsgNoKey {
-		t.Fatalf("message %q", s.Message)
+	if s := h.until(t, Idle); s.Note != NoteNoKey {
+		t.Fatalf("note %v", s.Note)
 	}
 }
 
@@ -310,7 +310,7 @@ func TestMicFailure(t *testing.T) {
 	h := newHarness(t)
 	h.rec.startErr = errors.New("no input device")
 	h.c.Handle(hotkey.Dictate)
-	if s := h.until(t, Idle); s.Message != MsgMicFailed+"no input device" {
-		t.Fatalf("message %q", s.Message)
+	if s := h.until(t, Idle); s.Note != NoteMicFailed || s.Err == nil || s.Err.Error() != "no input device" {
+		t.Fatalf("status %+v", s)
 	}
 }

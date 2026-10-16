@@ -23,6 +23,7 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
+	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
 
 // secretKey names the OpenRouter API key in the Keychain.
@@ -44,11 +45,13 @@ type app struct {
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
-	status   controller.Status
-	hideSeq  int
-	form     settingsForm
-	perms    permissions
-	saveNote string
+	status          controller.Status
+	hideSeq         int
+	form            settingsForm
+	perms           permissions
+	saved           saveResult
+	uiLanguage      string // "" follows the system
+	uiLanguageLabel string // bound to the language select
 }
 
 func main() {
@@ -76,6 +79,8 @@ func (a *app) ready() {
 		log.Printf("settings: %v; using defaults", err)
 	}
 	a.loadKey()
+	a.uiLanguage = a.store.Get().UILanguage
+	mygo.App.SetLocale(a.uiLanguage)
 
 	client := &openrouter.Client{Key: a.apiKey, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	a.ctrl = controller.New(context.Background(), controller.Deps{
@@ -108,7 +113,7 @@ func (a *app) ready() {
 
 	a.form = formFrom(a.store.Get(), a.apiKey())
 	a.settings = mygo.NewWindow(mygo.WindowOptions{
-		Title:     "Voice 设置",
+		Title:     locales.SettingsTitle(),
 		Hidden:    true,
 		Width:     560,
 		Height:    720,
@@ -125,6 +130,10 @@ func (a *app) ready() {
 	})
 
 	a.setupTray()
+	mygo.App.OnLocaleChanged(func(string) {
+		a.settings.SetTitle(locales.SettingsTitle())
+		a.localizeTray()
+	})
 
 	// Ask for Accessibility once; macOS shows its own dialog.
 	darwin.AccessibilityTrusted(true)

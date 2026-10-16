@@ -3,13 +3,16 @@
 package main
 
 import (
+	"errors"
 	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
+	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
 
 const (
@@ -17,8 +20,8 @@ const (
 	overlayHeight = 56
 	// overlayMargin keeps the voice bar above the Dock.
 	overlayMargin = 72
-	// messageTime is how long a message stays on the voice bar.
-	messageTime = 2500 * time.Millisecond
+	// noteTime is how long a note stays on the voice bar.
+	noteTime = 2500 * time.Millisecond
 )
 
 // barWeights shape the level meter into a little waveform.
@@ -37,12 +40,12 @@ func (a *app) onStatus(s controller.Status) {
 				a.placeOverlay()
 				a.overlay.ShowInactive()
 			}
-		case s.Message != "":
+		case s.Note != controller.NoteNone:
 			if !a.overlay.IsVisible() {
 				a.placeOverlay()
 				a.overlay.ShowInactive()
 			}
-			time.AfterFunc(messageTime, func() {
+			time.AfterFunc(noteTime, func() {
 				a.overlay.Update(func() {
 					if a.hideSeq == seq {
 						a.overlay.Hide()
@@ -66,6 +69,7 @@ func (a *app) placeOverlay() {
 
 func (a *app) overlayView(c *ui.Context) {
 	t := c.Theme()
+	m := locales.In(c.Locale())
 	s := a.status
 	bg := ui.RGBA(24, 24, 27, 0.92)
 	text := ui.Hex("#fafafa")
@@ -74,34 +78,34 @@ func (a *app) overlayView(c *ui.Context) {
 		switch s.State {
 		case controller.Recording:
 			ui.Box(c).Size(10, 10).Radius(5).Background(t.Danger)
-			a.modeChip(c, s, text)
+			a.modeChip(c, m, s, text)
 			a.levelMeter(c, text)
 			ui.Spacer(c)
-			hint := "Fn 完成 · Esc 取消"
+			hint := m.HintDictate()
 			if s.Mode == prompt.Translate {
-				hint = "Tab 换语言 · Esc 取消"
+				hint = m.HintTranslate()
 			}
 			ui.Text(c, hint).FontSize(11).TextColor(muted).NoWrap()
 		case controller.Transcribing, controller.Rewriting, controller.Pasting:
 			ui.Spinner(c).Size(16, 16)
-			ui.Text(c, stageText(s)).FontSize(13).TextColor(text).NoWrap()
+			ui.Text(c, stageText(m, s)).FontSize(13).TextColor(text).NoWrap()
 			ui.Spacer(c)
-			ui.Text(c, "Esc 取消").FontSize(11).TextColor(muted).NoWrap()
+			ui.Text(c, m.HintCancel()).FontSize(11).TextColor(muted).NoWrap()
 		default:
-			ui.Text(c, s.Message).FontSize(13).TextColor(text).MaxLines(1).Ellipsis("…").Grow(1)
+			ui.Text(c, noteText(m, s)).FontSize(13).TextColor(text).MaxLines(1).Ellipsis("…").Grow(1)
 		}
 	})
 }
 
-func (a *app) modeChip(c *ui.Context, s controller.Status, text ui.Color) {
+func (a *app) modeChip(c *ui.Context, m locales.Messages, s controller.Status, text ui.Color) {
 	if s.Mode != prompt.Translate {
-		ui.Text(c, "听写").FontSize(13).Bold().TextColor(text).NoWrap()
+		ui.Text(c, m.ModeDictate()).FontSize(13).Bold().TextColor(text).NoWrap()
 		return
 	}
 	chip := ui.Row(c).Gap(4).Padding(3, 8).Radius(6).Background(ui.RGBA(255, 255, 255, 0.12)).
-		Cursor(ui.CursorPointer).Tooltip("点击切换目标语言")
+		Cursor(ui.CursorPointer).Tooltip(m.SwitchLanguageTooltip())
 	chip.Children(func() {
-		ui.Text(c, "翻译 → "+prompt.LanguageFor(s.Target).Label).FontSize(13).Bold().TextColor(text).NoWrap()
+		ui.Text(c, m.ModeTranslate(prompt.LanguageFor(s.Target).Label)).FontSize(13).Bold().TextColor(text).NoWrap()
 	})
 	if chip.Clicked() {
 		a.ctrl.SetTarget(a.store.Get().NextTarget(s.Target))
@@ -120,14 +124,46 @@ func (a *app) levelMeter(c *ui.Context, color ui.Color) {
 	c.After(50 * time.Millisecond)
 }
 
-func stageText(s controller.Status) string {
+func stageText(m locales.Messages, s controller.Status) string {
 	switch {
 	case s.State == controller.Transcribing:
-		return "转写中…"
+		return m.StageTranscribing()
 	case s.State == controller.Rewriting && s.Mode == prompt.Translate:
-		return "翻译成 " + prompt.LanguageFor(s.Target).Label + "…"
+		return m.StageTranslating(prompt.LanguageFor(s.Target).Label)
 	case s.State == controller.Rewriting:
-		return "整理中…"
+		return m.StageCleaning()
 	}
-	return "粘贴中…"
+	return m.StagePasting()
+}
+
+// noteText words the status's note, "" when there is none.
+func noteText(m locales.Messages, s controller.Status) string {
+	detail := ""
+	if s.Err != nil {
+		detail = s.Err.Error()
+	}
+	switch s.Note {
+	case controller.NoteTooShort:
+		return m.NoteTooShort()
+	case controller.NoteSilent:
+		return m.NoteSilent()
+	case controller.NoteCancelled:
+		return m.NoteCancelled()
+	case controller.NoteNothing:
+		return m.NoteNothing()
+	case controller.NoteRawPasted:
+		return m.NoteRawPasted()
+	case controller.NoteNoKey:
+		return m.NoteNoKey()
+	case controller.NoteASRFailed:
+		return m.NoteAsrFailed(detail)
+	case controller.NotePasteFailed:
+		if errors.Is(s.Err, darwin.ErrNotTrusted) {
+			return m.NotePasteNeedsAccessibility()
+		}
+		return m.NotePasteFailed(detail)
+	case controller.NoteMicFailed:
+		return m.NoteMicFailed(detail)
+	}
+	return ""
 }

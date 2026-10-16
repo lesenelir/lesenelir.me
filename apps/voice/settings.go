@@ -3,14 +3,17 @@
 package main
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/store"
+	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
 
 // settingsForm holds the settings window's fields until Save.
@@ -111,22 +114,82 @@ func (f settingsForm) apply(s *store.Settings) {
 	s.Dictionary = splitList(f.dictionary, func(r rune) bool { return r == '\n' })
 }
 
+// saveResult is the outcome of the last Save, shown beside the button.
+type saveResult struct {
+	state saveState
+	err   error
+}
+
+type saveState int
+
+const (
+	saveNone saveState = iota
+	saveDone
+	saveKeyFailed
+	saveFailed
+)
+
+func (r saveResult) text(m locales.Messages) string {
+	switch r.state {
+	case saveDone:
+		return m.Saved()
+	case saveKeyFailed:
+		return m.SaveKeyFailed(r.err.Error())
+	case saveFailed:
+		return m.SaveFailed(r.err.Error())
+	}
+	return ""
+}
+
 // save writes the form to the store and the key to the Keychain.
 func (a *app) save() {
 	if err := a.setKey(strings.TrimSpace(a.form.apiKey)); err != nil {
-		a.saveNote = "保存 API Key 失败：" + err.Error()
+		a.saved = saveResult{saveKeyFailed, err}
 		return
 	}
 	if err := a.store.Update(a.form.apply); err != nil {
-		a.saveNote = "保存失败：" + err.Error()
+		a.saved = saveResult{saveFailed, err}
 		return
 	}
 	a.form = formFrom(a.store.Get(), a.apiKey())
-	a.saveNote = "已保存"
+	a.saved = saveResult{state: saveDone}
+}
+
+// uiLanguages are the interface languages, "" for the system's.
+var uiLanguages = []string{"", "en", "zh-Hans"}
+
+func uiLanguageLabels(m locales.Messages) []string {
+	return []string{m.LanguageSystem(), "English", "简体中文"}
+}
+
+// setUILanguage switches the interface at once and keeps the choice.
+func (a *app) setUILanguage(tag string) {
+	if tag == a.uiLanguage {
+		return
+	}
+	a.uiLanguage = tag
+	_ = a.store.Update(func(s *store.Settings) { s.UILanguage = tag })
+	mygo.App.SetLocale(tag)
+}
+
+func (a *app) languageSelect(c *ui.Context, m locales.Messages) {
+	labels := uiLanguageLabels(m)
+	// The label of the system option changes with the language; pick the
+	// current choice again when the bound label no longer matches one.
+	if !slices.Contains(labels, a.uiLanguageLabel) {
+		i := max(0, slices.Index(uiLanguages, a.uiLanguage))
+		a.uiLanguageLabel = labels[i]
+	}
+	ui.Select(c.Key("ui-language"), &a.uiLanguageLabel, labels).OnChange(func() {
+		if i := slices.Index(labels, a.uiLanguageLabel); i >= 0 {
+			a.setUILanguage(uiLanguages[i])
+		}
+	})
 }
 
 func (a *app) settingsView(c *ui.Context) {
 	t := c.Theme()
+	m := locales.In(c.Locale())
 	labels := make([]string, len(prompt.Languages))
 	for i, l := range prompt.Languages {
 		labels[i] = l.Label
@@ -135,48 +198,54 @@ func (a *app) settingsView(c *ui.Context) {
 		ui.Column(c).Padding(24).Gap(20).Children(func() {
 			ui.Column(c).Gap(4).Children(func() {
 				ui.Text(c, "Voice").FontSize(24).Bold()
-				ui.Text(c, "Fn 听写 · Fn + 左 Shift 翻译 · Esc 取消 · 翻译录音时 Tab 切换语言").FontSize(12).TextColor(t.TextMuted)
+				ui.Text(c, m.Tagline()).FontSize(12).TextColor(t.TextMuted)
 			})
 
-			section(c, "权限", func() {
-				permRow(c, "辅助功能", check(a.perms.accessibility), "监听 Fn 和粘贴文字需要它", "打开设置", darwin.OpenAccessibilitySettings)
-				permRow(c, "麦克风", micMark(a.perms.microphone), micText(a.perms.microphone), "打开设置", darwin.OpenMicrophoneSettings)
-				permRow(c, "按键监听", check(a.perms.tapRunning), "授权辅助功能后自动启动", "", nil)
-				permRow(c, "地球仪键", markInfo, "建议在 键盘 → 按下 🌐 键时 选择「不执行任何操作」", "打开键盘设置", darwin.OpenKeyboardSettings)
-			})
-
-			section(c, "OpenRouter", func() {
+			section(c, m.SectionGeneral(), func() {
 				ui.Form(c, func() {
-					ui.Field(c, "API Key", func() {
+					ui.Field(c, m.FieldLanguage(), func() { a.languageSelect(c, m) })
+				})
+			})
+
+			section(c, m.SectionPermissions(), func() {
+				permRow(c, m.PermAccessibility(), check(a.perms.accessibility), m.PermAccessibilityNote(), m.OpenSettings(), darwin.OpenAccessibilitySettings)
+				permRow(c, m.PermMicrophone(), micMark(a.perms.microphone), micText(m, a.perms.microphone), m.OpenSettings(), darwin.OpenMicrophoneSettings)
+				permRow(c, m.PermHotkeys(), check(a.perms.tapRunning), m.PermHotkeysNote(), "", nil)
+				permRow(c, m.PermGlobe(), markInfo, m.PermGlobeNote(), m.OpenKeyboardSettings(), darwin.OpenKeyboardSettings)
+			})
+
+			section(c, m.SectionOpenRouter(), func() {
+				ui.Form(c, func() {
+					ui.Field(c, m.FieldApiKey(), func() {
 						ui.TextInput(c, &a.form.apiKey).Password().Placeholder("sk-or-…")
-					}).Description("保存在 macOS 钥匙串里。")
-					ui.Field(c, "语音转写模型", func() {
+					}).Description(m.ApiKeyNote())
+					ui.Field(c, m.FieldAsrModel(), func() {
 						ui.TextInput(c, &a.form.asrModel).Placeholder("qwen/qwen3-asr-1.7b")
-					}).Description("备选：openai/gpt-4o-mini-transcribe、microsoft/mai-transcribe-2")
-					ui.Field(c, "转写语言提示", func() {
-						ui.TextInput(c, &a.form.asrLang).Placeholder("留空自动识别（中英混说建议留空）")
+					}).Description(m.AsrModelNote())
+					ui.Field(c, m.FieldAsrLanguage(), func() {
+						ui.TextInput(c, &a.form.asrLang).Placeholder(m.AsrLanguagePlaceholder())
 					})
-					ui.Field(c, "整理 / 翻译模型", func() {
+					ui.Field(c, m.FieldLlmModel(), func() {
 						ui.TextInput(c, &a.form.llmModel).Placeholder("openai/gpt-oss-120b")
-					}).Description("备选：anthropic/claude-haiku-5.5")
-					ui.Field(c, "优先供应商", func() {
+					}).Description(m.LlmModelNote())
+					ui.Field(c, m.FieldProviders(), func() {
 						ui.TextInput(c, &a.form.providers).Placeholder("cerebras, groq")
 					})
-					ui.Field(c, "整理超时（秒）", func() {
+					ui.Field(c, m.FieldTimeout(), func() {
 						ui.TextInput(c, &a.form.timeout).Width(80)
-					}).Description("超时就粘贴原始转写。")
+					}).Description(m.TimeoutNote())
 				})
 			})
 
-			section(c, "翻译", func() {
+			section(c, m.SectionTranslation(), func() {
 				ui.Form(c, func() {
-					ui.Field(c, "说中文时译成", func() { ui.Select(c.Key("zh"), &a.form.zhTo, labels) })
-					ui.Field(c, "说英文时译成", func() { ui.Select(c.Key("en"), &a.form.enTo, labels) })
-					ui.Field(c, "其他语言译成", func() { ui.Select(c.Key("default"), &a.form.defaultTo, labels) })
-					ui.Field(c, "记住上次选择", func() { ui.Switch(c, &a.form.remember) }).
-						Description("开启后，翻译从上次在语音条上选的语言开始。")
+					ui.Field(c, m.FieldChineseTo(), func() { ui.Select(c.Key("zh"), &a.form.zhTo, labels) })
+					ui.Field(c, m.FieldEnglishTo(), func() { ui.Select(c.Key("en"), &a.form.enTo, labels) })
+					ui.Field(c, m.FieldOtherTo(), func() { ui.Select(c.Key("default"), &a.form.defaultTo, labels) })
+					ui.Field(c, m.FieldRemember(), func() { ui.Switch(c, &a.form.remember) }).
+						Description(m.RememberNote())
 				})
-				ui.Text(c, "Tab 和语音条上可切换的语言").FontSize(12).TextColor(t.TextMuted)
+				ui.Text(c, m.TargetsNote()).FontSize(12).TextColor(t.TextMuted)
 				ui.Row(c).Wrap().Gap(12).Children(func() {
 					for i, l := range prompt.Languages {
 						ui.Checkbox(c.Key("target-"+l.Code), &a.form.targets[i], l.Label)
@@ -184,14 +253,14 @@ func (a *app) settingsView(c *ui.Context) {
 				})
 			})
 
-			section(c, "词典", func() {
-				ui.TextArea(c, &a.form.dictionary).Height(96).Placeholder("每行一个：人名、产品名、术语…")
+			section(c, m.SectionDictionary(), func() {
+				ui.TextArea(c, &a.form.dictionary).Height(96).Placeholder(m.DictionaryPlaceholder())
 			})
 
-			if s := a.status; s.Text != "" || s.Message != "" {
-				section(c, "最近一次", func() {
-					if s.Message != "" {
-						ui.Text(c, s.Message).FontSize(12).TextColor(t.TextMuted)
+			if s, note := a.status, noteText(m, a.status); s.Text != "" || note != "" {
+				section(c, m.SectionLast(), func() {
+					if note != "" {
+						ui.Text(c, note).FontSize(12).TextColor(t.TextMuted)
 					}
 					if s.Text != "" {
 						ui.Text(c, s.Text).Selectable()
@@ -200,12 +269,12 @@ func (a *app) settingsView(c *ui.Context) {
 			}
 
 			ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
-				ui.Text(c, a.saveNote).FontSize(12).TextColor(t.TextMuted).Grow(1)
-				if ui.Button(c, "还原").Clicked() {
+				ui.Text(c, a.saved.text(m)).FontSize(12).TextColor(t.TextMuted).Grow(1)
+				if ui.Button(c, m.ButtonRevert()).Clicked() {
 					a.form = formFrom(a.store.Get(), a.apiKey())
-					a.saveNote = ""
+					a.saved = saveResult{}
 				}
-				if ui.PrimaryButton(c, "保存").Clicked() {
+				if ui.PrimaryButton(c, m.ButtonSave()).Clicked() {
 					a.save()
 				}
 			})
@@ -246,7 +315,7 @@ func permRow(c *ui.Context, name string, m mark, note, action string, open func(
 			symbol, color = "i", t.TextMuted
 		}
 		ui.Text(c, symbol).Bold().TextColor(color).Width(14)
-		ui.Text(c, name).Width(72)
+		ui.Text(c, name).Width(96)
 		ui.Text(c, note).FontSize(12).TextColor(t.TextMuted).Grow(1)
 		if open != nil && ui.Button(c, action).Clicked() {
 			open()
@@ -264,12 +333,12 @@ func micMark(s darwin.MicStatus) mark {
 	return markInfo
 }
 
-func micText(s darwin.MicStatus) string {
+func micText(m locales.Messages, s darwin.MicStatus) string {
 	switch s {
 	case darwin.MicAuthorized:
-		return "已允许"
+		return m.MicAllowed()
 	case darwin.MicDenied, darwin.MicRestricted:
-		return "被拒绝，请在系统设置里允许"
+		return m.MicDenied()
 	}
-	return "第一次录音时 macOS 会询问"
+	return m.MicAsk()
 }

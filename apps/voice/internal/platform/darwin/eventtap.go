@@ -33,9 +33,9 @@ const (
 	syntheticTag = 0x766F696365 // "voice"
 )
 
-// ErrNotTrusted means the app may not watch the keyboard yet: the user has
-// to allow it under Privacy & Security → Accessibility.
-var ErrNotTrusted = errors.New("darwin: accessibility permission needed to watch the keyboard")
+// ErrNotTrusted means the app may not watch the keyboard or press keys
+// yet: the user has to allow it under Privacy & Security → Accessibility.
+var ErrNotTrusted = errors.New("darwin: accessibility permission needed")
 
 // EventTap watches the keyboard of every app for the hotkeys. There is one
 // per process; its callback runs on the main thread.

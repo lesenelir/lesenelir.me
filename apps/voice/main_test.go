@@ -34,6 +34,7 @@ func testApp(t *testing.T) *app {
 func TestOverlayShowsMode(t *testing.T) {
 	a := testApp(t)
 	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
+	tt.SetLocale("zh-Hans")
 
 	a.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
 	tt.Frame()
@@ -53,10 +54,42 @@ func TestOverlayShowsMode(t *testing.T) {
 		t.Errorf("rewriting bar %q", tt.Texts())
 	}
 
-	a.status = controller.Status{State: controller.Idle, Message: controller.MsgCancelled}
+	a.status = controller.Status{State: controller.Idle, Note: controller.NoteCancelled}
 	tt.Frame()
-	if !tt.HasText(controller.MsgCancelled) {
-		t.Errorf("message bar %q", tt.Texts())
+	if !tt.HasText("已取消") {
+		t.Errorf("note bar %q", tt.Texts())
+	}
+}
+
+func TestOverlayFollowsLanguage(t *testing.T) {
+	a := testApp(t)
+	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
+	tt.SetLocale("en")
+	a.status = controller.Status{State: controller.Recording, Mode: prompt.Translate, Target: "zh"}
+	tt.Frame()
+	if !tt.HasText("Translate → 简体中文") || !tt.HasText("Tab to switch · Esc to cancel") {
+		t.Errorf("English bar %q", tt.Texts())
+	}
+	a.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: darwin.ErrNotTrusted}
+	tt.Frame()
+	if !tt.HasText("Couldn't paste without Accessibility; the text is on the clipboard") {
+		t.Errorf("English note %q", tt.Texts())
+	}
+}
+
+func TestSettingsFollowLanguage(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), "")
+	tt := ui.NewTester(a.settingsView, 560, 720)
+	tt.SetLocale("en")
+	for _, want := range []string{"General", "Language", "System default", "Permissions", "Save"} {
+		if !tt.HasText(want) {
+			t.Errorf("no %q in %q", want, tt.Texts())
+		}
+	}
+	tt.SetLocale("zh-Hans")
+	if !tt.HasText("跟随系统") || !tt.HasText("界面语言") || tt.HasText("System default") {
+		t.Errorf("Chinese settings %q", tt.Texts())
 	}
 }
 
@@ -64,6 +97,7 @@ func TestSettingsViewRenders(t *testing.T) {
 	a := testApp(t)
 	a.form = formFrom(a.store.Get(), "")
 	tt := ui.NewTester(a.settingsView, 560, 720)
+	tt.SetLocale("zh-Hans")
 	for _, want := range []string{"权限", "OpenRouter", "翻译", "词典", "保存"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())

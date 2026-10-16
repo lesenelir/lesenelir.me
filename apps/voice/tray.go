@@ -11,26 +11,41 @@ import (
 	"log"
 
 	"github.com/egoist/mygo"
+
+	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
 
 func (a *app) setupTray() {
-	menu := mygo.NewMenu([]*mygo.MenuItem{
-		{Label: "设置…", Click: func(*mygo.MenuItem, *mygo.Window) { a.showSettings() }},
-		mygo.Separator(),
-		{Label: "退出 Voice", Click: func(*mygo.MenuItem, *mygo.Window) { mygo.App.Quit() }},
-	})
 	var err error
 	a.tray, err = mygo.NewTray(mygo.TrayOptions{
 		Icon:           trayIcon(),
 		IconIsTemplate: true,
-		ToolTip:        "Voice — Fn 听写，Fn + 左 Shift 翻译",
-		Menu:           menu,
+		ToolTip:        locales.TrayTooltip(),
+		Menu:           a.trayMenu(),
 	})
 	if err != nil {
 		log.Printf("tray: %v", err)
 		return
 	}
 	mygo.App.OnWillQuit(func(*mygo.QuitEvent) { a.tray.Destroy() })
+}
+
+// trayMenu is the menu bar icon's menu, in the language the app shows.
+func (a *app) trayMenu() *mygo.Menu {
+	return mygo.NewMenu([]*mygo.MenuItem{
+		{Label: locales.TraySettings(), Click: func(*mygo.MenuItem, *mygo.Window) { a.showSettings() }},
+		mygo.Separator(),
+		{Label: locales.TrayQuit(), Click: func(*mygo.MenuItem, *mygo.Window) { mygo.App.Quit() }},
+	})
+}
+
+// localizeTray says the tray's words again after the language changes.
+func (a *app) localizeTray() {
+	if a.tray == nil {
+		return
+	}
+	a.tray.SetToolTip(locales.TrayTooltip())
+	a.tray.SetMenu(a.trayMenu())
 }
 
 // trayIcon draws a microphone, black on transparent for macOS to tint.

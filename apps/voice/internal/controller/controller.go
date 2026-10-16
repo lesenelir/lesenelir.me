@@ -81,24 +81,29 @@ type Status struct {
 	Mode  prompt.Mode
 	// Target is the translation target code while translating.
 	Target string
-	// Message tells what went wrong or what was done instead, "" when all
-	// went to plan.
-	Message string
+	// Note tells what went wrong or what was done instead, NoteNone when
+	// all went to plan; Err is the error behind it, if any.
+	Note Note
+	Err  error
 	// Text is the last text pasted.
 	Text string
 }
 
-// Messages shown to the user.
+// Note is what the voice bar tells the user after a session. The UI words
+// it in the app's language.
+type Note int
+
 const (
-	MsgTooShort    = "录音太短，已忽略"
-	MsgSilent      = "没有收到声音，请检查麦克风权限"
-	MsgCancelled   = "已取消"
-	MsgNothing     = "没有识别到内容"
-	MsgRawPasted   = "整理失败，已粘贴原始转写"
-	MsgNoKey       = "请先在设置里填写 OpenRouter API Key"
-	MsgASRFailed   = "转写失败："
-	MsgPasteFailed = "粘贴失败，文字已复制到剪贴板："
-	MsgMicFailed   = "无法开始录音："
+	NoteNone Note = iota
+	NoteTooShort
+	NoteSilent
+	NoteCancelled
+	NoteNothing
+	NoteRawPasted
+	NoteNoKey
+	NoteASRFailed
+	NotePasteFailed
+	NoteMicFailed
 )
 
 // Controller is safe for concurrent use.
@@ -129,7 +134,7 @@ type transcribed struct {
 type rewritten struct {
 	session int
 	text    string
-	message string
+	note    Note
 }
 
 // New starts a controller; it stops when ctx is done.
@@ -230,7 +235,7 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 			c.stop(ctx)
 		case hotkey.Cancel:
 			c.d.Recorder.Cancel()
-			c.abort(MsgCancelled)
+			c.abort(NoteCancelled, nil)
 		case hotkey.CycleTarget:
 			if st.Mode == prompt.Translate {
 				c.pickTarget(c.d.Settings().NextTarget(st.Target))
@@ -238,14 +243,14 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 		}
 	case Transcribing, Rewriting:
 		if a == hotkey.Cancel {
-			c.abort(MsgCancelled)
+			c.abort(NoteCancelled, nil)
 		}
 	}
 }
 
 func (c *Controller) start(mode prompt.Mode) {
 	if err := c.d.Recorder.Start(); err != nil {
-		c.set(func(s *Status) { s.State, s.Message = Idle, MsgMicFailed+err.Error() })
+		c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, NoteMicFailed, err })
 		return
 	}
 	c.session++
@@ -255,7 +260,7 @@ func (c *Controller) start(mode prompt.Mode) {
 		target = c.d.Settings().InitialTarget()
 	}
 	c.set(func(s *Status) {
-		s.State, s.Mode, s.Target, s.Message = Recording, mode, target, ""
+		s.State, s.Mode, s.Target, s.Note, s.Err = Recording, mode, target, NoteNone, nil
 	})
 }
 
@@ -273,13 +278,13 @@ func (c *Controller) stop(ctx context.Context) {
 	pcm, err := c.d.Recorder.Stop()
 	switch {
 	case err != nil:
-		c.abort(MsgMicFailed + err.Error())
+		c.abort(NoteMicFailed, err)
 		return
 	case audio.Duration(pcm) < MinRecording:
-		c.abort(MsgTooShort)
+		c.abort(NoteTooShort, nil)
 		return
 	case audio.Silent(pcm):
-		c.abort(MsgSilent)
+		c.abort(NoteSilent, nil)
 		return
 	}
 	run, cancel := context.WithCancel(ctx)
@@ -297,15 +302,14 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		return
 	}
 	switch {
+	case errors.Is(m.err, ErrNoKey):
+		c.abort(NoteNoKey, nil)
+		return
 	case m.err != nil:
-		msg := MsgASRFailed + m.err.Error()
-		if errors.Is(m.err, ErrNoKey) {
-			msg = MsgNoKey
-		}
-		c.abort(msg)
+		c.abort(NoteASRFailed, m.err)
 		return
 	case m.text == "":
-		c.abort(MsgNothing)
+		c.abort(NoteNothing, nil)
 		return
 	}
 	st := c.Status()
@@ -326,7 +330,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		out = prompt.Clean(out)
 		r := rewritten{session: m.session, text: out}
 		if err != nil || !prompt.Plausible(req, out) {
-			r.text, r.message = m.text, MsgRawPasted
+			r.text, r.note = m.text, NoteRawPasted
 		}
 		c.send(ctx, r)
 	}()
@@ -338,21 +342,21 @@ func (c *Controller) onRewritten(m rewritten) {
 	}
 	c.cancel = nil
 	c.set(func(s *Status) { s.State = Pasting })
-	msg := m.message
-	if err := c.d.Paster.Paste(m.text); err != nil {
-		msg = MsgPasteFailed + err.Error()
+	note, err := m.note, c.d.Paster.Paste(m.text)
+	if err != nil {
+		note = NotePasteFailed
 	}
-	c.set(func(s *Status) { s.State, s.Text, s.Message = Idle, m.text, msg })
+	c.set(func(s *Status) { s.State, s.Text, s.Note, s.Err = Idle, m.text, note, err })
 }
 
 // abort ends the session: the pipeline's results are ignored from now on.
-func (c *Controller) abort(message string) {
+func (c *Controller) abort(note Note, err error) {
 	if c.cancel != nil {
 		c.cancel()
 		c.cancel = nil
 	}
 	c.session++
-	c.set(func(s *Status) { s.State, s.Message = Idle, message })
+	c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, note, err })
 }
 
 // ErrNoKey is what a Transcriber returns, or wraps, without an API key.

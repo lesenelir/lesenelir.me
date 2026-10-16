@@ -3,7 +3,6 @@
 package darwin
 
 import (
-	"errors"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -35,7 +34,7 @@ func (Paster) Paste(text string) error {
 	keep := err == nil && len(saved.Items()) > 0
 	mygo.Clipboard.WriteText(text)
 	if !axIsProcessTrusted() {
-		return errors.New("没有辅助功能权限")
+		return ErrNotTrusted
 	}
 	pressCmdV()
 	time.AfterFunc(restoreDelay, func() {

@@ -3,6 +3,7 @@
   "identifier": "me.lesenelir.voice",
   "version": "0.1.0",
   "out": "build",
+  "i18n": { "dir": "locales", "source": "en" },
   "macos": {
     "minimumSystemVersion": "13.0",
     "infoPlist": {

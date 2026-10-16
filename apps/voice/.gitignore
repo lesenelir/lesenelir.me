@@ -1,3 +1,5 @@
 /build/
 /.mygo/
 mygo_windows_*.syso
+# mygo generate writes this for web frontends; the app has none.
+/src/locales.ts
