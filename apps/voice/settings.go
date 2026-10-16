@@ -311,6 +311,8 @@ func settingsPalette(t *ui.Theme) palette {
 }
 
 func (a *app) settingsView(c *ui.Context) {
+	systemAccent := c.Theme().Accent
+	c.SetTheme(withAccent(c.Theme(), a.accent))
 	t := c.Theme()
 	m := locales.In(c.Locale())
 	pal := settingsPalette(t)
@@ -321,6 +323,7 @@ func (a *app) settingsView(c *ui.Context) {
 	if a.page == "" {
 		a.page = pageGeneral
 	}
+	a.systemAccent = systemAccent
 	ui.Row(c).Fill().AlignItems(ui.Stretch).Children(func() {
 		side := ui.Column(c).Width(sidebarWidth).Shrink(0)
 		if !vibrant {
@@ -425,6 +428,7 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 				m.AppearanceSystem(), m.AppearanceLight(), m.AppearanceDark()).
 				OnChange(func() { a.setAppearance(a.appearance) })
 		})
+		g.row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
 		g.row(c, m.FieldWhileRecording(), m.WhileRecordingNote(), func() {
 			ui.Segmented(c.Key("while-recording"), &a.form.whileRec,
 				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).OnChange(a.commit)

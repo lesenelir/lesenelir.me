@@ -137,5 +137,15 @@
         "example": "12.4 KB"
       }
     }
-  }
+  },
+  "fieldAccent": "Accent color",
+  "accentSystem": "System",
+  "accentBlue": "Blue",
+  "accentGreen": "Green",
+  "accentRed": "Red",
+  "accentYellow": "Yellow",
+  "accentPurple": "Purple",
+  "accentOrange": "Orange",
+  "accentPink": "Pink",
+  "accentBrown": "Brown"
 }

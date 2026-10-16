@@ -22,6 +22,9 @@ type Settings struct {
 	UILanguage string `json:"uiLanguage"`
 	// Appearance is "light", "dark", or "" to follow the system.
 	Appearance string `json:"appearance"`
+	// AccentColor is the accent color's name ("blue", "green"…), or "" to
+	// follow the one chosen in macOS.
+	AccentColor string `json:"accentColor"`
 	// HideTimings keeps how long transcription and cleanup took off the
 	// voice bar.
 	HideTimings bool `json:"hideTimings"`

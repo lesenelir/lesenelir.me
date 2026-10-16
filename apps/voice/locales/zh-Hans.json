@@ -115,5 +115,15 @@
   "historyDictate": "听写",
   "historyTranslate": "翻译 → {language}",
   "showMore": "显示更多",
-  "historyFailed": "历史记录操作失败：{error}"
+  "historyFailed": "历史记录操作失败：{error}",
+  "fieldAccent": "强调色",
+  "accentSystem": "跟随系统",
+  "accentBlue": "蓝色",
+  "accentGreen": "绿色",
+  "accentRed": "红色",
+  "accentYellow": "黄色",
+  "accentPurple": "紫色",
+  "accentOrange": "橙色",
+  "accentPink": "粉色",
+  "accentBrown": "棕色"
 }

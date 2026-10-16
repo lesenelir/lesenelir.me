@@ -509,3 +509,49 @@ func TestFormatSize(t *testing.T) {
 		}
 	}
 }
+
+func TestWithAccent(t *testing.T) {
+	base := ui.LightTheme()
+	if got := withAccent(base, ""); got != base {
+		t.Fatal("the system choice changed the theme")
+	}
+	blue := withAccent(base, "blue")
+	if blue.Accent != ui.Hex("#007aff") || blue.AccentText != ui.Hex("#ffffff") {
+		t.Fatalf("blue: accent %v text %v", blue.Accent, blue.AccentText)
+	}
+	if base.Accent == blue.Accent {
+		t.Fatal("withAccent changed the theme it was given")
+	}
+	if y := withAccent(base, "yellow"); y.AccentText == ui.Hex("#ffffff") {
+		t.Fatal("white text on yellow")
+	}
+	if d := withAccent(ui.DarkTheme(), "blue"); d.Accent != ui.Hex("#0a84ff") {
+		t.Fatalf("dark blue %v", d.Accent)
+	}
+}
+
+func TestAccentSelect(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), apiKeys{})
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	tt.SetLocale("en")
+	row, ok := tt.Find("Accent color")
+	if !ok {
+		t.Fatalf("no accent row in %q", tt.Texts())
+	}
+	// The select sits at the right of its row.
+	tt.ClickAt(settingsWidth-28-14-90, row.Y+row.H/2)
+	tt.Frame()
+	for _, want := range []string{"Blue", "Green", "Yellow", "Brown"} {
+		if !tt.HasText(want) {
+			t.Fatalf("the menu lacks %q: %q", want, tt.Texts())
+		}
+	}
+	if err := tt.Click("Purple"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.accent != "purple" || a.store.Get().AccentColor != "purple" {
+		t.Fatalf("chose %q, saved %q", a.accent, a.store.Get().AccentColor)
+	}
+}

@@ -48,10 +48,12 @@ type app struct {
 	form            settingsForm
 	perms           permissions
 	saved           saveResult
-	uiLanguage      string // "" follows the system
-	appearance      int    // index in appearances, bound to its control
-	uiLanguageLabel string // bound to the language select
-	page            string // the settings page shown
+	uiLanguage      string   // "" follows the system
+	accent          string   // the accent color's id, bound to its select
+	systemAccent    ui.Color // macOS's accent, for the "System" swatch
+	appearance      int      // index in appearances, bound to its control
+	uiLanguageLabel string   // bound to the language select
+	page            string   // the settings page shown
 	hist            historyView
 	levels          [waveBars]float32 // the voice bar's waveform, oldest first
 	levelAt         time.Time         // when levels last moved
@@ -96,6 +98,7 @@ func (a *app) ready() {
 	a.uiLanguage = settings.UILanguage
 	mygo.App.SetLocale(a.uiLanguage)
 	a.appearance = max(0, slices.Index(appearances, settings.Appearance))
+	a.accent = settings.AccentColor
 
 	client := &openrouter.Client{Key: a.openrouterKey.Get, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	sonioxClient := &soniox.Client{Key: a.sonioxKey.Get}

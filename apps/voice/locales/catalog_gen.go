@@ -1215,3 +1215,103 @@ func HistoryFailed(error string) string { return In(i18n.Locale()).HistoryFailed
 func (msgs Messages) HistoryFailed(error string) string {
 	return Catalog.Format(msgs.locale, "historyFailed", map[string]any{"error": error})
 }
+
+// FieldAccent says "Accent color"
+// in the language the app shows.
+func FieldAccent() string { return In(i18n.Locale()).FieldAccent() }
+
+// FieldAccent says "Accent color"
+// in the language of msgs.
+func (msgs Messages) FieldAccent() string {
+	return Catalog.Format(msgs.locale, "fieldAccent", nil)
+}
+
+// AccentSystem says "System"
+// in the language the app shows.
+func AccentSystem() string { return In(i18n.Locale()).AccentSystem() }
+
+// AccentSystem says "System"
+// in the language of msgs.
+func (msgs Messages) AccentSystem() string {
+	return Catalog.Format(msgs.locale, "accentSystem", nil)
+}
+
+// AccentBlue says "Blue"
+// in the language the app shows.
+func AccentBlue() string { return In(i18n.Locale()).AccentBlue() }
+
+// AccentBlue says "Blue"
+// in the language of msgs.
+func (msgs Messages) AccentBlue() string {
+	return Catalog.Format(msgs.locale, "accentBlue", nil)
+}
+
+// AccentGreen says "Green"
+// in the language the app shows.
+func AccentGreen() string { return In(i18n.Locale()).AccentGreen() }
+
+// AccentGreen says "Green"
+// in the language of msgs.
+func (msgs Messages) AccentGreen() string {
+	return Catalog.Format(msgs.locale, "accentGreen", nil)
+}
+
+// AccentRed says "Red"
+// in the language the app shows.
+func AccentRed() string { return In(i18n.Locale()).AccentRed() }
+
+// AccentRed says "Red"
+// in the language of msgs.
+func (msgs Messages) AccentRed() string {
+	return Catalog.Format(msgs.locale, "accentRed", nil)
+}
+
+// AccentYellow says "Yellow"
+// in the language the app shows.
+func AccentYellow() string { return In(i18n.Locale()).AccentYellow() }
+
+// AccentYellow says "Yellow"
+// in the language of msgs.
+func (msgs Messages) AccentYellow() string {
+	return Catalog.Format(msgs.locale, "accentYellow", nil)
+}
+
+// AccentPurple says "Purple"
+// in the language the app shows.
+func AccentPurple() string { return In(i18n.Locale()).AccentPurple() }
+
+// AccentPurple says "Purple"
+// in the language of msgs.
+func (msgs Messages) AccentPurple() string {
+	return Catalog.Format(msgs.locale, "accentPurple", nil)
+}
+
+// AccentOrange says "Orange"
+// in the language the app shows.
+func AccentOrange() string { return In(i18n.Locale()).AccentOrange() }
+
+// AccentOrange says "Orange"
+// in the language of msgs.
+func (msgs Messages) AccentOrange() string {
+	return Catalog.Format(msgs.locale, "accentOrange", nil)
+}
+
+// AccentPink says "Pink"
+// in the language the app shows.
+func AccentPink() string { return In(i18n.Locale()).AccentPink() }
+
+// AccentPink says "Pink"
+// in the language of msgs.
+func (msgs Messages) AccentPink() string {
+	return Catalog.Format(msgs.locale, "accentPink", nil)
+}
+
+// AccentBrown says "Brown"
+// in the language the app shows.
+func AccentBrown() string { return In(i18n.Locale()).AccentBrown() }
+
+// AccentBrown says "Brown"
+// in the language of msgs.
+func (msgs Messages) AccentBrown() string {
+	return Catalog.Format(msgs.locale, "accentBrown", nil)
+}
