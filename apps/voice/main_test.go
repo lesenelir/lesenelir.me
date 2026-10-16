@@ -31,20 +31,20 @@ func testApp(t *testing.T) *app {
 	}
 }
 
-func TestOverlayShowsMode(t *testing.T) {
+func TestOverlayShowsState(t *testing.T) {
 	a := testApp(t)
 	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
 	tt.SetLocale("zh-Hans")
 
 	a.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
 	tt.Frame()
-	if !tt.HasText("听写") || !tt.HasText("Fn 完成 · Esc 取消") {
+	if !tt.HasText("esc") || tt.HasText("→ English") {
 		t.Errorf("dictation bar %q", tt.Texts())
 	}
 
 	a.status = controller.Status{State: controller.Recording, Mode: prompt.Translate, Target: "en"}
 	tt.Frame()
-	if !tt.HasText("翻译 → English") {
+	if !tt.HasText("→ English") {
 		t.Errorf("translation bar %q", tt.Texts())
 	}
 
@@ -65,9 +65,9 @@ func TestOverlayFollowsLanguage(t *testing.T) {
 	a := testApp(t)
 	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
 	tt.SetLocale("en")
-	a.status = controller.Status{State: controller.Recording, Mode: prompt.Translate, Target: "zh"}
+	a.status = controller.Status{State: controller.Transcribing}
 	tt.Frame()
-	if !tt.HasText("Translate → 简体中文") || !tt.HasText("Tab to switch · Esc to cancel") {
+	if !tt.HasText("Transcribing…") {
 		t.Errorf("English bar %q", tt.Texts())
 	}
 	a.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: darwin.ErrNotTrusted}
@@ -77,12 +77,59 @@ func TestOverlayFollowsLanguage(t *testing.T) {
 	}
 }
 
+// The capsule is dark over any appearance, and the window around it is
+// transparent, with no shadow of its own to outline it.
+func TestOverlayCapsule(t *testing.T) {
+	a := testApp(t)
+	a.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
+	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
+	// Just inside the capsule's top edge, at the middle.
+	inside := func() (lum int, alpha uint8) {
+		px := tt.Image().RGBAAt(overlayWidth/2, overlayHeight-18-capsuleHeight+5)
+		return (int(px.R) + int(px.G) + int(px.B)) / 3, px.A
+	}
+	for _, dark := range []bool{false, true} {
+		tt.SetDark(dark)
+		if lum, alpha := inside(); lum > 60 || alpha < 200 {
+			t.Errorf("dark=%v: capsule luminance %d alpha %d", dark, lum, alpha)
+		}
+		if corner := tt.Image().RGBAAt(1, 1); corner.A != 0 {
+			t.Errorf("dark=%v: window corner %v is not transparent", dark, corner)
+		}
+	}
+}
+
+func TestSettingsPages(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), "")
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	tt.SetLocale("zh-Hans")
+	for _, want := range []string{"通用", "权限", "模型", "翻译", "词典", "界面语言", "外观", "快捷键", "fn", "esc"} {
+		if !tt.HasText(want) {
+			t.Errorf("general page: no %q in %q", want, tt.Texts())
+		}
+	}
+	for _, step := range []struct{ item, want string }{
+		{"权限", "辅助功能"},
+		{"模型", "API Key"},
+		{"翻译", "说中文时译成"},
+		{"词典", "词典里的名字和术语会按原样拼写。"},
+	} {
+		if err := tt.Click(step.item); err != nil {
+			t.Fatal(err)
+		}
+		if !tt.HasText(step.want) {
+			t.Errorf("%s page: no %q in %q", step.item, step.want, tt.Texts())
+		}
+	}
+}
+
 func TestSettingsFollowLanguage(t *testing.T) {
 	a := testApp(t)
 	a.form = formFrom(a.store.Get(), "")
-	tt := ui.NewTester(a.settingsView, 560, 720)
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
 	tt.SetLocale("en")
-	for _, want := range []string{"General", "Language", "System default", "Permissions", "Save"} {
+	for _, want := range []string{"General", "Language", "System default", "Appearance", "Light", "Dark", "Shortcuts"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}
@@ -93,15 +140,25 @@ func TestSettingsFollowLanguage(t *testing.T) {
 	}
 }
 
-func TestSettingsViewRenders(t *testing.T) {
+// Settings save as they change: there is no Save button.
+func TestSettingsSaveAsTheyChange(t *testing.T) {
 	a := testApp(t)
 	a.form = formFrom(a.store.Get(), "")
-	tt := ui.NewTester(a.settingsView, 560, 720)
-	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"权限", "OpenRouter", "翻译", "词典", "保存"} {
-		if !tt.HasText(want) {
-			t.Errorf("no %q in %q", want, tt.Texts())
-		}
+	a.page = pageModels
+	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	tt.SetLocale("en")
+	// The timeout's field sits at the right of its row, level with the
+	// middle of the label and the note under it.
+	note, ok := tt.Find("After this, the raw transcript is pasted.")
+	if !ok {
+		t.Fatalf("no timeout row in %q", tt.Texts())
+	}
+	tt.ClickAt(settingsWidth-28-14-30, note.Y+note.H/2-8)
+	tt.Key(ui.Cmd, ui.KeyA)
+	tt.Type("8")
+	tt.Frame()
+	if got := a.store.Get().LLMTimeout; got != 8 {
+		t.Fatalf("timeout saved as %v, want 8", got)
 	}
 }
 
@@ -136,41 +193,5 @@ func TestFormRoundTrip(t *testing.T) {
 	}
 	if !slices.Equal(s.Targets, []string{"en"}) {
 		t.Errorf("no targets ticked should keep the default: %q", s.Targets)
-	}
-}
-
-func TestSettingsShowAppearance(t *testing.T) {
-	a := testApp(t)
-	a.form = formFrom(a.store.Get(), "")
-	tt := ui.NewTester(a.settingsView, 560, 720)
-	tt.SetLocale("en")
-	for _, want := range []string{"Appearance", "System", "Light", "Dark"} {
-		if !tt.HasText(want) {
-			t.Errorf("no %q in %q", want, tt.Texts())
-		}
-	}
-	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"外观", "浅色", "深色"} {
-		if !tt.HasText(want) {
-			t.Errorf("no %q in %q", want, tt.Texts())
-		}
-	}
-}
-
-func TestOverlayFollowsAppearance(t *testing.T) {
-	a := testApp(t)
-	a.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
-	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
-	// A point on the bar's background, between the red dot and the label.
-	luminance := func() int {
-		px := tt.Image().RGBAAt(40, overlayHeight/2-12)
-		return (int(px.R) + int(px.G) + int(px.B)) / 3
-	}
-	tt.SetDark(false)
-	light := luminance()
-	tt.SetDark(true)
-	dark := luminance()
-	if light < 200 || dark > 60 {
-		t.Fatalf("background luminance light %d, dark %d", light, dark)
 	}
 }

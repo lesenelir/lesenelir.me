@@ -1,22 +1,21 @@
 {
   "@@locale": "en",
-
   "settingsTitle": "Voice Settings",
-  "@settingsTitle": { "description": "Title of the settings window." },
-  "tagline": "Fn to dictate · Fn + Left Shift to translate · Esc to cancel · Tab switches the language while translating",
-  "@tagline": { "description": "Hotkey summary under the app name in the settings window." },
-
-  "sectionGeneral": "General",
+  "@settingsTitle": {
+    "description": "Title of the settings window."
+  },
   "fieldLanguage": "Language",
-  "@fieldLanguage": { "description": "Settings field choosing the language of the app's interface." },
+  "@fieldLanguage": {
+    "description": "Settings field choosing the language of the app's interface."
+  },
   "languageSystem": "System default",
   "fieldAppearance": "Appearance",
   "appearanceSystem": "System",
   "appearanceLight": "Light",
   "appearanceDark": "Dark",
-  "@languageSystem": { "description": "Language option: follow the languages set in macOS." },
-
-  "sectionPermissions": "Permissions",
+  "@languageSystem": {
+    "description": "Language option: follow the languages set in macOS."
+  },
   "permAccessibility": "Accessibility",
   "permAccessibilityNote": "Needed to watch Fn and paste text",
   "permMicrophone": "Microphone",
@@ -29,12 +28,11 @@
   "permGlobeNote": "In Keyboard, set “Press 🌐 key to” to “Do Nothing”",
   "openSettings": "Open Settings",
   "openKeyboardSettings": "Open Keyboard Settings",
-
   "sectionOpenRouter": "OpenRouter",
   "fieldApiKey": "API key",
   "apiKeyNote": "Stored in the macOS Keychain.",
   "fieldAsrModel": "Speech-to-text model",
-  "asrModelNote": "Alternatives: openai/gpt-4o-mini-transcribe, microsoft/mai-transcribe-2",
+  "asrModelNote": "Also: openai/gpt-4o-mini-transcribe",
   "fieldAsrLanguage": "Speech language hint",
   "asrLanguagePlaceholder": "Empty to detect automatically",
   "fieldLlmModel": "Cleanup and translation model",
@@ -42,41 +40,20 @@
   "fieldProviders": "Preferred providers",
   "fieldTimeout": "Cleanup timeout (seconds)",
   "timeoutNote": "After this, the raw transcript is pasted.",
-
-  "sectionTranslation": "Translation",
   "fieldChineseTo": "Chinese speech into",
   "fieldEnglishTo": "English speech into",
   "fieldOtherTo": "Other speech into",
   "fieldRemember": "Remember last choice",
   "rememberNote": "Start translations in the language last picked on the voice bar.",
-  "targetsNote": "Languages that Tab and the voice bar switch between",
-
-  "sectionDictionary": "Dictionary",
   "dictionaryPlaceholder": "One per line: names, products, terms…",
-
   "sectionLast": "Last result",
-  "buttonRevert": "Revert",
-  "buttonSave": "Save",
-  "saved": "Saved",
   "saveKeyFailed": "Couldn't save the API key: {error}",
   "saveFailed": "Couldn't save: {error}",
-
-  "modeDictate": "Dictate",
-  "@modeDictate": { "description": "Voice bar label while dictating." },
-  "modeTranslate": "Translate → {language}",
-  "@modeTranslate": {
-    "description": "Voice bar label while translating; language is the target's name in itself.",
-    "placeholders": { "language": { "type": "String", "example": "English" } }
-  },
   "switchLanguageTooltip": "Click to switch the target language",
-  "hintDictate": "Fn to finish · Esc to cancel",
-  "hintTranslate": "Tab to switch · Esc to cancel",
-  "hintCancel": "Esc to cancel",
   "stageTranscribing": "Transcribing…",
   "stageCleaning": "Cleaning up…",
   "stageTranslating": "Translating into {language}…",
   "stagePasting": "Pasting…",
-
   "noteTooShort": "Too short, ignored",
   "noteSilent": "No sound came in; check the microphone permission",
   "noteCancelled": "Cancelled",
@@ -87,8 +64,28 @@
   "notePasteFailed": "Couldn't paste; the text is on the clipboard: {error}",
   "notePasteNeedsAccessibility": "Couldn't paste without Accessibility; the text is on the clipboard",
   "noteMicFailed": "Couldn't start recording: {error}",
-
   "traySettings": "Settings…",
   "trayQuit": "Quit Voice",
-  "trayTooltip": "Voice — Fn to dictate, Fn + Left Shift to translate"
+  "trayTooltip": "Voice — Fn to dictate, Fn + Left Shift to translate",
+  "navGeneral": "General",
+  "navPermissions": "Permissions",
+  "navModels": "Models",
+  "navTranslation": "Translation",
+  "navDictionary": "Dictionary",
+  "sectionShortcuts": "Shortcuts",
+  "shortcutDictate": "Start or finish dictation",
+  "shortcutTranslate": "Start translation",
+  "shortcutCancel": "Cancel",
+  "shortcutSwitch": "Switch the target language while translating",
+  "keyLeftShift": "Left ⇧",
+  "statusAllowed": "Allowed",
+  "statusNeeded": "Needed",
+  "statusRunning": "Running",
+  "statusWaiting": "Waiting",
+  "statusTip": "Tip",
+  "sectionSpeech": "Speech to text",
+  "sectionRewrite": "Cleanup and translation",
+  "sectionTargets": "Languages to switch between",
+  "dictionaryNote": "Names and terms here are spelled exactly as written.",
+  "autoSaveNote": "Changes are saved automatically."
 }

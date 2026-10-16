@@ -48,30 +48,6 @@ func (msgs Messages) SettingsTitle() string {
 	return Catalog.Format(msgs.locale, "settingsTitle", nil)
 }
 
-// Tagline says "Fn to dictate · Fn + Left Shift to translate · Esc to cancel · Tab switches the language while translating"
-// in the language the app shows.
-//
-// Hotkey summary under the app name in the settings window.
-func Tagline() string { return In(i18n.Locale()).Tagline() }
-
-// Tagline says "Fn to dictate · Fn + Left Shift to translate · Esc to cancel · Tab switches the language while translating"
-// in the language of msgs.
-//
-// Hotkey summary under the app name in the settings window.
-func (msgs Messages) Tagline() string {
-	return Catalog.Format(msgs.locale, "tagline", nil)
-}
-
-// SectionGeneral says "General"
-// in the language the app shows.
-func SectionGeneral() string { return In(i18n.Locale()).SectionGeneral() }
-
-// SectionGeneral says "General"
-// in the language of msgs.
-func (msgs Messages) SectionGeneral() string {
-	return Catalog.Format(msgs.locale, "sectionGeneral", nil)
-}
-
 // FieldLanguage says "Language"
 // in the language the app shows.
 //
@@ -138,16 +114,6 @@ func AppearanceDark() string { return In(i18n.Locale()).AppearanceDark() }
 // in the language of msgs.
 func (msgs Messages) AppearanceDark() string {
 	return Catalog.Format(msgs.locale, "appearanceDark", nil)
-}
-
-// SectionPermissions says "Permissions"
-// in the language the app shows.
-func SectionPermissions() string { return In(i18n.Locale()).SectionPermissions() }
-
-// SectionPermissions says "Permissions"
-// in the language of msgs.
-func (msgs Messages) SectionPermissions() string {
-	return Catalog.Format(msgs.locale, "sectionPermissions", nil)
 }
 
 // PermAccessibility says "Accessibility"
@@ -310,11 +276,11 @@ func (msgs Messages) FieldAsrModel() string {
 	return Catalog.Format(msgs.locale, "fieldAsrModel", nil)
 }
 
-// AsrModelNote says "Alternatives: openai/gpt-4o-mini-transcribe, microsoft/mai-transcribe-2"
+// AsrModelNote says "Also: openai/gpt-4o-mini-transcribe"
 // in the language the app shows.
 func AsrModelNote() string { return In(i18n.Locale()).AsrModelNote() }
 
-// AsrModelNote says "Alternatives: openai/gpt-4o-mini-transcribe, microsoft/mai-transcribe-2"
+// AsrModelNote says "Also: openai/gpt-4o-mini-transcribe"
 // in the language of msgs.
 func (msgs Messages) AsrModelNote() string {
 	return Catalog.Format(msgs.locale, "asrModelNote", nil)
@@ -390,16 +356,6 @@ func (msgs Messages) TimeoutNote() string {
 	return Catalog.Format(msgs.locale, "timeoutNote", nil)
 }
 
-// SectionTranslation says "Translation"
-// in the language the app shows.
-func SectionTranslation() string { return In(i18n.Locale()).SectionTranslation() }
-
-// SectionTranslation says "Translation"
-// in the language of msgs.
-func (msgs Messages) SectionTranslation() string {
-	return Catalog.Format(msgs.locale, "sectionTranslation", nil)
-}
-
 // FieldChineseTo says "Chinese speech into"
 // in the language the app shows.
 func FieldChineseTo() string { return In(i18n.Locale()).FieldChineseTo() }
@@ -450,26 +406,6 @@ func (msgs Messages) RememberNote() string {
 	return Catalog.Format(msgs.locale, "rememberNote", nil)
 }
 
-// TargetsNote says "Languages that Tab and the voice bar switch between"
-// in the language the app shows.
-func TargetsNote() string { return In(i18n.Locale()).TargetsNote() }
-
-// TargetsNote says "Languages that Tab and the voice bar switch between"
-// in the language of msgs.
-func (msgs Messages) TargetsNote() string {
-	return Catalog.Format(msgs.locale, "targetsNote", nil)
-}
-
-// SectionDictionary says "Dictionary"
-// in the language the app shows.
-func SectionDictionary() string { return In(i18n.Locale()).SectionDictionary() }
-
-// SectionDictionary says "Dictionary"
-// in the language of msgs.
-func (msgs Messages) SectionDictionary() string {
-	return Catalog.Format(msgs.locale, "sectionDictionary", nil)
-}
-
 // DictionaryPlaceholder says "One per line: names, products, terms…"
 // in the language the app shows.
 func DictionaryPlaceholder() string { return In(i18n.Locale()).DictionaryPlaceholder() }
@@ -488,36 +424,6 @@ func SectionLast() string { return In(i18n.Locale()).SectionLast() }
 // in the language of msgs.
 func (msgs Messages) SectionLast() string {
 	return Catalog.Format(msgs.locale, "sectionLast", nil)
-}
-
-// ButtonRevert says "Revert"
-// in the language the app shows.
-func ButtonRevert() string { return In(i18n.Locale()).ButtonRevert() }
-
-// ButtonRevert says "Revert"
-// in the language of msgs.
-func (msgs Messages) ButtonRevert() string {
-	return Catalog.Format(msgs.locale, "buttonRevert", nil)
-}
-
-// ButtonSave says "Save"
-// in the language the app shows.
-func ButtonSave() string { return In(i18n.Locale()).ButtonSave() }
-
-// ButtonSave says "Save"
-// in the language of msgs.
-func (msgs Messages) ButtonSave() string {
-	return Catalog.Format(msgs.locale, "buttonSave", nil)
-}
-
-// Saved says "Saved"
-// in the language the app shows.
-func Saved() string { return In(i18n.Locale()).Saved() }
-
-// Saved says "Saved"
-// in the language of msgs.
-func (msgs Messages) Saved() string {
-	return Catalog.Format(msgs.locale, "saved", nil)
 }
 
 // SaveKeyFailed says "Couldn't save the API key: {error}"
@@ -540,36 +446,6 @@ func (msgs Messages) SaveFailed(error string) string {
 	return Catalog.Format(msgs.locale, "saveFailed", map[string]any{"error": error})
 }
 
-// ModeDictate says "Dictate"
-// in the language the app shows.
-//
-// Voice bar label while dictating.
-func ModeDictate() string { return In(i18n.Locale()).ModeDictate() }
-
-// ModeDictate says "Dictate"
-// in the language of msgs.
-//
-// Voice bar label while dictating.
-func (msgs Messages) ModeDictate() string {
-	return Catalog.Format(msgs.locale, "modeDictate", nil)
-}
-
-// ModeTranslate says "Translate → {language}"
-// in the language the app shows.
-//
-// Voice bar label while translating; language is the target's name in
-// itself.
-func ModeTranslate(language string) string { return In(i18n.Locale()).ModeTranslate(language) }
-
-// ModeTranslate says "Translate → {language}"
-// in the language of msgs.
-//
-// Voice bar label while translating; language is the target's name in
-// itself.
-func (msgs Messages) ModeTranslate(language string) string {
-	return Catalog.Format(msgs.locale, "modeTranslate", map[string]any{"language": language})
-}
-
 // SwitchLanguageTooltip says "Click to switch the target language"
 // in the language the app shows.
 func SwitchLanguageTooltip() string { return In(i18n.Locale()).SwitchLanguageTooltip() }
@@ -578,36 +454,6 @@ func SwitchLanguageTooltip() string { return In(i18n.Locale()).SwitchLanguageToo
 // in the language of msgs.
 func (msgs Messages) SwitchLanguageTooltip() string {
 	return Catalog.Format(msgs.locale, "switchLanguageTooltip", nil)
-}
-
-// HintDictate says "Fn to finish · Esc to cancel"
-// in the language the app shows.
-func HintDictate() string { return In(i18n.Locale()).HintDictate() }
-
-// HintDictate says "Fn to finish · Esc to cancel"
-// in the language of msgs.
-func (msgs Messages) HintDictate() string {
-	return Catalog.Format(msgs.locale, "hintDictate", nil)
-}
-
-// HintTranslate says "Tab to switch · Esc to cancel"
-// in the language the app shows.
-func HintTranslate() string { return In(i18n.Locale()).HintTranslate() }
-
-// HintTranslate says "Tab to switch · Esc to cancel"
-// in the language of msgs.
-func (msgs Messages) HintTranslate() string {
-	return Catalog.Format(msgs.locale, "hintTranslate", nil)
-}
-
-// HintCancel says "Esc to cancel"
-// in the language the app shows.
-func HintCancel() string { return In(i18n.Locale()).HintCancel() }
-
-// HintCancel says "Esc to cancel"
-// in the language of msgs.
-func (msgs Messages) HintCancel() string {
-	return Catalog.Format(msgs.locale, "hintCancel", nil)
 }
 
 // StageTranscribing says "Transcribing…"
@@ -778,4 +624,214 @@ func TrayTooltip() string { return In(i18n.Locale()).TrayTooltip() }
 // in the language of msgs.
 func (msgs Messages) TrayTooltip() string {
 	return Catalog.Format(msgs.locale, "trayTooltip", nil)
+}
+
+// NavGeneral says "General"
+// in the language the app shows.
+func NavGeneral() string { return In(i18n.Locale()).NavGeneral() }
+
+// NavGeneral says "General"
+// in the language of msgs.
+func (msgs Messages) NavGeneral() string {
+	return Catalog.Format(msgs.locale, "navGeneral", nil)
+}
+
+// NavPermissions says "Permissions"
+// in the language the app shows.
+func NavPermissions() string { return In(i18n.Locale()).NavPermissions() }
+
+// NavPermissions says "Permissions"
+// in the language of msgs.
+func (msgs Messages) NavPermissions() string {
+	return Catalog.Format(msgs.locale, "navPermissions", nil)
+}
+
+// NavModels says "Models"
+// in the language the app shows.
+func NavModels() string { return In(i18n.Locale()).NavModels() }
+
+// NavModels says "Models"
+// in the language of msgs.
+func (msgs Messages) NavModels() string {
+	return Catalog.Format(msgs.locale, "navModels", nil)
+}
+
+// NavTranslation says "Translation"
+// in the language the app shows.
+func NavTranslation() string { return In(i18n.Locale()).NavTranslation() }
+
+// NavTranslation says "Translation"
+// in the language of msgs.
+func (msgs Messages) NavTranslation() string {
+	return Catalog.Format(msgs.locale, "navTranslation", nil)
+}
+
+// NavDictionary says "Dictionary"
+// in the language the app shows.
+func NavDictionary() string { return In(i18n.Locale()).NavDictionary() }
+
+// NavDictionary says "Dictionary"
+// in the language of msgs.
+func (msgs Messages) NavDictionary() string {
+	return Catalog.Format(msgs.locale, "navDictionary", nil)
+}
+
+// SectionShortcuts says "Shortcuts"
+// in the language the app shows.
+func SectionShortcuts() string { return In(i18n.Locale()).SectionShortcuts() }
+
+// SectionShortcuts says "Shortcuts"
+// in the language of msgs.
+func (msgs Messages) SectionShortcuts() string {
+	return Catalog.Format(msgs.locale, "sectionShortcuts", nil)
+}
+
+// ShortcutDictate says "Start or finish dictation"
+// in the language the app shows.
+func ShortcutDictate() string { return In(i18n.Locale()).ShortcutDictate() }
+
+// ShortcutDictate says "Start or finish dictation"
+// in the language of msgs.
+func (msgs Messages) ShortcutDictate() string {
+	return Catalog.Format(msgs.locale, "shortcutDictate", nil)
+}
+
+// ShortcutTranslate says "Start translation"
+// in the language the app shows.
+func ShortcutTranslate() string { return In(i18n.Locale()).ShortcutTranslate() }
+
+// ShortcutTranslate says "Start translation"
+// in the language of msgs.
+func (msgs Messages) ShortcutTranslate() string {
+	return Catalog.Format(msgs.locale, "shortcutTranslate", nil)
+}
+
+// ShortcutCancel says "Cancel"
+// in the language the app shows.
+func ShortcutCancel() string { return In(i18n.Locale()).ShortcutCancel() }
+
+// ShortcutCancel says "Cancel"
+// in the language of msgs.
+func (msgs Messages) ShortcutCancel() string {
+	return Catalog.Format(msgs.locale, "shortcutCancel", nil)
+}
+
+// ShortcutSwitch says "Switch the target language while translating"
+// in the language the app shows.
+func ShortcutSwitch() string { return In(i18n.Locale()).ShortcutSwitch() }
+
+// ShortcutSwitch says "Switch the target language while translating"
+// in the language of msgs.
+func (msgs Messages) ShortcutSwitch() string {
+	return Catalog.Format(msgs.locale, "shortcutSwitch", nil)
+}
+
+// KeyLeftShift says "Left ⇧"
+// in the language the app shows.
+func KeyLeftShift() string { return In(i18n.Locale()).KeyLeftShift() }
+
+// KeyLeftShift says "Left ⇧"
+// in the language of msgs.
+func (msgs Messages) KeyLeftShift() string {
+	return Catalog.Format(msgs.locale, "keyLeftShift", nil)
+}
+
+// StatusAllowed says "Allowed"
+// in the language the app shows.
+func StatusAllowed() string { return In(i18n.Locale()).StatusAllowed() }
+
+// StatusAllowed says "Allowed"
+// in the language of msgs.
+func (msgs Messages) StatusAllowed() string {
+	return Catalog.Format(msgs.locale, "statusAllowed", nil)
+}
+
+// StatusNeeded says "Needed"
+// in the language the app shows.
+func StatusNeeded() string { return In(i18n.Locale()).StatusNeeded() }
+
+// StatusNeeded says "Needed"
+// in the language of msgs.
+func (msgs Messages) StatusNeeded() string {
+	return Catalog.Format(msgs.locale, "statusNeeded", nil)
+}
+
+// StatusRunning says "Running"
+// in the language the app shows.
+func StatusRunning() string { return In(i18n.Locale()).StatusRunning() }
+
+// StatusRunning says "Running"
+// in the language of msgs.
+func (msgs Messages) StatusRunning() string {
+	return Catalog.Format(msgs.locale, "statusRunning", nil)
+}
+
+// StatusWaiting says "Waiting"
+// in the language the app shows.
+func StatusWaiting() string { return In(i18n.Locale()).StatusWaiting() }
+
+// StatusWaiting says "Waiting"
+// in the language of msgs.
+func (msgs Messages) StatusWaiting() string {
+	return Catalog.Format(msgs.locale, "statusWaiting", nil)
+}
+
+// StatusTip says "Tip"
+// in the language the app shows.
+func StatusTip() string { return In(i18n.Locale()).StatusTip() }
+
+// StatusTip says "Tip"
+// in the language of msgs.
+func (msgs Messages) StatusTip() string {
+	return Catalog.Format(msgs.locale, "statusTip", nil)
+}
+
+// SectionSpeech says "Speech to text"
+// in the language the app shows.
+func SectionSpeech() string { return In(i18n.Locale()).SectionSpeech() }
+
+// SectionSpeech says "Speech to text"
+// in the language of msgs.
+func (msgs Messages) SectionSpeech() string {
+	return Catalog.Format(msgs.locale, "sectionSpeech", nil)
+}
+
+// SectionRewrite says "Cleanup and translation"
+// in the language the app shows.
+func SectionRewrite() string { return In(i18n.Locale()).SectionRewrite() }
+
+// SectionRewrite says "Cleanup and translation"
+// in the language of msgs.
+func (msgs Messages) SectionRewrite() string {
+	return Catalog.Format(msgs.locale, "sectionRewrite", nil)
+}
+
+// SectionTargets says "Languages to switch between"
+// in the language the app shows.
+func SectionTargets() string { return In(i18n.Locale()).SectionTargets() }
+
+// SectionTargets says "Languages to switch between"
+// in the language of msgs.
+func (msgs Messages) SectionTargets() string {
+	return Catalog.Format(msgs.locale, "sectionTargets", nil)
+}
+
+// DictionaryNote says "Names and terms here are spelled exactly as written."
+// in the language the app shows.
+func DictionaryNote() string { return In(i18n.Locale()).DictionaryNote() }
+
+// DictionaryNote says "Names and terms here are spelled exactly as written."
+// in the language of msgs.
+func (msgs Messages) DictionaryNote() string {
+	return Catalog.Format(msgs.locale, "dictionaryNote", nil)
+}
+
+// AutoSaveNote says "Changes are saved automatically."
+// in the language the app shows.
+func AutoSaveNote() string { return In(i18n.Locale()).AutoSaveNote() }
+
+// AutoSaveNote says "Changes are saved automatically."
+// in the language of msgs.
+func (msgs Messages) AutoSaveNote() string {
+	return Catalog.Format(msgs.locale, "autoSaveNote", nil)
 }

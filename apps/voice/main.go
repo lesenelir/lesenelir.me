@@ -54,6 +54,10 @@ type app struct {
 	uiLanguage      string // "" follows the system
 	appearance      int    // index in appearances, bound to its control
 	uiLanguageLabel string // bound to the language select
+	page            string // the settings page shown
+	keyTimer        *time.Timer
+	levels          [waveBars]float32 // the voice bar's waveform, oldest first
+	levelAt         time.Time         // when levels last moved
 }
 
 func main() {
@@ -85,7 +89,6 @@ func (a *app) ready() {
 	a.uiLanguage = settings.UILanguage
 	mygo.App.SetLocale(a.uiLanguage)
 	a.appearance = max(0, slices.Index(appearances, settings.Appearance))
-	applyAppearance(settings.Appearance)
 
 	client := &openrouter.Client{Key: a.apiKey, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	a.ctrl = controller.New(context.Background(), controller.Deps{
@@ -110,9 +113,12 @@ func (a *app) ready() {
 		Hidden:      true,
 		Frameless:   true,
 		Transparent: true,
-		Width:       overlayWidth,
-		Height:      overlayHeight,
-		Content:     ui.View(a.overlayView),
+		// The capsule draws its own shadow; the window's would outline the
+		// whole transparent rectangle.
+		DisableShadow: true,
+		Width:         overlayWidth,
+		Height:        overlayHeight,
+		Content:       ui.View(a.overlayView),
 	})
 	a.overlay.SetIgnoreMouseEvents(false)
 
@@ -120,19 +126,28 @@ func (a *app) ready() {
 	a.settings = mygo.NewWindow(mygo.WindowOptions{
 		Title:     locales.SettingsTitle(),
 		Hidden:    true,
-		Width:     560,
-		Height:    720,
-		MinWidth:  480,
-		MinHeight: 480,
-		StateKey:  "settings",
-		Content:   ui.View(a.settingsView),
+		Width:     settingsWidth,
+		Height:    settingsHeight,
+		MinWidth:  640,
+		MinHeight: 420,
+		StateKey:  "settings-window",
+		// The view draws the whole window, the traffic lights over its
+		// sidebar, so no title bar of another color sits over it.
+		TitleBarStyle: mygo.TitleBarHiddenInset,
+		Vibrancy:      mygo.VibrancySidebar,
+		Content:       ui.View(a.settingsView),
 	})
+	a.settings.OnBlur(a.flushKey)
 	a.settings.OnClose(func(e *mygo.CloseEvent) {
 		if !a.quitting {
 			e.PreventDefault()
 			a.settings.Hide()
 		}
 	})
+
+	// MyGo refreshes the light or dark look of the windows that exist when
+	// the appearance is set, so set it once they do.
+	applyAppearance(settings.Appearance)
 
 	a.setupTray()
 	mygo.App.OnLocaleChanged(func(string) {
@@ -206,7 +221,10 @@ func (a *app) setKey(k string) error {
 }
 
 func (a *app) showSettings() {
-	a.settings.Update(func() { a.form = formFrom(a.store.Get(), a.apiKey()) })
+	a.settings.Update(func() {
+		a.flushKey()
+		a.form = formFrom(a.store.Get(), a.apiKey())
+	})
 	a.settings.Show()
 	a.settings.Focus()
 }

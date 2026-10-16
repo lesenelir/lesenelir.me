@@ -15,22 +15,39 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/voice/locales"
 )
 
+// The voice bar is a dark capsule at the bottom of the screen, as macOS's
+// own HUDs: dark in either appearance, so that it reads over any window.
+// The window is larger than the capsule to leave room for its shadow.
 const (
-	overlayWidth  = 360
-	overlayHeight = 56
+	overlayWidth  = 340
+	overlayHeight = 76
 	// overlayMargin keeps the voice bar above the Dock.
-	overlayMargin = 72
+	overlayMargin = 56
+	capsuleHeight = 40
 	// noteTime is how long a note stays on the voice bar.
 	noteTime = 2500 * time.Millisecond
+
+	waveBars = 20
+	// waveStep is how often the waveform moves on by a bar.
+	waveStep = 45 * time.Millisecond
 )
 
-// barWeights shape the level meter into a little waveform.
-var barWeights = []float32{0.35, 0.6, 0.85, 1, 0.8, 0.55, 0.3}
+var (
+	capsuleFill   = ui.RGBA(20, 20, 22, 0.94)
+	capsuleBorder = ui.RGBA(255, 255, 255, 0.1)
+	capsuleShadow = ui.RGBA(0, 0, 0, 0.35)
+	barText       = ui.RGBA(255, 255, 255, 0.92)
+	barMuted      = ui.RGBA(255, 255, 255, 0.5)
+	recordingRed  = ui.Hex("#ff453a")
+)
 
 // onStatus shows the controller's status on the voice bar. It runs on the
 // controller's goroutine.
 func (a *app) onStatus(s controller.Status) {
 	a.overlay.Update(func() {
+		if s.State == controller.Recording && a.status.State != controller.Recording {
+			a.levels = [waveBars]float32{}
+		}
 		a.status = s
 		a.hideSeq++
 		seq := a.hideSeq
@@ -67,84 +84,98 @@ func (a *app) placeOverlay() {
 	a.overlay.SetPosition(area.X+(area.Width-overlayWidth)/2, area.Y+area.Height-overlayHeight-overlayMargin)
 }
 
-// barColors are the voice bar's colors in the light or dark appearance.
-type barColors struct {
-	background, border, text, muted, chip ui.Color
-}
-
-func overlayColors(dark bool) barColors {
-	if dark {
-		return barColors{
-			background: ui.RGBA(24, 24, 27, 0.92),
-			border:     ui.RGBA(255, 255, 255, 0.08),
-			text:       ui.Hex("#fafafa"),
-			muted:      ui.Hex("#a1a1aa"),
-			chip:       ui.RGBA(255, 255, 255, 0.12),
-		}
-	}
-	return barColors{
-		background: ui.RGBA(255, 255, 255, 0.94),
-		border:     ui.RGBA(0, 0, 0, 0.1),
-		text:       ui.Hex("#18181b"),
-		muted:      ui.Hex("#71717a"),
-		chip:       ui.RGBA(0, 0, 0, 0.06),
-	}
-}
-
 func (a *app) overlayView(c *ui.Context) {
-	t := c.Theme()
+	c.Root().Background(ui.Transparent)
 	m := locales.In(c.Locale())
 	s := a.status
-	k := overlayColors(t.Dark)
-	ui.Row(c).Fill().Padding(0, 16).Gap(12).AlignItems(ui.Center).Radius(overlayHeight/2).
-		Background(k.background).Border(1, k.border).Children(func() {
-		switch s.State {
-		case controller.Recording:
-			ui.Box(c).Size(10, 10).Radius(5).Background(t.Danger)
-			a.modeChip(c, m, s, k)
-			a.levelMeter(c, k.text)
-			ui.Spacer(c)
-			hint := m.HintDictate()
-			if s.Mode == prompt.Translate {
-				hint = m.HintTranslate()
+	// The capsule sits at the bottom center, as wide as what it shows.
+	ui.Column(c).Fill().AlignItems(ui.Center).Justify(ui.End).Padding(0, 0, 18, 0).Children(func() {
+		capsule := ui.Row(c).Height(capsuleHeight).Padding(0, 14).Gap(10).AlignItems(ui.Center).
+			Radius(capsuleHeight/2).Background(capsuleFill).Border(1, capsuleBorder).
+			Shadow(0, 6, 18, 0, capsuleShadow)
+		capsule.Children(func() {
+			switch s.State {
+			case controller.Recording:
+				pulsingDot(c)
+				if s.Mode == prompt.Translate {
+					a.targetChip(c, m, s)
+				}
+				a.waveform(c)
+				overlayKeycap(c, "esc")
+			case controller.Transcribing, controller.Rewriting, controller.Pasting:
+				thinkingDots(c)
+				ui.Text(c, stageText(m, s)).FontSize(12.5).TextColor(barText).NoWrap()
+			default:
+				ui.Text(c, noteText(m, s)).FontSize(12.5).TextColor(barText).MaxWidth(280).
+					MaxLines(1).Ellipsis("…")
 			}
-			ui.Text(c, hint).FontSize(11).TextColor(k.muted).NoWrap()
-		case controller.Transcribing, controller.Rewriting, controller.Pasting:
-			ui.Spinner(c).Size(16, 16)
-			ui.Text(c, stageText(m, s)).FontSize(13).TextColor(k.text).NoWrap()
-			ui.Spacer(c)
-			ui.Text(c, m.HintCancel()).FontSize(11).TextColor(k.muted).NoWrap()
-		default:
-			ui.Text(c, noteText(m, s)).FontSize(13).TextColor(k.text).MaxLines(1).Ellipsis("…").Grow(1)
+		})
+	})
+}
+
+// pulsingDot is the red recording light, breathing.
+func pulsingDot(c *ui.Context) {
+	dot := ui.Box(c.Key("rec-dot")).Size(8, 8).Radius(4).Background(recordingRed)
+	p := dot.Loop("pulse", 1400*time.Millisecond, ui.EaseInOut)
+	dot.Opacity(0.45 + 0.55*triangle(p))
+}
+
+// thinkingDots are three dots lighting up in turn while a request runs.
+func thinkingDots(c *ui.Context) {
+	ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
+		for i := range 3 {
+			d := ui.Box(c.Key(i)).Size(5, 5).Radius(2.5).Background(barText)
+			p := d.Loop("thinking", 900*time.Millisecond, ui.Linear)
+			phase := p - float32(i)/3
+			if phase < 0 {
+				phase++
+			}
+			d.Opacity(0.25 + 0.75*triangle(phase))
 		}
 	})
 }
 
-func (a *app) modeChip(c *ui.Context, m locales.Messages, s controller.Status, k barColors) {
-	if s.Mode != prompt.Translate {
-		ui.Text(c, m.ModeDictate()).FontSize(13).Bold().TextColor(k.text).NoWrap()
-		return
+// triangle rises from 0 to 1 and falls back as p goes from 0 to 1.
+func triangle(p float32) float32 {
+	if p < 0.5 {
+		return p * 2
 	}
-	chip := ui.Row(c).Gap(4).Padding(3, 8).Radius(6).Background(k.chip).
+	return 2 - p*2
+}
+
+// waveform scrolls the loudness of the last second from right to left.
+func (a *app) waveform(c *ui.Context) {
+	if now := time.Now(); now.Sub(a.levelAt) >= waveStep {
+		copy(a.levels[:], a.levels[1:])
+		a.levels[waveBars-1] = a.rec.Level()
+		a.levelAt = now
+	}
+	ui.Row(c).Gap(2).AlignItems(ui.Center).Height(22).Children(func() {
+		for i, level := range a.levels {
+			// Older bars fade a little, so the newest sound reads first.
+			fade := 0.45 + 0.55*float32(i)/float32(waveBars-1)
+			ui.Box(c.Key(i)).Width(2.5).Height(3 + 19*level).Radius(1.25).
+				Background(ui.RGBA(255, 255, 255, fade))
+		}
+	})
+	c.After(waveStep)
+}
+
+// targetChip shows the translation target; a click moves to the next one.
+func (a *app) targetChip(c *ui.Context, m locales.Messages, s controller.Status) {
+	chip := ui.Row(c.Key("target")).Padding(2, 8).Radius(6).Background(ui.RGBA(255, 255, 255, 0.12)).
 		Cursor(ui.CursorPointer).Tooltip(m.SwitchLanguageTooltip())
 	chip.Children(func() {
-		ui.Text(c, m.ModeTranslate(prompt.LanguageFor(s.Target).Label)).FontSize(13).Bold().TextColor(k.text).NoWrap()
+		ui.Text(c, "→ "+prompt.LanguageFor(s.Target).Label).FontSize(12).Bold().TextColor(barText).NoWrap()
 	})
 	if chip.Clicked() {
 		a.ctrl.SetTarget(a.store.Get().NextTarget(s.Target))
 	}
 }
 
-func (a *app) levelMeter(c *ui.Context, color ui.Color) {
-	level := a.rec.Level()
-	ui.Row(c).Gap(3).AlignItems(ui.Center).Height(24).Children(func() {
-		for _, w := range barWeights {
-			h := 3 + 21*level*w
-			ui.Box(c).Width(3).Height(h).Radius(1.5).Background(color)
-		}
-	})
-	// Keep the meter moving while recording.
-	c.After(50 * time.Millisecond)
+func overlayKeycap(c *ui.Context, key string) {
+	ui.Text(c, key).FontSize(10.5).Padding(1, 6).Radius(5).Border(1, ui.RGBA(255, 255, 255, 0.2)).
+		TextColor(barMuted).SingleLine()
 }
 
 func stageText(m locales.Messages, s controller.Status) string {
