@@ -155,6 +155,29 @@ func (a *app) save() {
 	a.saved = saveResult{state: saveDone}
 }
 
+// appearances are the appearance choices, in the order the segmented
+// control shows them, as the settings keep them.
+var appearances = []string{"", "light", "dark"}
+
+// applyAppearance makes the app light, dark or the system's.
+func applyAppearance(appearance string) {
+	source := mygo.ThemeSystem
+	switch appearance {
+	case "light":
+		source = mygo.ThemeLight
+	case "dark":
+		source = mygo.ThemeDark
+	}
+	mygo.Theme.SetSource(source)
+}
+
+// setAppearance switches the appearance at once and keeps the choice.
+func (a *app) setAppearance(i int) {
+	appearance := appearances[i]
+	_ = a.store.Update(func(s *store.Settings) { s.Appearance = appearance })
+	applyAppearance(appearance)
+}
+
 // uiLanguages are the interface languages, "" for the system's.
 var uiLanguages = []string{"", "en", "zh-Hans"}
 
@@ -204,6 +227,11 @@ func (a *app) settingsView(c *ui.Context) {
 			section(c, m.SectionGeneral(), func() {
 				ui.Form(c, func() {
 					ui.Field(c, m.FieldLanguage(), func() { a.languageSelect(c, m) })
+					ui.Field(c, m.FieldAppearance(), func() {
+						ui.Segmented(c.Key("appearance"), &a.appearance,
+							m.AppearanceSystem(), m.AppearanceLight(), m.AppearanceDark()).
+							OnChange(func() { a.setAppearance(a.appearance) })
+					})
 				})
 			})
 

@@ -138,3 +138,39 @@ func TestFormRoundTrip(t *testing.T) {
 		t.Errorf("no targets ticked should keep the default: %q", s.Targets)
 	}
 }
+
+func TestSettingsShowAppearance(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), "")
+	tt := ui.NewTester(a.settingsView, 560, 720)
+	tt.SetLocale("en")
+	for _, want := range []string{"Appearance", "System", "Light", "Dark"} {
+		if !tt.HasText(want) {
+			t.Errorf("no %q in %q", want, tt.Texts())
+		}
+	}
+	tt.SetLocale("zh-Hans")
+	for _, want := range []string{"外观", "浅色", "深色"} {
+		if !tt.HasText(want) {
+			t.Errorf("no %q in %q", want, tt.Texts())
+		}
+	}
+}
+
+func TestOverlayFollowsAppearance(t *testing.T) {
+	a := testApp(t)
+	a.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
+	tt := ui.NewTester(a.overlayView, overlayWidth, overlayHeight)
+	// A point on the bar's background, between the red dot and the label.
+	luminance := func() int {
+		px := tt.Image().RGBAAt(40, overlayHeight/2-12)
+		return (int(px.R) + int(px.G) + int(px.B)) / 3
+	}
+	tt.SetDark(false)
+	light := luminance()
+	tt.SetDark(true)
+	dark := luminance()
+	if light < 200 || dark > 60 {
+		t.Fatalf("background luminance light %d, dark %d", light, dark)
+	}
+}

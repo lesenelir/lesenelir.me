@@ -10,6 +10,10 @@
   "fieldLanguage": "Language",
   "@fieldLanguage": { "description": "Settings field choosing the language of the app's interface." },
   "languageSystem": "System default",
+  "fieldAppearance": "Appearance",
+  "appearanceSystem": "System",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark",
   "@languageSystem": { "description": "Language option: follow the languages set in macOS." },
 
   "sectionPermissions": "Permissions",

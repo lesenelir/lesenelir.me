@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"time"
 
@@ -51,6 +52,7 @@ type app struct {
 	perms           permissions
 	saved           saveResult
 	uiLanguage      string // "" follows the system
+	appearance      int    // index in appearances, bound to its control
 	uiLanguageLabel string // bound to the language select
 }
 
@@ -79,8 +81,11 @@ func (a *app) ready() {
 		log.Printf("settings: %v; using defaults", err)
 	}
 	a.loadKey()
-	a.uiLanguage = a.store.Get().UILanguage
+	settings := a.store.Get()
+	a.uiLanguage = settings.UILanguage
 	mygo.App.SetLocale(a.uiLanguage)
+	a.appearance = max(0, slices.Index(appearances, settings.Appearance))
+	applyAppearance(settings.Appearance)
 
 	client := &openrouter.Client{Key: a.apiKey, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	a.ctrl = controller.New(context.Background(), controller.Deps{

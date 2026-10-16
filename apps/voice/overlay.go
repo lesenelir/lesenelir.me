@@ -67,45 +67,68 @@ func (a *app) placeOverlay() {
 	a.overlay.SetPosition(area.X+(area.Width-overlayWidth)/2, area.Y+area.Height-overlayHeight-overlayMargin)
 }
 
+// barColors are the voice bar's colors in the light or dark appearance.
+type barColors struct {
+	background, border, text, muted, chip ui.Color
+}
+
+func overlayColors(dark bool) barColors {
+	if dark {
+		return barColors{
+			background: ui.RGBA(24, 24, 27, 0.92),
+			border:     ui.RGBA(255, 255, 255, 0.08),
+			text:       ui.Hex("#fafafa"),
+			muted:      ui.Hex("#a1a1aa"),
+			chip:       ui.RGBA(255, 255, 255, 0.12),
+		}
+	}
+	return barColors{
+		background: ui.RGBA(255, 255, 255, 0.94),
+		border:     ui.RGBA(0, 0, 0, 0.1),
+		text:       ui.Hex("#18181b"),
+		muted:      ui.Hex("#71717a"),
+		chip:       ui.RGBA(0, 0, 0, 0.06),
+	}
+}
+
 func (a *app) overlayView(c *ui.Context) {
 	t := c.Theme()
 	m := locales.In(c.Locale())
 	s := a.status
-	bg := ui.RGBA(24, 24, 27, 0.92)
-	text := ui.Hex("#fafafa")
-	muted := ui.Hex("#a1a1aa")
-	ui.Row(c).Fill().Padding(0, 16).Gap(12).AlignItems(ui.Center).Radius(overlayHeight / 2).Background(bg).Children(func() {
+	k := overlayColors(t.Dark)
+	ui.Row(c).Fill().Padding(0, 16).Gap(12).AlignItems(ui.Center).Radius(overlayHeight/2).
+		Background(k.background).Border(1, k.border).Children(func() {
 		switch s.State {
 		case controller.Recording:
 			ui.Box(c).Size(10, 10).Radius(5).Background(t.Danger)
-			a.modeChip(c, m, s, text)
-			a.levelMeter(c, text)
+			a.modeChip(c, m, s, k)
+			a.levelMeter(c, k.text)
 			ui.Spacer(c)
 			hint := m.HintDictate()
 			if s.Mode == prompt.Translate {
 				hint = m.HintTranslate()
 			}
-			ui.Text(c, hint).FontSize(11).TextColor(muted).NoWrap()
+			ui.Text(c, hint).FontSize(11).TextColor(k.muted).NoWrap()
 		case controller.Transcribing, controller.Rewriting, controller.Pasting:
 			ui.Spinner(c).Size(16, 16)
-			ui.Text(c, stageText(m, s)).FontSize(13).TextColor(text).NoWrap()
+			ui.Text(c, stageText(m, s)).FontSize(13).TextColor(k.text).NoWrap()
 			ui.Spacer(c)
-			ui.Text(c, m.HintCancel()).FontSize(11).TextColor(muted).NoWrap()
+			ui.Text(c, m.HintCancel()).FontSize(11).TextColor(k.muted).NoWrap()
 		default:
-			ui.Text(c, noteText(m, s)).FontSize(13).TextColor(text).MaxLines(1).Ellipsis("…").Grow(1)
+			ui.Text(c, noteText(m, s)).FontSize(13).TextColor(k.text).MaxLines(1).Ellipsis("…").Grow(1)
 		}
 	})
 }
 
-func (a *app) modeChip(c *ui.Context, m locales.Messages, s controller.Status, text ui.Color) {
+func (a *app) modeChip(c *ui.Context, m locales.Messages, s controller.Status, k barColors) {
 	if s.Mode != prompt.Translate {
-		ui.Text(c, m.ModeDictate()).FontSize(13).Bold().TextColor(text).NoWrap()
+		ui.Text(c, m.ModeDictate()).FontSize(13).Bold().TextColor(k.text).NoWrap()
 		return
 	}
-	chip := ui.Row(c).Gap(4).Padding(3, 8).Radius(6).Background(ui.RGBA(255, 255, 255, 0.12)).
+	chip := ui.Row(c).Gap(4).Padding(3, 8).Radius(6).Background(k.chip).
 		Cursor(ui.CursorPointer).Tooltip(m.SwitchLanguageTooltip())
 	chip.Children(func() {
-		ui.Text(c, m.ModeTranslate(prompt.LanguageFor(s.Target).Label)).FontSize(13).Bold().TextColor(text).NoWrap()
+		ui.Text(c, m.ModeTranslate(prompt.LanguageFor(s.Target).Label)).FontSize(13).Bold().TextColor(k.text).NoWrap()
 	})
 	if chip.Clicked() {
 		a.ctrl.SetTarget(a.store.Get().NextTarget(s.Target))

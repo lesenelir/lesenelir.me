@@ -9,8 +9,8 @@ A macOS menu bar app for voice input, built with [MyGo](https://mygo.egoist.dev/
 | `Tab` (while translating) | Switch the target language. Clicking the language on the voice bar does the same. |
 | `Esc` | Cancel while recording, transcribing or rewriting. |
 
-The interface is in English or Simplified Chinese: Settings → General → Language switches it at once, or follows
-the system. Strings live in `locales/en.json` and `locales/zh-Hans.json`; `go tool mygo generate` (also run by
+The interface is in English or Simplified Chinese, light or dark: Settings → General → Language and Appearance
+switch them at once, or follow the system. Strings live in `locales/en.json` and `locales/zh-Hans.json`; `go tool mygo generate` (also run by
 `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
 Speech to text and the rewrite both go through [OpenRouter](https://openrouter.ai/). Set the API key in Settings

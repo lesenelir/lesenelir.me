@@ -20,6 +20,8 @@ type Settings struct {
 	// UILanguage is the language of the app's interface, as a BCP 47 tag
 	// ("en", "zh-Hans"); "" follows the system.
 	UILanguage string `json:"uiLanguage"`
+	// Appearance is "light", "dark", or "" to follow the system.
+	Appearance string `json:"appearance"`
 
 	// ASRModel is the OpenRouter speech-to-text model; ASRLanguage an
 	// ISO 639-1 hint, "" to detect it.

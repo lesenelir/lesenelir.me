@@ -100,6 +100,46 @@ func (msgs Messages) LanguageSystem() string {
 	return Catalog.Format(msgs.locale, "languageSystem", nil)
 }
 
+// FieldAppearance says "Appearance"
+// in the language the app shows.
+func FieldAppearance() string { return In(i18n.Locale()).FieldAppearance() }
+
+// FieldAppearance says "Appearance"
+// in the language of msgs.
+func (msgs Messages) FieldAppearance() string {
+	return Catalog.Format(msgs.locale, "fieldAppearance", nil)
+}
+
+// AppearanceSystem says "System"
+// in the language the app shows.
+func AppearanceSystem() string { return In(i18n.Locale()).AppearanceSystem() }
+
+// AppearanceSystem says "System"
+// in the language of msgs.
+func (msgs Messages) AppearanceSystem() string {
+	return Catalog.Format(msgs.locale, "appearanceSystem", nil)
+}
+
+// AppearanceLight says "Light"
+// in the language the app shows.
+func AppearanceLight() string { return In(i18n.Locale()).AppearanceLight() }
+
+// AppearanceLight says "Light"
+// in the language of msgs.
+func (msgs Messages) AppearanceLight() string {
+	return Catalog.Format(msgs.locale, "appearanceLight", nil)
+}
+
+// AppearanceDark says "Dark"
+// in the language the app shows.
+func AppearanceDark() string { return In(i18n.Locale()).AppearanceDark() }
+
+// AppearanceDark says "Dark"
+// in the language of msgs.
+func (msgs Messages) AppearanceDark() string {
+	return Catalog.Format(msgs.locale, "appearanceDark", nil)
+}
+
 // SectionPermissions says "Permissions"
 // in the language the app shows.
 func SectionPermissions() string { return In(i18n.Locale()).SectionPermissions() }
