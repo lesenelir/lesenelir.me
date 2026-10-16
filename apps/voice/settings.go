@@ -326,7 +326,7 @@ func (a *app) settingsView(c *ui.Context) {
 		if !vibrant {
 			side.Background(t.Surface)
 		}
-		side.Children(func() { a.settingsSidebar(c, m, vibrant) })
+		side.Children(func() { a.settingsSidebar(c, m) })
 		ui.Box(c).Width(1).Background(pal.border)
 		ui.Column(c).Grow(1).MinWidth(0).Background(pal.pane).Children(func() {
 			bar := c.TitleBar()
@@ -359,19 +359,45 @@ func (a *app) settingsView(c *ui.Context) {
 	})
 }
 
-func (a *app) settingsSidebar(c *ui.Context, m locales.Messages, vibrant bool) {
+func (a *app) settingsSidebar(c *ui.Context, m locales.Messages) {
 	// The traffic lights sit here.
 	ui.Box(c).Height(headerHeight).Shrink(0).DragWindow()
-	list := ui.Sidebar(c, &a.page, func() {
-		ui.SidebarItem(c, pageGeneral, iconGeneral, m.NavGeneral())
-		ui.SidebarItem(c, pageHistory, iconHistory, m.NavHistory())
-		ui.SidebarItem(c, pagePermissions, iconPermissions, m.NavPermissions())
-		ui.SidebarItem(c, pageModels, iconModels, m.NavModels())
-		ui.SidebarItem(c, pageTranslation, iconTranslation, m.NavTranslation())
-		ui.SidebarItem(c, pageDictionary, iconDictionary, m.NavDictionary())
-	}).Grow(1).Label(m.SettingsTitle())
-	if vibrant {
-		list.Background(ui.Transparent)
+	ui.Column(c).Gap(2).Padding(0, 10).Role(ui.RoleList).Label(m.SettingsTitle()).Children(func() {
+		a.navItem(c, pageGeneral, iconGeneral, m.NavGeneral())
+		a.navItem(c, pageHistory, iconHistory, m.NavHistory())
+		a.navItem(c, pagePermissions, iconPermissions, m.NavPermissions())
+		a.navItem(c, pageModels, iconModels, m.NavModels())
+		a.navItem(c, pageTranslation, iconTranslation, m.NavTranslation())
+		a.navItem(c, pageDictionary, iconDictionary, m.NavDictionary())
+	})
+}
+
+// navItem is a page in the sidebar: the one shown filled with the accent
+// color, as macOS's sidebars show it, and a faint accent behind the one
+// hovered.
+func (a *app) navItem(c *ui.Context, page string, icon *ui.SVG, label string) {
+	t := c.Theme()
+	hover := float32(0.08)
+	if t.Dark {
+		hover = 0.14
+	}
+	chosen := a.page == page
+	item := ui.ButtonBase(c.Key("nav-"+page)).Gap(t.Space(2)).Padding(t.Space(1.5), t.Space(2)).
+		Radius(t.Radius).AlignItems(ui.Center).Label(label).Selected(chosen)
+	iconColor, textColor := t.Accent, t.Text
+	switch {
+	case chosen:
+		item.Background(t.Accent)
+		iconColor, textColor = t.AccentText, t.AccentText
+	case item.Hovered():
+		item.Background(ui.RGBA(t.Accent.R, t.Accent.G, t.Accent.B, hover))
+	}
+	item.Children(func() {
+		ui.Icon(c, icon).FontSize(16).TextColor(iconColor)
+		ui.Text(c, label).Grow(1).SingleLine().TextColor(textColor)
+	})
+	if item.Clicked() {
+		a.page = page
 	}
 }
 
