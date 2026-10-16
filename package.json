@@ -14,6 +14,8 @@
   "scripts": {
     "build:website": "pnpm --filter @lesenelir/website build",
     "dev:website": "pnpm --filter @lesenelir/website dev",
+    "build:voice": "pnpm --filter @lesenelir/voice build",
+    "dev:voice": "pnpm --filter @lesenelir/voice dev",
     "typecheck": "pnpm -r typecheck",
     "check": "biome check --write .",
     "lint": "biome check .",

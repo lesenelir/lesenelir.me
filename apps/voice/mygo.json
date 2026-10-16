@@ -1,0 +1,13 @@
+{
+  "name": "Voice",
+  "identifier": "me.lesenelir.voice",
+  "version": "0.1.0",
+  "out": "build",
+  "macos": {
+    "minimumSystemVersion": "13.0",
+    "infoPlist": {
+      "LSUIElement": true,
+      "NSMicrophoneUsageDescription": "Voice records what you say to turn it into text."
+    }
+  }
+}
