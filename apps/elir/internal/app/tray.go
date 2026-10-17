@@ -3,11 +3,7 @@
 package app
 
 import (
-	"bytes"
-	"image"
-	"image/color"
-	"image/draw"
-	"image/png"
+	_ "embed"
 	"log"
 
 	"github.com/egoist/mygo"
@@ -18,7 +14,7 @@ import (
 func (a *App) setupTray() {
 	var err error
 	a.tray, err = mygo.NewTray(mygo.TrayOptions{
-		Icon:           trayIcon(),
+		Icon:           trayIcon,
 		IconIsTemplate: true,
 		ToolTip:        locales.TrayTooltip(),
 		Menu:           a.trayMenu(),
@@ -56,21 +52,9 @@ func (a *App) localizeTray() {
 	a.tray.SetMenu(a.trayMenu())
 }
 
-// trayIcon draws a toolbox, black on transparent for macOS to tint.
-func trayIcon() []byte {
-	img := image.NewNRGBA(image.Rect(0, 0, 32, 32))
-	ink := image.NewUniform(color.NRGBA{A: 255})
-	for _, r := range []image.Rectangle{
-		image.Rect(12, 5, 20, 7),   // top of the handle
-		image.Rect(12, 7, 14, 11),  // left of the handle
-		image.Rect(18, 7, 20, 11),  // right of the handle
-		image.Rect(4, 11, 28, 17),  // lid
-		image.Rect(4, 19, 28, 27),  // body
-		image.Rect(14, 15, 18, 21), // latch, across the seam
-	} {
-		draw.Draw(img, r, ink, image.Point{}, draw.Src)
-	}
-	var b bytes.Buffer
-	_ = png.Encode(&b, img)
-	return b.Bytes()
-}
+// trayIcon is the head of the app icon's character, black on transparent
+// for macOS to tint: 16 points, drawn at 32 pixels for Retina by
+// design/icon/menubar.go.
+//
+//go:embed trayicon.png
+var trayIcon []byte
