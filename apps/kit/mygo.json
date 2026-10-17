@@ -1,0 +1,14 @@
+{
+  "name": "Kit",
+  "identifier": "me.lesenelir.kit",
+  "version": "0.1.0",
+  "out": "build",
+  "i18n": { "dir": "locales", "source": "en" },
+  "macos": {
+    "minimumSystemVersion": "13.0",
+    "infoPlist": {
+      "LSUIElement": true,
+      "NSMicrophoneUsageDescription": "Kit’s voice input records what you say to turn it into text."
+    }
+  }
+}

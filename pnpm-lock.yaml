@@ -18,6 +18,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  apps/kit: {}
+
   apps/ts-starter:
     devDependencies:
       '@types/node':
@@ -35,8 +37,6 @@ importers:
       vitest:
         specifier: ^5.0.4
         version: 5.0.4(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(jiti@2.7.0))
-
-  apps/voice: {}
 
   apps/website:
     dependencies:

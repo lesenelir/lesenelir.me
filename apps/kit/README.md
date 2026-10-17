@@ -1,0 +1,79 @@
+# Kit
+
+A personal toolbox for macOS: a menu bar app whose tools share one settings window, built with
+[MyGo](https://mygo.egoist.dev/) native UI. Its first tool is voice input; more will follow.
+
+## Voice input
+
+| Key | Action |
+| --- | --- |
+| `Fn` | Start dictation; tap again to finish. The text is cleaned up and pasted at the cursor. |
+| `Fn` + `Left Shift` | Start translation; tap `Fn` to finish. |
+| `Tab` (while translating) | Switch the target language. Clicking the language on the voice bar does the same. |
+| `Esc` | Cancel while recording, transcribing or rewriting. |
+
+Speech is transcribed while you talk by [Soniox](https://soniox.com/) real-time speech to text, so the text is
+nearly ready when you stop. The cleanup and translation go through [OpenRouter](https://openrouter.ai/), which also
+transcribes the whole recording when Soniox has no key or fails. Set both API keys in Settings → Models (stored in
+the Keychain), or export `SONIOX_API_KEY` and `OPENROUTER_API_KEY` for development.
+
+The text of each dictation and translation is kept in `~/Library/Application Support/Kit/voice/history.jsonl` (text
+only, never audio; the latest 1,000). Settings → History shows it, and can copy, delete, clear it all, or stop keeping
+it.
+
+## The app
+
+The interface is in English or Simplified Chinese, light or dark, in an accent color: Settings → General switches
+them at once, or follows the system. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
+`go tool mygo generate` (also run by `mygo dev` and `mygo build`) writes the typed `locales` package from them.
+
+Settings are kept in `~/Library/Application Support/Kit/settings.json`, a section per part: `app` for the app itself,
+`voice` for voice input. On its first launch Kit brings over the settings, history and API keys of Voice, the
+standalone app it grew from.
+
+## Development
+
+```sh
+pnpm dev:kit     # from the repo root: go tool mygo dev
+pnpm build:kit   # Kit.app and a disk image in apps/kit/build
+cd apps/kit && go test ./...
+```
+
+Go 1.27.1 or later is required; with an older Go, `GOTOOLCHAIN=auto` (the default) downloads it.
+
+## Permissions
+
+- **Accessibility**: watching `Fn`/`Esc`/`Tab` and pressing `Cmd+V`.
+- **Microphone**: macOS asks on the first recording.
+- Set System Settings → Keyboard → "Press 🌐 key to" → "Do Nothing", or `Fn` also switches the input source.
+
+Builds are ad-hoc signed, so macOS may ask for Accessibility again after a rebuild.
+
+## Layout
+
+```text
+main.go                       adds the tools to the app and runs it
+internal/app                  the shell: settings window and sidebar, General and Permissions pages, menu bar icon,
+                              the Feature interface tools implement, migration from Voice
+internal/widget               the settings window's building blocks: grouped rows, glass dropdown, badges, keycaps
+internal/store                the settings JSON, a typed section per part
+internal/secret               API keys in the Keychain
+internal/openrouter           OpenRouter client
+internal/platform/darwin      CGEventTap, AudioQueue, CoreAudio, Cmd+V, permissions (purego)
+internal/voice                voice input: the feature, voice bar, its settings pages, pipeline adapters
+internal/voice/config         its settings section
+internal/voice/controller     record → transcribe → rewrite → paste state machine
+internal/voice/hotkey         Fn / Fn+Left Shift / Esc / Tab decisions
+internal/voice/soniox         Soniox real-time streaming client
+internal/voice/prompt         prompts and spoken-language detection
+internal/voice/history        local history of pasted text
+internal/voice/audio          WAV and FLAC encoding, levels
+locales                       interface strings (en, zh-Hans) and their generated accessors
+```
+
+## Adding a tool
+
+A tool is a package under `internal/` with a type that implements `app.Feature`: `Start` sets it up (its settings
+section from `Host.Store`, its windows, its files under `Host.DataDir/<tool>`), and `Pages` lists its settings pages.
+It may also implement `app.NeedsSetup`, `app.SettingsShown`, `app.SettingsBlurred` and `app.PermissionsView`. Add it
+in `main.go` with `kit.Add`.
