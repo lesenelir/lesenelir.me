@@ -35,6 +35,12 @@ only be decrypted with that Windows user's credentials. They are not portable to
 another account. Screenshot selection uses built-in Windows PowerShell and
 WinForms; environments that disable these cannot use screenshot capture.
 
+The screenshot helper uses the system PowerShell executable and modules, and does
+not inherit Elir's API key environment variables. Temporary auto-paste text opts
+out of Windows clipboard history and device synchronization. Other local apps can
+still read the clipboard. If the secret file cannot be read or decrypted, Elir
+refuses to replace it; restore the file and restart Elir before saving keys again.
+
 Windows updates are installed manually. The existing signed update feed and
 `scripts/release.sh` remain the macOS release path. The sections below describe
 macOS shortcuts and paths.

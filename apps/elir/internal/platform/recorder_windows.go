@@ -6,28 +6,26 @@ import (
 	"math"
 	"sync"
 	"sync/atomic"
-	"syscall"
 	"time"
 	"unsafe"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/audio"
 )
 
-var kernel32 = syscall.NewLazyDLL("kernel32.dll")
 var createEvent = kernel32.NewProc("CreateEventW")
 var setEvent = kernel32.NewProc("SetEvent")
 var waitEvent = kernel32.NewProc("WaitForSingleObject")
 var closeHandle = kernel32.NewProc("CloseHandle")
 
-var winmm = syscall.NewLazyDLL("winmm.dll")
+var winmm = systemDLL("winmm.dll")
 var (
-	waveOpen         = winmm.NewProc("waveInOpen")
-	wavePrepare      = winmm.NewProc("waveInPrepareHeader")
-	waveAdd          = winmm.NewProc("waveInAddBuffer")
-	waveStart        = winmm.NewProc("waveInStart")
-	waveReset        = winmm.NewProc("waveInReset")
-	waveUnprepare    = winmm.NewProc("waveInUnprepareHeader")
-	waveClose        = winmm.NewProc("waveInClose")
+	waveOpen         = winmm.MustFindProc("waveInOpen")
+	wavePrepare      = winmm.MustFindProc("waveInPrepareHeader")
+	waveAdd          = winmm.MustFindProc("waveInAddBuffer")
+	waveStart        = winmm.MustFindProc("waveInStart")
+	waveReset        = winmm.MustFindProc("waveInReset")
+	waveUnprepare    = winmm.MustFindProc("waveInUnprepareHeader")
+	waveClose        = winmm.MustFindProc("waveInClose")
 	microphoneStatus atomic.Int32
 )
 

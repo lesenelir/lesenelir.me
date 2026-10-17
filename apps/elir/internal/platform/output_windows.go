@@ -17,11 +17,11 @@ type guid struct {
 }
 
 var (
-	ole32         = syscall.NewLazyDLL("ole32.dll")
-	coInit        = ole32.NewProc("CoInitializeEx")
-	coUninit      = ole32.NewProc("CoUninitialize")
-	coCreate      = ole32.NewProc("CoCreateInstance")
-	coFree        = ole32.NewProc("CoTaskMemFree")
+	ole32         = systemDLL("ole32.dll")
+	coInit        = ole32.MustFindProc("CoInitializeEx")
+	coUninit      = ole32.MustFindProc("CoUninitialize")
+	coCreate      = ole32.MustFindProc("CoCreateInstance")
+	coFree        = ole32.MustFindProc("CoTaskMemFree")
 	clsEnumerator = guid{0xbcde0395, 0xe52f, 0x467c, [8]byte{0x8e, 0x3d, 0xc4, 0x57, 0x92, 0x91, 0x69, 0x2e}}
 	iidEnumerator = guid{0xa95664d2, 0x9614, 0x4f35, [8]byte{0xa7, 0x46, 0xde, 0x8d, 0xb6, 0x36, 0x17, 0xe6}}
 	iidVolume     = guid{0x5cdf2c82, 0x841e, 0x4546, [8]byte{0x97, 0x22, 0x0c, 0xf7, 0x40, 0x78, 0x22, 0x9a}}

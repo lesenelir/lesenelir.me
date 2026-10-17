@@ -9,13 +9,13 @@ import (
 	"github.com/egoist/mygo"
 )
 
-var user32 = syscall.NewLazyDLL("user32.dll")
+var user32 = systemDLL("user32.dll")
 var (
-	setHook   = user32.NewProc("SetWindowsHookExW")
-	unhook    = user32.NewProc("UnhookWindowsHookEx")
-	nextHook  = user32.NewProc("CallNextHookEx")
-	asyncKey  = user32.NewProc("GetAsyncKeyState")
-	sendInput = user32.NewProc("SendInput")
+	setHook   = user32.MustFindProc("SetWindowsHookExW")
+	unhook    = user32.MustFindProc("UnhookWindowsHookEx")
+	nextHook  = user32.MustFindProc("CallNextHookEx")
+	asyncKey  = user32.MustFindProc("GetAsyncKeyState")
+	sendInput = user32.MustFindProc("SendInput")
 )
 
 var ErrNotTrusted = errors.New("Windows blocked keyboard input; use an app with the same privilege level")

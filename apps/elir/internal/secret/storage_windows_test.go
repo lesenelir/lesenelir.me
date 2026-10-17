@@ -50,4 +50,19 @@ func TestWindowsSecretsRejectCorruption(t *testing.T) {
 	if _, err := protectData(data, false); err == nil {
 		t.Fatal("accepted corrupt encrypted data")
 	}
+	path := filepath.Join(t.TempDir(), "secrets.json")
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	st, err := OpenStore(path)
+	if err == nil {
+		t.Fatal("opened corrupt encrypted store")
+	}
+	if err := st.put("new", "must-not-overwrite"); err == nil {
+		t.Fatal("overwrote corrupt encrypted store")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(data, after) {
+		t.Fatalf("corrupt original changed: %v", err)
+	}
 }

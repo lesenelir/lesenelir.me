@@ -3,6 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 Add-Type @'
 using System;
 using System.Runtime.InteropServices;
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 public class ElirCapture {
     [StructLayout(LayoutKind.Sequential)] public struct Point { public int X, Y; }
     [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left, Top, Right, Bottom; }

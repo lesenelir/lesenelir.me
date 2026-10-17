@@ -30,3 +30,28 @@ func TestPasteStopsBeforeInjectionWhenClipboardFails(t *testing.T) {
 		}
 	}
 }
+
+func TestTemporaryPasteOptsOutOfWindowsHistory(t *testing.T) {
+	read, write, press := readClipboard, writeClipboard, injectControl
+	t.Cleanup(func() { readClipboard, writeClipboard, injectControl = read, write, press })
+	readClipboard = func(...transfer.Format) (transfer.Data, error) { return transfer.Data{}, nil }
+	var written transfer.Data
+	writeClipboard = func(data transfer.Data, _ ...mygo.ClipboardOptions) error { written = data; return nil }
+	// Stop before scheduling restoration, without injecting real input.
+	injectControl = func(uint16) error { return ErrNotTrusted }
+	if err := (Paster{}).Paste("private transcript"); !errors.Is(err, ErrNotTrusted) {
+		t.Fatal(err)
+	}
+	items := written.Items()
+	if len(items) != 1 {
+		t.Fatal("no clipboard item")
+	}
+	text, err := items[0].Read(transfer.Text)
+	if err != nil || string(text) != "private transcript" {
+		t.Fatal("missing paste text")
+	}
+	marker, err := items[0].Read("ExcludeClipboardContentFromMonitorProcessing")
+	if err != nil || len(marker) == 0 {
+		t.Fatal("temporary text can enter Windows clipboard history")
+	}
+}

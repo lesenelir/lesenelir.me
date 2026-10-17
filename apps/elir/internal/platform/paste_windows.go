@@ -21,7 +21,12 @@ func (Paster) Paste(text string) error {
 		return err
 	}
 	keep := len(saved.Items()) > 0
-	if err := writeClipboard(transfer.TextData(text)); err != nil {
+	// This temporary transport must not become a Windows history/cloud entry.
+	data := transfer.New(transfer.NewItem(
+		transfer.Bytes(transfer.Text, []byte(text)),
+		transfer.Bytes("ExcludeClipboardContentFromMonitorProcessing", []byte{0}),
+	))
+	if err := writeClipboard(data); err != nil {
 		return err
 	}
 	if err := injectControl('V'); err != nil {

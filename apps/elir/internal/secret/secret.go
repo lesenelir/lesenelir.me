@@ -16,6 +16,7 @@ import (
 	"errors"
 	"io/fs"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,8 +33,9 @@ const TypingDelay = 600 * time.Millisecond
 type Store struct {
 	path string
 
-	mu     sync.Mutex
-	values map[string]string // a name present with "" is a key removed
+	mu      sync.Mutex
+	values  map[string]string // a name present with "" is a key removed
+	loadErr error
 }
 
 // OpenStore reads the keys at path. A missing file is an empty store.
@@ -43,10 +45,17 @@ func OpenStore(path string) (*Store, error) {
 	if errors.Is(err, fs.ErrNotExist) {
 		return st, nil
 	}
-	if err != nil {
-		return st, err
+	if err == nil {
+		err = json.Unmarshal(data, &st.values)
+		if err == nil && st.values == nil {
+			err = errors.New("secret: expected a JSON object")
+		}
 	}
-	return st, json.Unmarshal(data, &st.values)
+	if err != nil {
+		st.values = map[string]string{}
+	}
+	st.loadErr = err
+	return st, err
 }
 
 // lookup returns a key, and whether the file has it, even as removed.
@@ -61,8 +70,12 @@ func (st *Store) lookup(name string) (string, bool) {
 func (st *Store) put(name, value string) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	st.values[name] = value
-	data, err := json.MarshalIndent(st.values, "", "  ")
+	if st.loadErr != nil {
+		return st.loadErr
+	}
+	values := maps.Clone(st.values)
+	values[name] = value
+	data, err := json.MarshalIndent(values, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -73,7 +86,11 @@ func (st *Store) put(name, value string) error {
 	if err := writeSecretFile(tmp, data); err != nil {
 		return err
 	}
-	return os.Rename(tmp, st.path)
+	if err := os.Rename(tmp, st.path); err != nil {
+		return err
+	}
+	st.values = values
+	return nil
 }
 
 // Import keeps a key from elsewhere, unless the file has it already, and
