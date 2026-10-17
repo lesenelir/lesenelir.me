@@ -38,6 +38,9 @@ func (a *App) generalPage() Page {
 				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(), func() {
 					ui.Switch(c.Key("open-at-login"), &a.openAtLogin).Label(m.FieldOpenAtLogin()).OnChange(a.setOpenAtLogin)
 				})
+				g.Row(c, m.FieldShowInDock(), m.ShowInDockNote(), func() {
+					ui.Switch(c.Key("show-in-dock"), &a.showInDock).Label(m.FieldShowInDock()).OnChange(a.setShowInDock)
+				})
 			})
 			a.updatesGroup(c, m, pal)
 		},
@@ -48,6 +51,29 @@ func (a *App) generalPage() Page {
 // the page.
 func (a *App) update(fn func(*Settings)) {
 	a.saveErr = a.settings.Update(fn)
+}
+
+// applyDock shows or hides Kit's Dock icon; its menu bar icon stays.
+func applyDock(show bool) {
+	if show {
+		mygo.App.SetActivationPolicy(mygo.ActivationPolicyRegular)
+	} else {
+		mygo.App.SetActivationPolicy(mygo.ActivationPolicyAccessory)
+	}
+}
+
+// setShowInDock keeps the choice and applies it at once. macOS deactivates
+// an app that leaves the Dock, so the settings window comes back to the
+// front.
+func (a *App) setShowInDock() {
+	show := a.showInDock
+	a.update(func(s *Settings) { s.ShowInDock = show })
+	applyDock(show)
+	if a.window != nil {
+		mygo.App.Focus()
+		a.window.Show()
+		a.window.Focus()
+	}
 }
 
 // setOpenAtLogin makes the app start when the user logs in, or not, as

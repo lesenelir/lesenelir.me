@@ -220,5 +220,7 @@
   "fieldCheckUpdates": "Check for updates automatically",
   "checkUpdatesNote": "Once a day. Kit asks before it installs one.",
   "whatsNew": "What’s new",
-  "trayUpdate": "Update to Kit {version}…"
+  "trayUpdate": "Update to Kit {version}…",
+  "fieldShowInDock": "Show in Dock",
+  "showInDockNote": "Also in ⌘Tab. The menu bar icon always stays."
 }

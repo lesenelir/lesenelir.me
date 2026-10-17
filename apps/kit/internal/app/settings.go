@@ -16,6 +16,9 @@ type Settings struct {
 	// AccentColor is the accent color's name ("blue", "green"…), or "" to
 	// follow the one chosen in macOS.
 	AccentColor string `json:"accentColor"`
+	// ShowInDock gives Kit a Dock icon, and a place in ⌘Tab, besides its
+	// menu bar icon.
+	ShowInDock bool `json:"showInDock"`
 	// CheckUpdates checks for a new version a while after launch and
 	// then daily.
 	CheckUpdates bool `json:"checkUpdates"`

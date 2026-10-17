@@ -41,6 +41,7 @@ type App struct {
 	accent       string // the accent color's id, bound to its select
 	openAtLogin  bool   // as the system has it, bound to its switch
 	checkAuto    bool   // bound to the switch of Settings.CheckUpdates
+	showInDock   bool   // bound to the switch of Settings.ShowInDock
 	upd          updates
 	systemAccent ui.Color // macOS's accent, for the "System" swatch
 	perms        permissions
@@ -63,6 +64,12 @@ func (a *App) Run() error {
 	mygo.App.SetActivationPolicy(mygo.ActivationPolicyAccessory)
 	mygo.App.OnWindowAllClosed(func() {})
 	mygo.App.OnSecondInstance(func([]string, string) { a.showSettings("") })
+	// A click on the Dock icon, when Kit has one, opens the settings.
+	mygo.App.OnActivate(func(hasVisibleWindows bool) {
+		if a.showInDock && !hasVisibleWindows {
+			a.showSettings("")
+		}
+	})
 	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) { a.quitting = true })
 	mygo.App.WhenReady(a.ready)
 	return mygo.App.Run()
@@ -91,6 +98,7 @@ func (a *App) ready() {
 	a.accent = s.AccentColor
 	a.openAtLogin = mygo.App.OpenAtLogin()
 	a.checkAuto = s.CheckUpdates
+	a.showInDock = s.ShowInDock
 
 	a.window = mygo.NewWindow(mygo.WindowOptions{
 		Title:     locales.SettingsTitle(),
@@ -138,6 +146,7 @@ func (a *App) ready() {
 	// MyGo refreshes the light or dark look of the windows that exist when
 	// the appearance is set, so set it once the features' are made too.
 	applyAppearance(s.Appearance)
+	applyDock(s.ShowInDock)
 
 	a.setupTray()
 	mygo.App.OnLocaleChanged(func(string) {

@@ -1835,3 +1835,23 @@ func TrayUpdate(version string) string { return In(i18n.Locale()).TrayUpdate(ver
 func (msgs Messages) TrayUpdate(version string) string {
 	return Catalog.Format(msgs.locale, "trayUpdate", map[string]any{"version": version})
 }
+
+// FieldShowInDock says "Show in Dock"
+// in the language the app shows.
+func FieldShowInDock() string { return In(i18n.Locale()).FieldShowInDock() }
+
+// FieldShowInDock says "Show in Dock"
+// in the language of msgs.
+func (msgs Messages) FieldShowInDock() string {
+	return Catalog.Format(msgs.locale, "fieldShowInDock", nil)
+}
+
+// ShowInDockNote says "Also in ⌘Tab. The menu bar icon always stays."
+// in the language the app shows.
+func ShowInDockNote() string { return In(i18n.Locale()).ShowInDockNote() }
+
+// ShowInDockNote says "Also in ⌘Tab. The menu bar icon always stays."
+// in the language of msgs.
+func (msgs Messages) ShowInDockNote() string {
+	return Catalog.Format(msgs.locale, "showInDockNote", nil)
+}

@@ -176,5 +176,7 @@
   "fieldCheckUpdates": "自动检查更新",
   "checkUpdatesNote": "每天检查一次，安装前会先问你。",
   "whatsNew": "更新内容",
-  "trayUpdate": "更新到 Kit {version}…"
+  "trayUpdate": "更新到 Kit {version}…",
+  "fieldShowInDock": "在程序坞中显示",
+  "showInDockNote": "也会出现在 ⌘Tab 中，菜单栏图标始终保留。"
 }

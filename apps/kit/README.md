@@ -35,7 +35,8 @@ show in Finder or delete, and clears them all.
 ## The app
 
 The interface is in English or Simplified Chinese, light or dark, in an accent color: Settings → General switches
-them at once, or follows the system. It also makes Kit open at login. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
+them at once, or follows the system. It also makes Kit open at login, and shows it in the Dock (and ⌘Tab) besides
+the menu bar. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
 `go tool mygo generate` (also run by `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
 Settings are kept in `~/Library/Application Support/Kit/settings.json`, a section per part: `app` for the app itself,
