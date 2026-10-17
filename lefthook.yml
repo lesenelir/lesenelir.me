@@ -4,8 +4,8 @@ pre-commit:
     - name: biome check
       run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
-    - name: go fmt and vet (kit)
-      root: apps/kit/
+    - name: go fmt and vet (elir)
+      root: apps/elir/
       glob: "*.go"
       run: gofmt -l -w {staged_files} && go vet ./...
       stage_fixed: true

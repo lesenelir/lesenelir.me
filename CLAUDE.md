@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A pnpm monorepo (`apps/*`, `packages/*`; Node >= 24, pnpm 11) holding lesenelir's personal projects:
 
 - `apps/website` — the lesenelir.me site (Next.js 16 App Router, React 19, Tailwind CSS 4, MDX, Jotai), deployed on Vercel.
-- `apps/kit` — Kit, a personal macOS menu bar toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
+- `apps/elir` — Elir (formerly Kit, and Voice before it), a personal macOS menu bar toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
 - `apps/ts-starter` — the TypeScript library template (bunchee + vitest).
 - `packages/create-ts-starter` — the `npm create @lesenelir/ts-starter` CLI. Its `template` script copies `apps/ts-starter` into a gitignored `template/` folder that gets published.
 
@@ -18,9 +18,9 @@ Run from the repo root:
 ```sh
 pnpm dev:website        # next dev
 pnpm build:website      # next build
-pnpm dev:kit            # go tool mygo dev
-pnpm build:kit          # Kit.app + disk image in apps/kit/build
-pnpm release:kit 0.1.0  # test, build a universal dmg, tag kit-v0.1.0, push, GitHub release (--dry-run to stop before tagging)
+pnpm dev:elir            # go tool mygo dev
+pnpm build:elir          # Elir.app + disk image in apps/elir/build
+pnpm release:elir 0.1.0  # test, build a universal dmg, tag kit-v0.1.0, push, GitHub release (--dry-run to stop before tagging)
 pnpm typecheck          # every package; the website runs `next typegen && tsc --noEmit`
 pnpm lint               # biome check (no writes)
 pnpm check              # biome check --write (lint + format + organize imports)
@@ -29,14 +29,14 @@ pnpm check              # biome check --write (lint + format + organize imports)
 Tests:
 
 ```sh
-cd apps/kit && go test ./...                              # all Go tests
-cd apps/kit && go test ./internal/voice/hotkey -run TestX # a single Go test
+cd apps/elir && go test ./...                              # all Go tests
+cd apps/elir && go test ./internal/voice/hotkey -run TestX # a single Go test
 pnpm --filter @lesenelir/ts-starter exec vitest run test/index.test.ts
 ```
 
-The website has no tests. For Kit changes, the repo's MyGo skill (`apps/kit/.agents/skills/mygo-maintenance/SKILL.md`) also recommends `go tool mygo vet .` and `CGO_ENABLED=0 go test ./...`. Read that skill before touching any MyGo UI code (`internal/app`, `internal/widget`, the views in `internal/voice`); it covers element lifetimes, handles/keys, and keeping work off the UI thread.
+The website has no tests. For Elir changes, the repo's MyGo skill (`apps/elir/.agents/skills/mygo-maintenance/SKILL.md`) also recommends `go tool mygo vet .` and `CGO_ENABLED=0 go test ./...`. Read that skill before touching any MyGo UI code (`internal/app`, `internal/widget`, the views in `internal/voice`); it covers element lifetimes, handles/keys, and keeping work off the UI thread.
 
-Lefthook pre-commit runs `biome check --write` on staged files, plus `gofmt -w` and `go vet ./...` for staged Go files in `apps/kit`.
+Lefthook pre-commit runs `biome check --write` on staged files, plus `gofmt -w` and `go vet ./...` for staged Go files in `apps/elir`.
 
 ## Code style
 
@@ -51,11 +51,11 @@ TypeScript is v7 (native), which no longer auto-includes `@types/*`, so global t
 - **Client state**: a server page passes data into a `*-provider.tsx` client component, which calls `useHydrateAtoms`. After that, interactive components use Jotai atoms in `src/atoms/`. The songs player keeps one shared `HTMLAudioElement` in an atom; write-only atoms handle play modes, next/prev and audio event wiring.
 - **Theming**: colors are CSS variables in `src/styles/colors.css`, exposed as Tailwind theme tokens (`text-primary`, `foreground`, `dividing`, `link`, …) in `src/styles/tailwind.css`. `next-themes` switches light/dark. Icons are Iconify MingCute classes (`i-mingcute-*`) from `@egoist/tailwindcss-icons`.
 
-## Kit architecture (`apps/kit`)
+## Elir architecture (`apps/elir`)
 
 macOS only (`//go:build darwin`; `main_other.go` is a stub). Go 1.27.1+, with `mygo` pinned as a `go tool` in `go.mod`. `main.go` creates the app shell and adds each tool to it.
 
-- `internal/app` is the shell: a single-instance menu bar app (accessory policy, no Dock icon) with one settings window laid out as System Settings (sidebar, pages of grouped rows, glass scroll edge), the menu bar icon, the General page (interface language, appearance, accent color) and the Permissions page. A tool implements `app.Feature` (`Start(*Host)`, `Pages()`), plus optional `NeedsSetup`, `SettingsShown`, `SettingsBlurred`, `PermissionRows` and `PermissionTips`. The shell owns the one global `darwin.EventTap` and starts it once Accessibility is allowed; tools add their `darwin.KeyHandler` with `Host.HandleKeys` in `Start`, and every handler sees every key (an event is swallowed when any handler swallows it). The sidebar lists General, the tools' everyday pages, their `Setup` pages, then Permissions. `migrate.go` brings over the data of Voice, the standalone app Kit grew from, on a new install.
+- `internal/app` is the shell: a single-instance menu bar app (accessory policy, no Dock icon) with one settings window laid out as System Settings (sidebar, pages of grouped rows, glass scroll edge), the menu bar icon, the General page (interface language, appearance, accent color) and the Permissions page. A tool implements `app.Feature` (`Start(*Host)`, `Pages()`), plus optional `NeedsSetup`, `SettingsShown`, `SettingsBlurred`, `PermissionRows` and `PermissionTips`. The shell owns the one global `darwin.EventTap` and starts it once Accessibility is allowed; tools add their `darwin.KeyHandler` with `Host.HandleKeys` in `Start`, and every handler sees every key (an event is swallowed when any handler swallows it). The sidebar lists General, the tools' everyday pages, their `Setup` pages, then Permissions. `migrate.go` moves Kit's data directory (`Kit/`, `Kit Dev/`) into Elir's on first launch, and brings over the data of Voice, the standalone app before Kit, on a new install. The bundle ID stays `me.lesenelir.kit`, so permissions and Keychain keys carry over.
 - `internal/store` keeps `settings.json` as one section per part (`"app"`, `"voice"`, …); `store.NewSection[T]` gives a part its typed section over defaults. `internal/secret` keeps API keys in the Keychain, or takes them from an environment variable in development. `internal/widget` holds the settings window's shared building blocks (`Group`/`Rows`, `Dropdown` with a Liquid Glass popup, `Badge`, `Keycaps`, `IconButton`, `EmptyState`, `PaletteFor`).
 - UI state is only read and written on the main thread: by the views, and through `Window.Update` from other goroutines. A tool updates the settings window through `Host.Settings`.
 
@@ -81,6 +81,6 @@ Pressing Fn starts dictation and Fn + Left Shift starts translation. The audio i
 ### Strings and look
 
 - User-facing strings live in `locales/en.json` (source) and `locales/zh-Hans.json`; `go tool mygo generate` (also run by `mygo dev`/`mygo build`) writes the typed `locales` package. Views word them with `locales.In(c.Locale())`. The controller reports a `Note` code, not text, and `noteText` in `internal/voice/overlay.go` words it. The interface language (`App.SetLocale`), appearance (`Theme.SetSource`: system/light/dark) and accent color (`internal/app/accent.go`: the settings view swaps the theme's accent for an Apple system color each frame, or keeps macOS's) are chosen in Settings → General and kept in the `app` section.
-- `pnpm dev:kit` and `pnpm build:kit` sign with "Kit Local Signing", a self-signed identity `scripts/signing-identity.sh` creates once in the login keychain, so rebuilds keep their Accessibility, Screen Recording and Microphone permissions (an ad-hoc signature, as plain `go tool mygo dev` gives, makes each rebuild a new app to TCC). Builds signed with an identity get the hardened runtime, so `entitlements.plist` grants `com.apple.security.device.audio-input`.
-- Kit updates itself through `mygo.Updater` (`internal/app/updates.go`, behind a small `updater` interface that tests fake): Settings → General checks, shows the notes (Markdown) and installs with "Update and Relaunch"; a background check runs 10 s after launch and daily unless `checkUpdates` is off, and an update found adds an item to the tray menu. Updates are signed with the key of `updates.publicKey` (private key in `~/Library/Application Support/mygo/update-keys/kit/`, never in the repo) and served from the `kit-updates` pre-release at the fixed `updates.url`, not the API-resolved `kit-v*` releases, because anonymous GitHub API calls are rate-limited per IP. `scripts/release.sh` uploads the archive and deltas there, then the manifest.
+- `pnpm dev:elir` and `pnpm build:elir` sign with "Kit Local Signing", a self-signed identity `scripts/signing-identity.sh` creates once in the login keychain, so rebuilds keep their Accessibility, Screen Recording and Microphone permissions (an ad-hoc signature, as plain `go tool mygo dev` gives, makes each rebuild a new app to TCC). Builds signed with an identity get the hardened runtime, so `entitlements.plist` grants `com.apple.security.device.audio-input`.
+- Elir updates itself through `mygo.Updater` (`internal/app/updates.go`, behind a small `updater` interface that tests fake): Settings → General checks, shows the notes (Markdown) and installs with "Update and Relaunch"; a background check runs 10 s after launch and daily unless `checkUpdates` is off, and an update found adds an item to the tray menu. Updates are signed with the key of `updates.publicKey` (private key in `~/Library/Application Support/mygo/update-keys/kit/`, never in the repo) and served from the `kit-updates` pre-release at the fixed `updates.url`, not the API-resolved `kit-v*` releases, because anonymous GitHub API calls are rate-limited per IP. `scripts/release.sh` uploads the archive and deltas there, then the manifest.
 - Settings → General also has "Open at login" (`mygo.App.SetOpenAtLogin`), the system's setting rather than a copy in the settings JSON, and "Show in Dock" (`showInDock`: the activation policy switches between accessory, as `LSUIElement` starts it, and regular; a Dock click with no window open shows the settings); the app icon is `resources/icon.png`. For Fn to work, System Settings → Keyboard → "Press 🌐 key to" must be set to "Do Nothing".

@@ -14,9 +14,9 @@
   "scripts": {
     "build:website": "pnpm --filter @lesenelir/website build",
     "dev:website": "pnpm --filter @lesenelir/website dev",
-    "build:kit": "pnpm --filter @lesenelir/kit build",
-    "dev:kit": "pnpm --filter @lesenelir/kit dev",
-    "release:kit": "pnpm --filter @lesenelir/kit release",
+    "build:elir": "pnpm --filter @lesenelir/elir build",
+    "dev:elir": "pnpm --filter @lesenelir/elir dev",
+    "release:elir": "pnpm --filter @lesenelir/elir release",
     "typecheck": "pnpm -r typecheck",
     "check": "biome check --write .",
     "lint": "biome check .",
