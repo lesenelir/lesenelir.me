@@ -1,6 +1,6 @@
 {
   "name": "@lesenelir/elir",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "description": "A personal toolbox for macOS: voice input, screenshots, and more tools to come",
   "scripts": {
