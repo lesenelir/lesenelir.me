@@ -3,14 +3,11 @@
 package voice
 
 import (
-	"fmt"
 	"log"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/voice/controller"
@@ -25,8 +22,6 @@ const historyBatch = 50
 
 var (
 	iconHistory = widget.Icon(`<circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/>`)
-	iconCopy    = widget.Icon(`<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/>`)
-	iconTrash   = widget.Icon(`<path d="M2.5 4.5h11M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4 4.5l.7 8.6a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9l.7-8.6"/>`)
 )
 
 // historyRowMotion grows entries in as they come and collapses them as
@@ -136,7 +131,7 @@ func (v *Voice) historyPage(c *ui.Context, m locales.Messages, pal widget.Palett
 		g.Row(c, m.FieldSaveHistory(), m.SaveHistoryNote(), func() {
 			ui.Switch(c.Key("save-history"), &v.form.saveHistory).Label(m.FieldSaveHistory()).OnChange(v.commit)
 		})
-		g.Row(c, m.HistoryUsage(len(h.entries), formatSize(h.size)), "", func() {
+		g.Row(c, m.HistoryUsage(len(h.entries), widget.FormatSize(h.size)), "", func() {
 			if ui.Button(c.Key("clear-history"), m.ButtonClearHistory()).Disabled(len(h.entries) == 0).Clicked() {
 				h.confirm = true
 			}
@@ -202,17 +197,17 @@ func (v *Voice) historyEntry(c *ui.Context, m locales.Messages, pal widget.Palet
 	})
 	card.Children(func() {
 		ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-			ui.Text(c, formatTime(c.Locale(), e.Time)).FontSize(12).TextColor(pal.Muted).SingleLine()
+			ui.Text(c, widget.FormatTime(c.Locale(), e.Time)).FontSize(12).TextColor(pal.Muted).SingleLine()
 			label := m.HistoryDictate()
 			if e.Mode == "translate" {
 				label = m.HistoryTranslate(prompt.LanguageFor(e.Target).Label)
 			}
 			widget.Badge(c, label, pal.Muted)
 			ui.Spacer(c)
-			if widget.IconButton(c.Key("copy"), iconCopy, m.ButtonCopy(), pal).Clicked() {
+			if widget.IconButton(c.Key("copy"), widget.IconCopy, m.ButtonCopy(), pal).Clicked() {
 				copyText(e.Text)
 			}
-			if widget.IconButton(c.Key("delete"), iconTrash, m.ButtonDelete(), pal).Clicked() {
+			if widget.IconButton(c.Key("delete"), widget.IconTrash, m.ButtonDelete(), pal).Clicked() {
 				deleted = true
 			}
 		})
@@ -230,21 +225,4 @@ func (v *Voice) historyEntry(c *ui.Context, m locales.Messages, pal widget.Palet
 		}
 	})
 	return deleted
-}
-
-// formatTime writes when an entry was made in the language's way, the
-// month and day before the time: 10月17日 14:32, Oct 17, 2:32 PM.
-func formatTime(locale string, t time.Time) string {
-	return i18n.FormatDate(locale, t.Local(), i18n.DateOptions{Skeleton: "MMMdjm"})
-}
-
-// formatSize writes a file size: 512 B, 12.4 KB, 1.3 MB.
-func formatSize(n int64) string {
-	switch {
-	case n < 1024:
-		return fmt.Sprintf("%d B", n)
-	case n < 1024*1024:
-		return fmt.Sprintf("%.1f KB", float64(n)/1024)
-	}
-	return fmt.Sprintf("%.1f MB", float64(n)/(1024*1024))
 }

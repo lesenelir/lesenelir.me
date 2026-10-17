@@ -46,6 +46,30 @@ func Microphone() MicStatus {
 	return MicStatus(objc.Send[int](device, objc.RegisterName("authorizationStatusForMediaType:"), objc.ID(avMediaTypeAudio)))
 }
 
+// ScreenCaptureAllowed reports whether the app may capture the windows of
+// other apps.
+func ScreenCaptureAllowed() bool {
+	if load() != nil {
+		return false
+	}
+	return cgPreflightScreenCaptureAccess()
+}
+
+// RequestScreenCapture asks for the Screen Recording permission. macOS
+// shows its dialog once; after that the user turns it on in System
+// Settings.
+func RequestScreenCapture() bool {
+	if load() != nil {
+		return false
+	}
+	return cgRequestScreenCaptureAccess()
+}
+
+// OpenScreenRecordingSettings opens Privacy & Security → Screen Recording.
+func OpenScreenRecordingSettings() {
+	_ = mygo.Shell.OpenExternal("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
+}
+
 // OpenAccessibilitySettings opens Privacy & Security → Accessibility.
 func OpenAccessibilitySettings() {
 	_ = mygo.Shell.OpenExternal("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")

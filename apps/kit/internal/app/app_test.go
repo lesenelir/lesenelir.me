@@ -10,6 +10,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/lesenelir/lesenelir.me/apps/kit/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/kit/locales"
@@ -32,7 +33,7 @@ func (tool) Pages() []Page {
 }
 
 func (tool) PermissionRows(c *ui.Context, _ locales.Messages, _ widget.Palette, g *widget.Rows) {
-	g.Row(c, "Tool hotkeys", "", nil)
+	g.Row(c, "Tool permission", "", nil)
 }
 
 func (tool) PermissionTips(c *ui.Context, _ locales.Messages, pal widget.Palette) {
@@ -50,6 +51,7 @@ func testApp(t *testing.T, features ...Feature) *App {
 		t.Fatal(err)
 	}
 	a.pages = a.collectPages()
+	a.tap = &darwin.EventTap{Handler: a.keys}
 	return a
 }
 
@@ -75,7 +77,8 @@ func TestPages(t *testing.T) {
 		{"Tool", "used every day"},
 		{"Tool Setup", "set up once"},
 		{"权限", "辅助功能"},
-		{"权限", "Tool hotkeys"},
+		{"权限", "Tool permission"},
+		{"权限", "按键监听"},
 		{"权限", "Tool tip"},
 	} {
 		if err := tt.Click(step.item); err != nil {
@@ -182,5 +185,39 @@ func TestMigrateFiles(t *testing.T) {
 	// Reopened, the file holds both sections.
 	if st, err := store.Open(filepath.Join(dir, "settings.json")); err != nil || st.Raw(voiceSection) == nil || st.Raw(settingsSection) == nil {
 		t.Fatalf("saved file: %v", err)
+	}
+}
+
+// recorder is a key handler that swallows one key.
+type recorder struct {
+	swallow int64
+	seen    []int64
+}
+
+func (r *recorder) FlagsChanged(keycode int64, _ uint64) bool {
+	r.seen = append(r.seen, keycode)
+	return keycode == r.swallow
+}
+
+func (r *recorder) KeyDown(keycode int64, _ uint64, _ bool) bool {
+	r.seen = append(r.seen, keycode)
+	return keycode == r.swallow
+}
+
+func (r *recorder) KeyUp(keycode int64) bool {
+	r.seen = append(r.seen, keycode)
+	return keycode == r.swallow
+}
+
+// Every feature sees every key; one that swallows it keeps it from the app
+// in front.
+func TestKeys(t *testing.T) {
+	a, b := &recorder{swallow: 19}, &recorder{swallow: 53}
+	k := keys{a, b}
+	if k.KeyDown(1, 0, false) || !k.KeyDown(19, 0, false) || !k.KeyUp(53) || !k.FlagsChanged(19, 0) {
+		t.Fatal("swallowed the wrong keys")
+	}
+	if want := []int64{1, 19, 53, 19}; !slices.Equal(a.seen, want) || !slices.Equal(b.seen, want) {
+		t.Fatalf("seen %v and %v, want %v", a.seen, b.seen, want)
 	}
 }

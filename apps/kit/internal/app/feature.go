@@ -6,6 +6,7 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
+	"github.com/lesenelir/lesenelir.me/apps/kit/internal/platform/darwin"
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/kit/locales"
@@ -33,11 +34,16 @@ type (
 	// SettingsBlurred is told the settings window lost the focus, on the
 	// main thread, to save what is still being typed.
 	SettingsBlurred interface{ SettingsBlurred() }
-	// PermissionsView adds the feature's part to the Permissions page: rows
-	// in its group, as whether the feature's hotkeys run, and groups of
-	// tips under it.
-	PermissionsView interface {
+	// PermissionRows adds the rows of the permissions the feature needs to
+	// the Permissions page's group, as the microphone. The page shows
+	// afresh every two seconds, so the rows can read the permissions as
+	// they draw.
+	PermissionRows interface {
 		PermissionRows(c *ui.Context, m locales.Messages, pal widget.Palette, g *widget.Rows)
+	}
+	// PermissionTips adds groups of tips under the Permissions page's
+	// group, as a system setting the feature works better with.
+	PermissionTips interface {
 		PermissionTips(c *ui.Context, m locales.Messages, pal widget.Palette)
 	}
 )
@@ -66,4 +72,7 @@ type Host struct {
 	// ShowSettings opens the settings window at a page, "" for the one
 	// shown last.
 	ShowSettings func(page string)
+	// HandleKeys adds a handler of the global keyboard events, in Start.
+	// Its methods run on the main thread and must return quickly.
+	HandleKeys func(h darwin.KeyHandler)
 }

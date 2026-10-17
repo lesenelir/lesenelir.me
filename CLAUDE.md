@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A pnpm monorepo (`apps/*`, `packages/*`; Node >= 24, pnpm 11) holding lesenelir's personal projects:
 
 - `apps/website` — the lesenelir.me site (Next.js 16 App Router, React 19, Tailwind CSS 4, MDX, Jotai), deployed on Vercel.
-- `apps/kit` — Kit, a personal macOS menu bar toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its first tool is voice input. Its `package.json` only wraps Go commands.
+- `apps/kit` — Kit, a personal macOS menu bar toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
 - `apps/ts-starter` — the TypeScript library template (bunchee + vitest).
 - `packages/create-ts-starter` — the `npm create @lesenelir/ts-starter` CLI. Its `template` script copies `apps/ts-starter` into a gitignored `template/` folder that gets published.
 
@@ -54,7 +54,7 @@ TypeScript is v7 (native), which no longer auto-includes `@types/*`, so global t
 
 macOS only (`//go:build darwin`; `main_other.go` is a stub). Go 1.27.1+, with `mygo` pinned as a `go tool` in `go.mod`. `main.go` creates the app shell and adds each tool to it.
 
-- `internal/app` is the shell: a single-instance menu bar app (accessory policy, no Dock icon) with one settings window laid out as System Settings (sidebar, pages of grouped rows, glass scroll edge), the menu bar icon, the General page (interface language, appearance, accent color) and the Permissions page. A tool implements `app.Feature` (`Start(*Host)`, `Pages()`), plus optional `NeedsSetup`, `SettingsShown`, `SettingsBlurred` and `PermissionsView`. The sidebar lists General, the tools' everyday pages, their `Setup` pages, then Permissions. `migrate.go` brings over the data of Voice, the standalone app Kit grew from, on a new install.
+- `internal/app` is the shell: a single-instance menu bar app (accessory policy, no Dock icon) with one settings window laid out as System Settings (sidebar, pages of grouped rows, glass scroll edge), the menu bar icon, the General page (interface language, appearance, accent color) and the Permissions page. A tool implements `app.Feature` (`Start(*Host)`, `Pages()`), plus optional `NeedsSetup`, `SettingsShown`, `SettingsBlurred`, `PermissionRows` and `PermissionTips`. The shell owns the one global `darwin.EventTap` and starts it once Accessibility is allowed; tools add their `darwin.KeyHandler` with `Host.HandleKeys` in `Start`, and every handler sees every key (an event is swallowed when any handler swallows it). The sidebar lists General, the tools' everyday pages, their `Setup` pages, then Permissions. `migrate.go` brings over the data of Voice, the standalone app Kit grew from, on a new install.
 - `internal/store` keeps `settings.json` as one section per part (`"app"`, `"voice"`, …); `store.NewSection[T]` gives a part its typed section over defaults. `internal/secret` keeps API keys in the Keychain, or takes them from an environment variable in development. `internal/widget` holds the settings window's shared building blocks (`Group`/`Rows`, `Dropdown` with a Liquid Glass popup, `Badge`, `Keycaps`, `IconButton`, `EmptyState`, `PaletteFor`).
 - UI state is only read and written on the main thread: by the views, and through `Window.Update` from other goroutines. A tool updates the settings window through `Host.Settings`.
 
@@ -70,6 +70,12 @@ Pressing Fn starts dictation and Fn + Left Shift starts translation. The audio i
 - While the microphone records, the controller's `Recording` hook has `quiet.go` mute the default output device, or lower it to 20%, per `whileRecording` (CoreAudio in `internal/platform/darwin/output.go`). What to undo is kept in `voice/output-to-restore.json` in the user data directory until it is undone, so a crash mid-recording is undone on the next launch; a mute or volume the user changed meanwhile is left as they set it.
 - Every pasted result goes to the controller's `OnResult` hook, and `historypage.go` appends it to `voice/history.jsonl` in the user data directory (`internal/voice/history`: one JSON object per line, text only, never audio, newest 1000 kept) unless `noHistory` is set. Settings → History lists, searches, copies, deletes (with undo) and clears it.
 - `pages.go` and `form.go` are its settings pages (Dictation & Translation, History, Dictionary, Models), saved as they change; `overlay.go` is the voice bar.
+
+### Screenshots (`internal/screenshot`)
+
+- ⌘⇧2 (`shortcut.go`, swallowed with its key up) runs `/usr/sbin/screencapture -i` into the `Library` (`library.go`: PNGs in `screenshot/` of the user data directory, never the Desktop; the file's modification time is when it was taken). A cancelled capture leaves no file. Without the Screen Recording permission it asks for it and opens the Permissions page instead of capturing.
+- The PNG goes to the clipboard, and a thumbnail (`Shrink`, made for 2×) shows in a panel at the bottom right of the screen for 5 s, longer while hovered (`popup.go`). It drags out as a file (`transfer.FileData`) and opens on click.
+- Settings → Screenshot (`page.go`) sets `keepDays` (1, 7, 30, or 0 for ever; pruned at launch, hourly and on change) and lists the screenshots in a grid, with thumbnails made on demand one at a time; copy, drag, show in Finder, delete with undo, clear all.
 
 ### Strings and look
 

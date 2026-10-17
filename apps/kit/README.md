@@ -1,7 +1,7 @@
 # Kit
 
 A personal toolbox for macOS: a menu bar app whose tools share one settings window, built with
-[MyGo](https://mygo.egoist.dev/) native UI. Its first tool is voice input; more will follow.
+[MyGo](https://mygo.egoist.dev/) native UI. Its tools are voice input and screenshots.
 
 ## Voice input
 
@@ -21,6 +21,16 @@ The text of each dictation and translation is kept in `~/Library/Application Sup
 only, never audio; the latest 1,000). Settings → History shows it, and can copy, delete, clear it all, or stop keeping
 it.
 
+## Screenshots
+
+`⌘⇧2` runs macOS's own capture, as `⌘⇧4` does: drag over an area, or press `Space` and click a window; `Esc`
+cancels. The screenshot is copied to the clipboard, ready to paste into a chat with `⌘V`, and its thumbnail shows in the
+bottom right corner for a few seconds: drag it into an app, or click it to open the screenshot.
+
+Nothing goes to the Desktop: screenshots are kept in `~/Library/Application Support/Kit/screenshot/` for 1, 7 (the
+default) or 30 days, or forever, as Settings → Screenshot says, and deleted after. That page lists them to copy, drag,
+show in Finder or delete, and clears them all.
+
 ## The app
 
 The interface is in English or Simplified Chinese, light or dark, in an accent color: Settings → General switches
@@ -28,7 +38,7 @@ them at once, or follows the system. Strings live in `locales/en.json` and `loca
 `go tool mygo generate` (also run by `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
 Settings are kept in `~/Library/Application Support/Kit/settings.json`, a section per part: `app` for the app itself,
-`voice` for voice input. On its first launch Kit brings over the settings, history and API keys of Voice, the
+`voice` for voice input, `screenshot` for screenshots. On its first launch Kit brings over the settings, history and API keys of Voice, the
 standalone app it grew from.
 
 ## Development
@@ -45,6 +55,8 @@ Go 1.27.1 or later is required; with an older Go, `GOTOOLCHAIN=auto` (the defaul
 
 - **Accessibility**: watching `Fn`/`Esc`/`Tab` and pressing `Cmd+V`.
 - **Microphone**: macOS asks on the first recording.
+- **Screen Recording**: capturing the windows of other apps. macOS asks on the first screenshot; Kit may need a
+  relaunch after it is allowed.
 - Set System Settings → Keyboard → "Press 🌐 key to" → "Do Nothing", or `Fn` also switches the input source.
 
 Builds are ad-hoc signed, so macOS may ask for Accessibility again after a rebuild.
@@ -68,6 +80,7 @@ internal/voice/soniox         Soniox real-time streaming client
 internal/voice/prompt         prompts and spoken-language detection
 internal/voice/history        local history of pasted text
 internal/voice/audio          WAV and FLAC encoding, levels
+internal/screenshot           screenshots: ⌘⇧2, capture, clipboard, corner thumbnail, the kept screenshots
 locales                       interface strings (en, zh-Hans) and their generated accessors
 ```
 
@@ -75,5 +88,6 @@ locales                       interface strings (en, zh-Hans) and their generate
 
 A tool is a package under `internal/` with a type that implements `app.Feature`: `Start` sets it up (its settings
 section from `Host.Store`, its windows, its files under `Host.DataDir/<tool>`), and `Pages` lists its settings pages.
-It may also implement `app.NeedsSetup`, `app.SettingsShown`, `app.SettingsBlurred` and `app.PermissionsView`. Add it
-in `main.go` with `kit.Add`.
+Its hotkeys go to `Host.HandleKeys`, which shares the one event tap. It may also implement `app.NeedsSetup`,
+`app.SettingsShown`, `app.SettingsBlurred`, `app.PermissionRows` and `app.PermissionTips`. Add it in `main.go` with
+`kit.Add`.

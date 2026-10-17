@@ -28,6 +28,8 @@ type App struct {
 	settings *store.Section[Settings]
 	window   *mygo.Window
 	tray     *mygo.Tray
+	keys     keys
+	tap      *darwin.EventTap
 	quitting bool
 
 	// Read and written on the main thread: by the views and in
@@ -112,13 +114,20 @@ func (a *App) ready() {
 		}
 	})
 
-	host := &Host{Store: a.store, DataDir: dir, Settings: a.window, ShowSettings: a.showSettings}
+	host := &Host{
+		Store:        a.store,
+		DataDir:      dir,
+		Settings:     a.window,
+		ShowSettings: a.showSettings,
+		HandleKeys:   func(h darwin.KeyHandler) { a.keys = append(a.keys, h) },
+	}
 	for _, f := range a.features {
 		if err := f.Start(host); err != nil {
 			log.Printf("feature: %v", err)
 		}
 	}
 	a.pages = a.collectPages()
+	a.tap = &darwin.EventTap{Handler: a.keys}
 
 	// MyGo refreshes the light or dark look of the windows that exist when
 	// the appearance is set, so set it once the features' are made too.

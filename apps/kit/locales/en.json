@@ -156,5 +156,45 @@
   "sectionVoiceBar": "Recording and voice bar",
   "cancelNote": "While recording, transcribing or cleaning up.",
   "translateNote": "Speak any language; the text comes out translated. Fn finishes.",
-  "targetsTabNote": "Tab cycles through the languages ticked below while translating."
+  "targetsTabNote": "Tab cycles through the languages ticked below while translating.",
+  "navScreenshot": "Screenshot",
+  "shortcutCapture": "Capture an area or a window",
+  "captureNote": "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels.",
+  "sectionScreenshots": "Screenshots",
+  "fieldKeep": "Keep screenshots for",
+  "keepNote": "Older ones are deleted. Nothing is saved to the Desktop.",
+  "keepDays": "{count, plural, one {# day} other {# days}}",
+  "@keepDays": {
+    "description": "A choice of how long screenshots are kept.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+  "keepForever": "Forever",
+  "screenshotUsage": "{count, plural, one {# screenshot} other {# screenshots}} · {size}",
+  "@screenshotUsage": {
+    "description": "Screenshots kept and the space they take.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      },
+      "size": {
+        "type": "String",
+        "example": "8.4 MB"
+      }
+    }
+  },
+  "clearScreenshotsTitle": "Delete all screenshots?",
+  "clearScreenshotsMessage": "This deletes them from this Mac. You can’t undo it.",
+  "screenshotFailed": "Couldn’t take or keep the screenshot: {error}",
+  "screenshotsEmpty": "No screenshots yet. Press ⌘⇧2 to take one.",
+  "showInFinder": "Show in Finder",
+  "screenshotThumbnail": "Screenshot",
+  "thumbnailHint": "Drag into an app, or click to open",
+  "permScreenRecording": "Screen Recording",
+  "permScreenRecordingNote": "Needed to capture the windows of other apps"
 }

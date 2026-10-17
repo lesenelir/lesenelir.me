@@ -39,7 +39,6 @@ type Voice struct {
 	ctrl     *controller.Controller
 	rec      *darwin.Recorder
 	keys     *hotkeys
-	tap      *darwin.EventTap
 	overlay  *mygo.Window
 
 	openrouterKey *secret.Secret
@@ -48,14 +47,13 @@ type Voice struct {
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
-	status     controller.Status
-	hideSeq    int
-	form       settingsForm
-	saved      saveResult
-	tapRunning bool
-	hist       historyView
-	levels     [waveBars]float32 // the voice bar's waveform, oldest first
-	levelAt    time.Time         // when levels last moved
+	status  controller.Status
+	hideSeq int
+	form    settingsForm
+	saved   saveResult
+	hist    historyView
+	levels  [waveBars]float32 // the voice bar's waveform, oldest first
+	levelAt time.Time         // when levels last moved
 }
 
 var _ interface {
@@ -63,23 +61,22 @@ var _ interface {
 	app.NeedsSetup
 	app.SettingsShown
 	app.SettingsBlurred
-	app.PermissionsView
+	app.PermissionRows
+	app.PermissionTips
 } = (*Voice)(nil)
 
 // New returns voice input, to Add to the app.
 func New() *Voice {
-	v := &Voice{
+	return &Voice{
 		rec:           &darwin.Recorder{},
 		keys:          &hotkeys{},
 		openrouterKey: secret.New("openrouter-api-key", "OPENROUTER_API_KEY"),
 		sonioxKey:     secret.New("soniox-api-key", "SONIOX_API_KEY"),
 	}
-	v.tap = &darwin.EventTap{Handler: v.keys}
-	return v
 }
 
 // Start reads the settings, history and keys, makes the voice bar, and
-// watches Fn once Accessibility is allowed.
+// watches Fn.
 func (v *Voice) Start(h *app.Host) error {
 	v.host = h
 	dir := filepath.Join(h.DataDir, "voice")
@@ -135,26 +132,8 @@ func (v *Voice) Start(h *app.Host) error {
 	v.overlay.SetIgnoreMouseEvents(false)
 
 	v.form = formFrom(v.settings.Get(), v.apiKeys())
-	go v.watchTap()
+	h.HandleKeys(v.keys)
 	return nil
-}
-
-// watchTap starts the event tap as soon as Accessibility is allowed, and
-// keeps the Permissions page's Hotkeys row current.
-func (v *Voice) watchTap() {
-	for {
-		running := v.tap.Running()
-		if !running && darwin.AccessibilityTrusted(false) {
-			if err := v.tap.Start(); err != nil {
-				log.Printf("event tap: %v", err)
-			} else {
-				running = true
-				log.Print("event tap: watching Fn")
-			}
-		}
-		v.host.Settings.Update(func() { v.tapRunning = running })
-		time.Sleep(2 * time.Second)
-	}
 }
 
 // NeedsSetup reports whether the OpenRouter key, which cleanup and
@@ -170,16 +149,33 @@ func (v *Voice) SettingsShown() {
 // SettingsBlurred saves the keys still being typed.
 func (v *Voice) SettingsBlurred() { v.flushKeys() }
 
-// PermissionRows tells whether the hotkeys run.
+// PermissionRows shows the microphone permission.
 func (v *Voice) PermissionRows(c *ui.Context, m locales.Messages, pal widget.Palette, g *widget.Rows) {
 	t := c.Theme()
-	g.Row(c, m.PermHotkeys(), m.PermHotkeysNote(), func() {
-		if v.tapRunning {
-			widget.Badge(c, m.StatusRunning(), t.Success)
-		} else {
+	mic := darwin.Microphone()
+	g.Row(c, m.PermMicrophone(), micText(m, mic), func() {
+		switch mic {
+		case darwin.MicAuthorized:
+			widget.Badge(c, m.StatusAllowed(), t.Success)
+		case darwin.MicDenied, darwin.MicRestricted:
+			widget.Badge(c, m.StatusNeeded(), t.Danger)
+			if ui.Button(c, m.OpenSettings()).Clicked() {
+				darwin.OpenMicrophoneSettings()
+			}
+		default:
 			widget.Badge(c, m.StatusWaiting(), t.TextMuted)
 		}
 	})
+}
+
+func micText(m locales.Messages, s darwin.MicStatus) string {
+	switch s {
+	case darwin.MicAuthorized:
+		return m.MicAllowed()
+	case darwin.MicDenied, darwin.MicRestricted:
+		return m.MicDenied()
+	}
+	return m.MicAsk()
 }
 
 // PermissionTips tells how to keep the Globe key from macOS, which would
@@ -210,7 +206,7 @@ func (k *hotkeys) FlagsChanged(keycode int64, flags uint64) bool {
 	return false
 }
 
-func (k *hotkeys) KeyDown(keycode int64, repeat bool) bool {
+func (k *hotkeys) KeyDown(keycode int64, _ uint64, repeat bool) bool {
 	action, swallow := k.detector.KeyDown(keycode, repeat)
 	k.do(action)
 	return swallow

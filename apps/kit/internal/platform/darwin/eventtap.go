@@ -41,7 +41,7 @@ var ErrNotTrusted = errors.New("darwin: accessibility permission needed")
 // code, flags the CGEventFlags.
 type KeyHandler interface {
 	FlagsChanged(keycode int64, flags uint64) (swallow bool)
-	KeyDown(keycode int64, repeat bool) (swallow bool)
+	KeyDown(keycode int64, flags uint64, repeat bool) (swallow bool)
 	KeyUp(keycode int64) (swallow bool)
 }
 
@@ -138,7 +138,7 @@ func onTapEvent(proxy, eventType, event, info uintptr) uintptr {
 			swallow = t.Handler.FlagsChanged(keycode, cgEventGetFlags(event))
 		case cgEventKeyDown:
 			repeat := cgEventGetIntegerValueField(event, fieldKeyboardEventAutorepeat) != 0
-			swallow = t.Handler.KeyDown(keycode, repeat)
+			swallow = t.Handler.KeyDown(keycode, cgEventGetFlags(event), repeat)
 		case cgEventKeyUp:
 			swallow = t.Handler.KeyUp(keycode)
 		}

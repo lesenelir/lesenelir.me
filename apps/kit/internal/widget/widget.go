@@ -14,6 +14,8 @@ func Icon(shapes string) *ui.SVG {
 var (
 	IconCheck   = Icon(`<path d="M3.5 8.5l3 3 6-7"/>`)
 	IconChevron = Icon(`<path d="M4.5 6.5L8 10l3.5-3.5"/>`)
+	IconCopy    = Icon(`<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/>`)
+	IconTrash   = Icon(`<path d="M2.5 4.5h11M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4 4.5l.7 8.6a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9l.7-8.6"/>`)
 )
 
 // Palette is the settings window's colors over the theme's.

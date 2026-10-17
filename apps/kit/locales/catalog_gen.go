@@ -1405,3 +1405,193 @@ func TargetsTabNote() string { return In(i18n.Locale()).TargetsTabNote() }
 func (msgs Messages) TargetsTabNote() string {
 	return Catalog.Format(msgs.locale, "targetsTabNote", nil)
 }
+
+// NavScreenshot says "Screenshot"
+// in the language the app shows.
+func NavScreenshot() string { return In(i18n.Locale()).NavScreenshot() }
+
+// NavScreenshot says "Screenshot"
+// in the language of msgs.
+func (msgs Messages) NavScreenshot() string {
+	return Catalog.Format(msgs.locale, "navScreenshot", nil)
+}
+
+// ShortcutCapture says "Capture an area or a window"
+// in the language the app shows.
+func ShortcutCapture() string { return In(i18n.Locale()).ShortcutCapture() }
+
+// ShortcutCapture says "Capture an area or a window"
+// in the language of msgs.
+func (msgs Messages) ShortcutCapture() string {
+	return Catalog.Format(msgs.locale, "shortcutCapture", nil)
+}
+
+// CaptureNote says "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels."
+// in the language the app shows.
+func CaptureNote() string { return In(i18n.Locale()).CaptureNote() }
+
+// CaptureNote says "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels."
+// in the language of msgs.
+func (msgs Messages) CaptureNote() string {
+	return Catalog.Format(msgs.locale, "captureNote", nil)
+}
+
+// SectionScreenshots says "Screenshots"
+// in the language the app shows.
+func SectionScreenshots() string { return In(i18n.Locale()).SectionScreenshots() }
+
+// SectionScreenshots says "Screenshots"
+// in the language of msgs.
+func (msgs Messages) SectionScreenshots() string {
+	return Catalog.Format(msgs.locale, "sectionScreenshots", nil)
+}
+
+// FieldKeep says "Keep screenshots for"
+// in the language the app shows.
+func FieldKeep() string { return In(i18n.Locale()).FieldKeep() }
+
+// FieldKeep says "Keep screenshots for"
+// in the language of msgs.
+func (msgs Messages) FieldKeep() string {
+	return Catalog.Format(msgs.locale, "fieldKeep", nil)
+}
+
+// KeepNote says "Older ones are deleted. Nothing is saved to the Desktop."
+// in the language the app shows.
+func KeepNote() string { return In(i18n.Locale()).KeepNote() }
+
+// KeepNote says "Older ones are deleted. Nothing is saved to the Desktop."
+// in the language of msgs.
+func (msgs Messages) KeepNote() string {
+	return Catalog.Format(msgs.locale, "keepNote", nil)
+}
+
+// KeepDays says "{count, plural, one {# day} other {# days}}"
+// in the language the app shows.
+//
+// A choice of how long screenshots are kept.
+func KeepDays(count int) string { return In(i18n.Locale()).KeepDays(count) }
+
+// KeepDays says "{count, plural, one {# day} other {# days}}"
+// in the language of msgs.
+//
+// A choice of how long screenshots are kept.
+func (msgs Messages) KeepDays(count int) string {
+	return Catalog.Format(msgs.locale, "keepDays", map[string]any{"count": count})
+}
+
+// KeepForever says "Forever"
+// in the language the app shows.
+func KeepForever() string { return In(i18n.Locale()).KeepForever() }
+
+// KeepForever says "Forever"
+// in the language of msgs.
+func (msgs Messages) KeepForever() string {
+	return Catalog.Format(msgs.locale, "keepForever", nil)
+}
+
+// ScreenshotUsage says "{count, plural, one {# screenshot} other {# screenshots}} · {size}"
+// in the language the app shows.
+//
+// Screenshots kept and the space they take.
+func ScreenshotUsage(count int, size string) string {
+	return In(i18n.Locale()).ScreenshotUsage(count, size)
+}
+
+// ScreenshotUsage says "{count, plural, one {# screenshot} other {# screenshots}} · {size}"
+// in the language of msgs.
+//
+// Screenshots kept and the space they take.
+func (msgs Messages) ScreenshotUsage(count int, size string) string {
+	return Catalog.Format(msgs.locale, "screenshotUsage", map[string]any{"count": count, "size": size})
+}
+
+// ClearScreenshotsTitle says "Delete all screenshots?"
+// in the language the app shows.
+func ClearScreenshotsTitle() string { return In(i18n.Locale()).ClearScreenshotsTitle() }
+
+// ClearScreenshotsTitle says "Delete all screenshots?"
+// in the language of msgs.
+func (msgs Messages) ClearScreenshotsTitle() string {
+	return Catalog.Format(msgs.locale, "clearScreenshotsTitle", nil)
+}
+
+// ClearScreenshotsMessage says "This deletes them from this Mac. You can’t undo it."
+// in the language the app shows.
+func ClearScreenshotsMessage() string { return In(i18n.Locale()).ClearScreenshotsMessage() }
+
+// ClearScreenshotsMessage says "This deletes them from this Mac. You can’t undo it."
+// in the language of msgs.
+func (msgs Messages) ClearScreenshotsMessage() string {
+	return Catalog.Format(msgs.locale, "clearScreenshotsMessage", nil)
+}
+
+// ScreenshotFailed says "Couldn’t take or keep the screenshot: {error}"
+// in the language the app shows.
+func ScreenshotFailed(error string) string { return In(i18n.Locale()).ScreenshotFailed(error) }
+
+// ScreenshotFailed says "Couldn’t take or keep the screenshot: {error}"
+// in the language of msgs.
+func (msgs Messages) ScreenshotFailed(error string) string {
+	return Catalog.Format(msgs.locale, "screenshotFailed", map[string]any{"error": error})
+}
+
+// ScreenshotsEmpty says "No screenshots yet. Press ⌘⇧2 to take one."
+// in the language the app shows.
+func ScreenshotsEmpty() string { return In(i18n.Locale()).ScreenshotsEmpty() }
+
+// ScreenshotsEmpty says "No screenshots yet. Press ⌘⇧2 to take one."
+// in the language of msgs.
+func (msgs Messages) ScreenshotsEmpty() string {
+	return Catalog.Format(msgs.locale, "screenshotsEmpty", nil)
+}
+
+// ShowInFinder says "Show in Finder"
+// in the language the app shows.
+func ShowInFinder() string { return In(i18n.Locale()).ShowInFinder() }
+
+// ShowInFinder says "Show in Finder"
+// in the language of msgs.
+func (msgs Messages) ShowInFinder() string {
+	return Catalog.Format(msgs.locale, "showInFinder", nil)
+}
+
+// ScreenshotThumbnail says "Screenshot"
+// in the language the app shows.
+func ScreenshotThumbnail() string { return In(i18n.Locale()).ScreenshotThumbnail() }
+
+// ScreenshotThumbnail says "Screenshot"
+// in the language of msgs.
+func (msgs Messages) ScreenshotThumbnail() string {
+	return Catalog.Format(msgs.locale, "screenshotThumbnail", nil)
+}
+
+// ThumbnailHint says "Drag into an app, or click to open"
+// in the language the app shows.
+func ThumbnailHint() string { return In(i18n.Locale()).ThumbnailHint() }
+
+// ThumbnailHint says "Drag into an app, or click to open"
+// in the language of msgs.
+func (msgs Messages) ThumbnailHint() string {
+	return Catalog.Format(msgs.locale, "thumbnailHint", nil)
+}
+
+// PermScreenRecording says "Screen Recording"
+// in the language the app shows.
+func PermScreenRecording() string { return In(i18n.Locale()).PermScreenRecording() }
+
+// PermScreenRecording says "Screen Recording"
+// in the language of msgs.
+func (msgs Messages) PermScreenRecording() string {
+	return Catalog.Format(msgs.locale, "permScreenRecording", nil)
+}
+
+// PermScreenRecordingNote says "Needed to capture the windows of other apps"
+// in the language the app shows.
+func PermScreenRecordingNote() string { return In(i18n.Locale()).PermScreenRecordingNote() }
+
+// PermScreenRecordingNote says "Needed to capture the windows of other apps"
+// in the language of msgs.
+func (msgs Messages) PermScreenRecordingNote() string {
+	return Catalog.Format(msgs.locale, "permScreenRecordingNote", nil)
+}

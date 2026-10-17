@@ -1,8 +1,9 @@
 //go:build darwin
 
 // Package darwin is the macOS half of the app that MyGo does not cover:
-// the global Fn/Esc/Tab event tap, microphone capture with AudioQueue,
-// pasting with a synthesized Cmd+V and the privacy permissions behind them.
+// the global keyboard event tap, microphone capture with AudioQueue, the
+// output volume, pasting with a synthesized Cmd+V and the privacy
+// permissions behind them. It knows nothing of the tools that use it.
 // It calls the system frameworks through purego, without cgo, as MyGo does.
 package darwin
 
@@ -46,6 +47,9 @@ var (
 	cgEventSetFlags             func(event uintptr, flags uint64)
 	cgEventPost                 func(tap uint32, event uintptr)
 	cgEventSourceCreate         func(state int32) uintptr
+
+	cgPreflightScreenCaptureAccess func() bool
+	cgRequestScreenCaptureAccess   func() bool
 )
 
 // ApplicationServices (HIServices).
@@ -120,6 +124,8 @@ func loadFrameworks() error {
 	purego.RegisterLibFunc(&cgEventSetFlags, cg, "CGEventSetFlags")
 	purego.RegisterLibFunc(&cgEventPost, cg, "CGEventPost")
 	purego.RegisterLibFunc(&cgEventSourceCreate, cg, "CGEventSourceCreate")
+	purego.RegisterLibFunc(&cgPreflightScreenCaptureAccess, cg, "CGPreflightScreenCaptureAccess")
+	purego.RegisterLibFunc(&cgRequestScreenCaptureAccess, cg, "CGRequestScreenCaptureAccess")
 
 	purego.RegisterLibFunc(&axIsProcessTrusted, as, "AXIsProcessTrusted")
 	purego.RegisterLibFunc(&axIsProcessTrustedWithOptions, as, "AXIsProcessTrustedWithOptions")

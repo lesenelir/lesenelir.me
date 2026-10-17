@@ -108,7 +108,7 @@ func TestHotkeys(t *testing.T) {
 		t.Fatal("swallowed Fn")
 	}
 	k.detector.Capture(true, false)
-	if !k.KeyDown(hotkey.KeyEscape, false) || !k.KeyUp(hotkey.KeyEscape) {
+	if !k.KeyDown(hotkey.KeyEscape, 0, false) || !k.KeyUp(hotkey.KeyEscape) {
 		t.Fatal("let a captured Esc through")
 	}
 	if want := []string{"dictate", "cancel"}; !slices.Equal(got, want) {
@@ -526,14 +526,6 @@ func TestHistoryOff(t *testing.T) {
 	f := formFrom(v.settings.Get(), apiKeys{})
 	if f.saveHistory {
 		t.Fatal("form shows history on")
-	}
-}
-
-func TestFormatSize(t *testing.T) {
-	for n, want := range map[int64]string{0: "0 B", 900: "900 B", 12700: "12.4 KB", 3 << 20: "3.0 MB"} {
-		if got := formatSize(n); got != want {
-			t.Errorf("formatSize(%d) = %q, want %q", n, got, want)
-		}
 	}
 }
 
