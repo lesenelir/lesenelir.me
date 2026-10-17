@@ -38,6 +38,7 @@ type App struct {
 	uiLanguage   string   // "" follows the system
 	appearance   int      // index in appearances, bound to its control
 	accent       string   // the accent color's id, bound to its select
+	openAtLogin  bool     // as the system has it, bound to its switch
 	systemAccent ui.Color // macOS's accent, for the "System" swatch
 	perms        permissions
 	saveErr      error
@@ -85,6 +86,7 @@ func (a *App) ready() {
 	mygo.App.SetLocale(a.uiLanguage)
 	a.appearance = max(0, slices.Index(appearances, s.Appearance))
 	a.accent = s.AccentColor
+	a.openAtLogin = mygo.App.OpenAtLogin()
 
 	a.window = mygo.NewWindow(mygo.WindowOptions{
 		Title:     locales.SettingsTitle(),
@@ -184,6 +186,8 @@ func (a *App) showSettings(page string) {
 		if page != "" {
 			a.page = page
 		}
+		// The user may have changed it in System Settings meanwhile.
+		a.openAtLogin = mygo.App.OpenAtLogin()
 	})
 	a.window.Show()
 	a.window.Focus()

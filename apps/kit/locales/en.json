@@ -202,5 +202,7 @@
   "sectionPaste": "Paste",
   "pasteApps": "Into apps and browsers",
   "pasteTerminals": "Into Claude Code and other terminals",
-  "pasteTerminalsNote": "A terminal’s ⌘V pastes text only."
+  "pasteTerminalsNote": "A terminal’s ⌘V pastes text only.",
+  "fieldOpenAtLogin": "Open at login",
+  "openAtLoginNote": "Kit waits in the menu bar from the moment you log in."
 }

@@ -68,7 +68,7 @@ func TestPages(t *testing.T) {
 	}
 	tt := ui.NewTester(a.view, settingsWidth, settingsHeight)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"通用", "Tool", "Tool Setup", "权限", "界面语言", "外观", "强调色"} {
+	for _, want := range []string{"通用", "Tool", "Tool Setup", "权限", "界面语言", "外观", "强调色", "登录时打开"} {
 		if !tt.HasText(want) {
 			t.Errorf("general page: no %q in %q", want, tt.Texts())
 		}

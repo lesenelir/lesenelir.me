@@ -31,6 +31,11 @@ func (a *App) generalPage() Page {
 				})
 				g.Row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
 			})
+			widget.Group(c, pal, "", func(g *widget.Rows) {
+				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(), func() {
+					ui.Switch(c.Key("open-at-login"), &a.openAtLogin).Label(m.FieldOpenAtLogin()).OnChange(a.setOpenAtLogin)
+				})
+			})
 		},
 	}
 }
@@ -39,6 +44,15 @@ func (a *App) generalPage() Page {
 // the page.
 func (a *App) update(fn func(*Settings)) {
 	a.saveErr = a.settings.Update(fn)
+}
+
+// setOpenAtLogin makes the app start when the user logs in, or not, as
+// its switch says. It is the system's setting, which the user can also
+// change in System Settings → General → Login Items, so the app keeps no
+// copy of it.
+func (a *App) setOpenAtLogin() {
+	a.saveErr = mygo.App.SetOpenAtLogin(a.openAtLogin)
+	a.openAtLogin = mygo.App.OpenAtLogin()
 }
 
 // appearances are the appearance choices, in the order the segmented

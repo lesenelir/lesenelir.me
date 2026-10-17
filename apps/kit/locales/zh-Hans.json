@@ -158,5 +158,7 @@
   "sectionPaste": "粘贴",
   "pasteApps": "粘贴到应用和浏览器",
   "pasteTerminals": "粘贴到 Claude Code 等终端",
-  "pasteTerminalsNote": "终端的 ⌘V 只能粘贴文字。"
+  "pasteTerminalsNote": "终端的 ⌘V 只能粘贴文字。",
+  "fieldOpenAtLogin": "登录时打开",
+  "openAtLoginNote": "登录 Mac 后，Kit 就在菜单栏待命。"
 }

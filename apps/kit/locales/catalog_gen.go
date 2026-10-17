@@ -1655,3 +1655,23 @@ func PasteTerminalsNote() string { return In(i18n.Locale()).PasteTerminalsNote()
 func (msgs Messages) PasteTerminalsNote() string {
 	return Catalog.Format(msgs.locale, "pasteTerminalsNote", nil)
 }
+
+// FieldOpenAtLogin says "Open at login"
+// in the language the app shows.
+func FieldOpenAtLogin() string { return In(i18n.Locale()).FieldOpenAtLogin() }
+
+// FieldOpenAtLogin says "Open at login"
+// in the language of msgs.
+func (msgs Messages) FieldOpenAtLogin() string {
+	return Catalog.Format(msgs.locale, "fieldOpenAtLogin", nil)
+}
+
+// OpenAtLoginNote says "Kit waits in the menu bar from the moment you log in."
+// in the language the app shows.
+func OpenAtLoginNote() string { return In(i18n.Locale()).OpenAtLoginNote() }
+
+// OpenAtLoginNote says "Kit waits in the menu bar from the moment you log in."
+// in the language of msgs.
+func (msgs Messages) OpenAtLoginNote() string {
+	return Catalog.Format(msgs.locale, "openAtLoginNote", nil)
+}
