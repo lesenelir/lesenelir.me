@@ -60,6 +60,9 @@ func withOutput(id string, fn func(uintptr, string) error) error {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 	hr, _, _ := coInit.Call(0, 0)
+	if uint32(hr) == 0x80010106 { // RPC_E_CHANGED_MODE: MyGo's main thread is STA.
+		hr, _, _ = coInit.Call(0, 2) // COINIT_APARTMENTTHREADED; normally S_FALSE.
+	}
 	if err := comError("CoInitializeEx", hr); err != nil {
 		return err
 	}

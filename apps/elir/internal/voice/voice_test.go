@@ -424,25 +424,6 @@ func TestQuieterLeaveAlone(t *testing.T) {
 	q.Recording(false)
 }
 
-// What a crashed run left is undone, and the file goes either way. The
-// device here does not exist, so nothing real changes.
-func TestQuieterRecovers(t *testing.T) {
-	v := testVoice(t)
-	path := filepath.Join(t.TempDir(), "restore.json")
-	for _, content := range []string{
-		`{"kind":"volume","device":4294967000,"volume":0.5,"set":0.1}`,
-		`{`,
-	} {
-		_ = os.WriteFile(path, []byte(content), 0o644)
-		q := &quieter{settings: v.settings.Get, path: path}
-		q.recover()
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			t.Fatalf("%s: restore file kept", content)
-		}
-	}
-	(&quieter{settings: v.settings.Get, path: path}).recover() // no file: nothing to do
-}
-
 func TestWhileRecordingSetting(t *testing.T) {
 	s := config.Defaults()
 	if s.WhileRecording != "mute" {

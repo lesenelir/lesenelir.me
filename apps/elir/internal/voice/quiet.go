@@ -18,6 +18,9 @@ import (
 // WhileRecording "lower".
 const lowerLevel = 0.2
 
+var quietOutput = platform.QuietOutput
+var restoreOutput = platform.RestoreOutput
+
 // quieter mutes or lowers the computer's sound while the microphone
 // records, and puts it back after. What it must undo is saved in a file
 // until it is undone, so that a crash while recording does not leave the
@@ -38,6 +41,12 @@ func (q *quieter) Recording(on bool) {
 		q.restore()
 		return
 	}
+	if q.state.Kind != "" {
+		q.restore()
+		if q.state.Kind != "" {
+			return
+		}
+	}
 	level := float32(0)
 	switch q.settings().WhileRecording {
 	case "none":
@@ -45,7 +54,7 @@ func (q *quieter) Recording(on bool) {
 	case "lower":
 		level = lowerLevel
 	}
-	state, err := platform.QuietOutput(level)
+	state, err := quietOutput(level)
 	if err != nil {
 		log.Printf("quiet output: %v", err)
 		return
@@ -63,8 +72,9 @@ func (q *quieter) restore() {
 	if q.state.Kind == "" {
 		return
 	}
-	if err := platform.RestoreOutput(q.state); err != nil {
+	if err := restoreOutput(q.state); err != nil {
 		log.Printf("restore output: %v", err)
+		return
 	}
 	q.state = platform.OutputState{}
 	_ = os.Remove(q.path)
