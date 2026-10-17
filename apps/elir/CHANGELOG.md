@@ -2,6 +2,10 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.2.2
+
+- The menu bar icon is now the head of the character of Elir's icon, tinted to match a light or dark menu bar.
+
 ## 0.2.1
 
 - Kit is now **Elir**, with a new icon. Settings, history, screenshots, API keys and permissions carry over. An
