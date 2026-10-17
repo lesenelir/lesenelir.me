@@ -104,8 +104,8 @@ body="$notes
 
 ## Install
 
-Elir is signed by its author but not notarized by Apple, so macOS refuses to open the disk image at first ("Apple
-could not verify … is free of malware").
+Elir is signed by its author but not notarized by Apple, so macOS refuses to open the disk image at first (\"Apple
+could not verify … is free of malware\").
 
 1. Download \`Elir-$version.dmg\`, then in Terminal clear the mark macOS put on it:
    \`\`\`sh
