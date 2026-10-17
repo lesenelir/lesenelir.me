@@ -1426,21 +1426,21 @@ func (msgs Messages) ShortcutCapture() string {
 	return Catalog.Format(msgs.locale, "shortcutCapture", nil)
 }
 
-// CaptureNote says "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels."
+// CaptureNote says "Copied to the clipboard."
 // in the language the app shows.
 func CaptureNote() string { return In(i18n.Locale()).CaptureNote() }
 
-// CaptureNote says "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels."
+// CaptureNote says "Copied to the clipboard."
 // in the language of msgs.
 func (msgs Messages) CaptureNote() string {
 	return Catalog.Format(msgs.locale, "captureNote", nil)
 }
 
-// SectionScreenshots says "Screenshots"
+// SectionScreenshots says "Saved screenshots"
 // in the language the app shows.
 func SectionScreenshots() string { return In(i18n.Locale()).SectionScreenshots() }
 
-// SectionScreenshots says "Screenshots"
+// SectionScreenshots says "Saved screenshots"
 // in the language of msgs.
 func (msgs Messages) SectionScreenshots() string {
 	return Catalog.Format(msgs.locale, "sectionScreenshots", nil)
@@ -1594,4 +1594,64 @@ func PermScreenRecordingNote() string { return In(i18n.Locale()).PermScreenRecor
 // in the language of msgs.
 func (msgs Messages) PermScreenRecordingNote() string {
 	return Catalog.Format(msgs.locale, "permScreenRecordingNote", nil)
+}
+
+// SectionCapture says "Capture"
+// in the language the app shows.
+func SectionCapture() string { return In(i18n.Locale()).SectionCapture() }
+
+// SectionCapture says "Capture"
+// in the language of msgs.
+func (msgs Messages) SectionCapture() string {
+	return Catalog.Format(msgs.locale, "sectionCapture", nil)
+}
+
+// ShortcutWindow says "Capture a window instead"
+// in the language the app shows.
+func ShortcutWindow() string { return In(i18n.Locale()).ShortcutWindow() }
+
+// ShortcutWindow says "Capture a window instead"
+// in the language of msgs.
+func (msgs Messages) ShortcutWindow() string {
+	return Catalog.Format(msgs.locale, "shortcutWindow", nil)
+}
+
+// SectionPaste says "Paste"
+// in the language the app shows.
+func SectionPaste() string { return In(i18n.Locale()).SectionPaste() }
+
+// SectionPaste says "Paste"
+// in the language of msgs.
+func (msgs Messages) SectionPaste() string {
+	return Catalog.Format(msgs.locale, "sectionPaste", nil)
+}
+
+// PasteApps says "Into apps and browsers"
+// in the language the app shows.
+func PasteApps() string { return In(i18n.Locale()).PasteApps() }
+
+// PasteApps says "Into apps and browsers"
+// in the language of msgs.
+func (msgs Messages) PasteApps() string {
+	return Catalog.Format(msgs.locale, "pasteApps", nil)
+}
+
+// PasteTerminals says "Into Claude Code and other terminals"
+// in the language the app shows.
+func PasteTerminals() string { return In(i18n.Locale()).PasteTerminals() }
+
+// PasteTerminals says "Into Claude Code and other terminals"
+// in the language of msgs.
+func (msgs Messages) PasteTerminals() string {
+	return Catalog.Format(msgs.locale, "pasteTerminals", nil)
+}
+
+// PasteTerminalsNote says "A terminal’s ⌘V pastes text only."
+// in the language the app shows.
+func PasteTerminalsNote() string { return In(i18n.Locale()).PasteTerminalsNote() }
+
+// PasteTerminalsNote says "A terminal’s ⌘V pastes text only."
+// in the language of msgs.
+func (msgs Messages) PasteTerminalsNote() string {
+	return Catalog.Format(msgs.locale, "pasteTerminalsNote", nil)
 }

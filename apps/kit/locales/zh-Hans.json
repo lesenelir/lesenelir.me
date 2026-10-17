@@ -137,8 +137,8 @@
   "targetsTabNote": "翻译录音时按 Tab，在下面勾选的语言之间切换。",
   "navScreenshot": "截图",
   "shortcutCapture": "截取区域或窗口",
-  "captureNote": "截图会复制到剪贴板，用 ⌘V 粘贴。按空格切换为窗口，按 Esc 取消。",
-  "sectionScreenshots": "截图",
+  "captureNote": "截图会自动复制到剪贴板。",
+  "sectionScreenshots": "已保存的截图",
   "fieldKeep": "截图保留",
   "keepNote": "超过时间的会自动删除，不会存到桌面。",
   "keepDays": "{count} 天",
@@ -152,5 +152,11 @@
   "screenshotThumbnail": "截图",
   "thumbnailHint": "拖到应用里，或点击打开",
   "permScreenRecording": "屏幕录制",
-  "permScreenRecordingNote": "截取其他应用的窗口需要它"
+  "permScreenRecordingNote": "截取其他应用的窗口需要它",
+  "sectionCapture": "截取",
+  "shortcutWindow": "改为截取窗口",
+  "sectionPaste": "粘贴",
+  "pasteApps": "粘贴到应用和浏览器",
+  "pasteTerminals": "粘贴到 Claude Code 等终端",
+  "pasteTerminalsNote": "终端的 ⌘V 只能粘贴文字。"
 }

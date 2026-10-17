@@ -25,7 +25,8 @@ it.
 
 `⌘⇧2` runs macOS's own capture, as `⌘⇧4` does: drag over an area, or press `Space` and click a window; `Esc`
 cancels. The screenshot is copied to the clipboard, ready to paste into a chat with `⌘V`, and its thumbnail shows in the
-bottom right corner for a few seconds: drag it into an app, or click it to open the screenshot.
+bottom right corner for a few seconds: drag it into an app, or click it to open the screenshot. In Claude Code and
+other terminals paste it with `Control+V`: a terminal's `⌘V` pastes text only, and a file dropped on it becomes its path.
 
 Nothing goes to the Desktop: screenshots are kept in `~/Library/Application Support/Kit/screenshot/` for 1, 7 (the
 default) or 30 days, or forever, as Settings → Screenshot says, and deleted after. That page lists them to copy, drag,

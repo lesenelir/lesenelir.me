@@ -159,8 +159,8 @@
   "targetsTabNote": "Tab cycles through the languages ticked below while translating.",
   "navScreenshot": "Screenshot",
   "shortcutCapture": "Capture an area or a window",
-  "captureNote": "Copied to the clipboard, ready to paste with ⌘V. Space switches to a window; Esc cancels.",
-  "sectionScreenshots": "Screenshots",
+  "captureNote": "Copied to the clipboard.",
+  "sectionScreenshots": "Saved screenshots",
   "fieldKeep": "Keep screenshots for",
   "keepNote": "Older ones are deleted. Nothing is saved to the Desktop.",
   "keepDays": "{count, plural, one {# day} other {# days}}",
@@ -196,5 +196,11 @@
   "screenshotThumbnail": "Screenshot",
   "thumbnailHint": "Drag into an app, or click to open",
   "permScreenRecording": "Screen Recording",
-  "permScreenRecordingNote": "Needed to capture the windows of other apps"
+  "permScreenRecordingNote": "Needed to capture the windows of other apps",
+  "sectionCapture": "Capture",
+  "shortcutWindow": "Capture a window instead",
+  "sectionPaste": "Paste",
+  "pasteApps": "Into apps and browsers",
+  "pasteTerminals": "Into Claude Code and other terminals",
+  "pasteTerminalsNote": "A terminal’s ⌘V pastes text only."
 }
