@@ -20,6 +20,7 @@ pnpm dev:website        # next dev
 pnpm build:website      # next build
 pnpm dev:kit            # go tool mygo dev
 pnpm build:kit          # Kit.app + disk image in apps/kit/build
+pnpm release:kit 0.1.0  # test, build a universal dmg, tag kit-v0.1.0, push, GitHub release (--dry-run to stop before tagging)
 pnpm typecheck          # every package; the website runs `next typegen && tsc --noEmit`
 pnpm lint               # biome check (no writes)
 pnpm check              # biome check --write (lint + format + organize imports)

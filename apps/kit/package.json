@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "./scripts/signing-identity.sh && go tool mygo dev -sign \"Kit Local Signing\"",
     "build": "./scripts/signing-identity.sh && go tool mygo build -sign \"Kit Local Signing\"",
+    "release": "./scripts/release.sh",
     "test": "go test ./...",
     "vet": "go vet ./..."
   }

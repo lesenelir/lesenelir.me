@@ -58,6 +58,20 @@ login keychain the first time. macOS keeps an app's permissions by its signature
 signed with the same identity, rebuilds keep them. Builds signed with an identity run under the hardened runtime, so
 `entitlements.plist` asks for the microphone.
 
+## Releasing
+
+Add a `## <version>` section to `CHANGELOG.md`, commit it on `master`, then from the repo root:
+
+```sh
+pnpm release:kit 0.1.0 --dry-run   # checks, tests and builds; tags, pushes and releases nothing
+pnpm release:kit 0.1.0             # the same, then tags kit-v0.1.0, pushes and creates the GitHub release
+```
+
+`scripts/release.sh` sets the version in `mygo.json` and `package.json` (committing it when it changed), builds
+`Kit <version>.dmg` for Apple silicon and Intel, signed with the local identity, and attaches it to the release, whose
+notes are the changelog section and how to install. Kit is self-signed, not notarized: on another Mac it opens after
+`xattr -dr com.apple.quarantine /Applications/Kit.app`, as the notes say.
+
 ## Permissions
 
 - **Accessibility**: watching `Fn`/`Esc`/`Tab` and pressing `Cmd+V`.

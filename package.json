@@ -16,6 +16,7 @@
     "dev:website": "pnpm --filter @lesenelir/website dev",
     "build:kit": "pnpm --filter @lesenelir/kit build",
     "dev:kit": "pnpm --filter @lesenelir/kit dev",
+    "release:kit": "pnpm --filter @lesenelir/kit release",
     "typecheck": "pnpm -r typecheck",
     "check": "biome check --write .",
     "lint": "biome check .",
