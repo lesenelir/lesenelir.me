@@ -57,9 +57,7 @@
   "navGeneral": "通用",
   "navPermissions": "权限",
   "navModels": "模型",
-  "navTranslation": "翻译",
   "navDictionary": "词典",
-  "sectionShortcuts": "快捷键",
   "shortcutDictate": "开始或结束听写",
   "shortcutTranslate": "开始翻译",
   "shortcutCancel": "取消",
@@ -129,5 +127,12 @@
   "searchHistory": "搜索历史",
   "historyNoMatch": "没有匹配的记录",
   "providersNote": "按顺序优先使用；留空由 OpenRouter 自动选择。",
-  "dictionaryAdd": "输入词条后按回车"
+  "dictionaryAdd": "输入词条后按回车",
+  "navVoice": "听写与翻译",
+  "sectionDictation": "听写",
+  "sectionTranslate": "翻译",
+  "sectionVoiceBar": "录音与语音条",
+  "cancelNote": "录音、转写和整理时都可以取消。",
+  "translateNote": "说任何语言，输出翻译后的文字；按 Fn 结束。",
+  "targetsTabNote": "翻译录音时按 Tab，在下面勾选的语言之间切换。"
 }

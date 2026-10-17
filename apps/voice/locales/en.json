@@ -66,9 +66,7 @@
   "navGeneral": "General",
   "navPermissions": "Permissions",
   "navModels": "Models",
-  "navTranslation": "Translation",
   "navDictionary": "Dictionary",
-  "sectionShortcuts": "Shortcuts",
   "shortcutDictate": "Start or finish dictation",
   "shortcutTranslate": "Start translation",
   "shortcutCancel": "Cancel",
@@ -151,5 +149,12 @@
   "searchHistory": "Search history",
   "historyNoMatch": "No matches",
   "providersNote": "Tried first, in order. Empty lets OpenRouter choose.",
-  "dictionaryAdd": "Type a term, then Enter"
+  "dictionaryAdd": "Type a term, then Enter",
+  "navVoice": "Dictation & Translation",
+  "sectionDictation": "Dictation",
+  "sectionTranslate": "Translation",
+  "sectionVoiceBar": "Recording and voice bar",
+  "cancelNote": "While recording, transcribing or cleaning up.",
+  "translateNote": "Speak any language; the text comes out translated. Fn finishes.",
+  "targetsTabNote": "Tab cycles through the languages ticked below while translating."
 }

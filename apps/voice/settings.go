@@ -37,7 +37,7 @@ const (
 	pageGeneral     = "general"
 	pagePermissions = "permissions"
 	pageModels      = "models"
-	pageTranslation = "translation"
+	pageVoice       = "voice"
 	pageDictionary  = "dictionary"
 )
 
@@ -49,7 +49,7 @@ var (
 	iconGeneral     = icon(`<circle cx="8" cy="8" r="2.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/>`)
 	iconPermissions = icon(`<path d="M8 1.5l5 2v4c0 3.2-2.2 5.6-5 7-2.8-1.4-5-3.8-5-7v-4z"/><path d="M5.8 8l1.6 1.6L10.4 6.6"/>`)
 	iconModels      = icon(`<rect x="3.5" y="3.5" width="9" height="9" rx="2"/><path d="M6 1.5v2M10 1.5v2M6 12.5v2M10 12.5v2M1.5 6h2M1.5 10h2M12.5 6h2M12.5 10h2"/>`)
-	iconTranslation = icon(`<path d="M2 3.5h7M5.5 2v1.5M3.5 3.5c.6 2.4 2.4 4.2 4.5 5M7.5 3.5c-.6 2.4-2.4 4.2-4.5 5"/><path d="M8.5 14l2.5-6 2.5 6M9.3 12h3.4"/>`)
+	iconVoice       = icon(`<path d="M2.5 7v2M5 4.5v7M8 2.5v11M11 4.5v7M13.5 7v2"/>`)
 	iconDictionary  = icon(`<path d="M3 2.5h7.5a1.5 1.5 0 0 1 1.5 1.5v10H4.5A1.5 1.5 0 0 1 3 12.5z"/><path d="M3 12.5A1.5 1.5 0 0 1 4.5 11H12"/><path d="M6 5.5h3.5"/>`)
 )
 
@@ -351,8 +351,8 @@ func (a *app) settingsView(c *ui.Context) {
 						a.permissionsPage(c, m, pal)
 					case pageModels:
 						a.modelsPage(c, m, pal)
-					case pageTranslation:
-						a.translationPage(c, m, pal)
+					case pageVoice:
+						a.voicePage(c, m, pal)
 					case pageDictionary:
 						a.dictionaryPage(c, m, pal)
 					default:
@@ -378,12 +378,15 @@ func (a *app) settingsSidebar(c *ui.Context, m locales.Messages) {
 	// The traffic lights sit here.
 	ui.Box(c).Height(headerHeight).Shrink(0).DragWindow()
 	ui.Column(c).Gap(2).Padding(0, 10).Role(ui.RoleList).Label(m.SettingsTitle()).Children(func() {
+		// What the app does and what the user keeps…
 		a.navItem(c, pageGeneral, iconGeneral, m.NavGeneral())
+		a.navItem(c, pageVoice, iconVoice, m.NavVoice())
 		a.navItem(c, pageHistory, iconHistory, m.NavHistory())
-		a.navItem(c, pagePermissions, iconPermissions, m.NavPermissions())
-		a.navItem(c, pageModels, iconModels, m.NavModels())
-		a.navItem(c, pageTranslation, iconTranslation, m.NavTranslation())
 		a.navItem(c, pageDictionary, iconDictionary, m.NavDictionary())
+		// …then what is set up once.
+		ui.Box(c).Height(12)
+		a.navItem(c, pageModels, iconModels, m.NavModels())
+		a.navItem(c, pagePermissions, iconPermissions, m.NavPermissions())
 	})
 }
 
@@ -424,8 +427,8 @@ func pageTitle(m locales.Messages, page string) string {
 		return m.NavPermissions()
 	case pageModels:
 		return m.NavModels()
-	case pageTranslation:
-		return m.NavTranslation()
+	case pageVoice:
+		return m.NavVoice()
 	case pageDictionary:
 		return m.NavDictionary()
 	}
@@ -441,38 +444,7 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 				Label(m.FieldAppearance()).OnChange(func() { a.setAppearance(a.appearance) })
 		})
 		g.row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
-		g.row(c, m.FieldWhileRecording(), m.WhileRecordingNote(), func() {
-			ui.Segmented(c.Key("while-recording"), &a.form.whileRec,
-				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).
-				Label(m.FieldWhileRecording()).OnChange(a.commit)
-		})
-		g.row(c, m.FieldShowTimings(), m.ShowTimingsNote(), func() {
-			ui.Switch(c.Key("show-timings"), &a.form.showTimings).Label(m.FieldShowTimings()).OnChange(a.commit)
-		})
 	})
-	group(c, pal, m.SectionShortcuts(), func(g *rows) {
-		g.row(c, m.ShortcutDictate(), "", func() { keycaps(c, pal, "fn") })
-		g.row(c, m.ShortcutTranslate(), "", func() { keycaps(c, pal, "fn", m.KeyLeftShift()) })
-		g.row(c, m.ShortcutCancel(), "", func() { keycaps(c, pal, "esc") })
-		g.row(c, m.ShortcutSwitch(), "", func() { keycaps(c, pal, "tab") })
-	})
-	if s, note := a.status, noteText(m, a.status); s.Text != "" || note != "" {
-		group(c, pal, m.SectionLast(), func(g *rows) {
-			g.block(c, func() {
-				ui.Column(c).Gap(6).Children(func() {
-					if note != "" {
-						ui.Text(c, note).FontSize(12).TextColor(pal.muted)
-					}
-					if s.Timings != (controller.Timings{}) {
-						ui.Text(c, lastTimingsText(m, s)).FontSize(12).TextColor(pal.muted)
-					}
-					if s.Text != "" {
-						ui.Text(c, s.Text).Selectable()
-					}
-				})
-			})
-		})
-	}
 }
 
 func (a *app) languageSelect(c *ui.Context, m locales.Messages) {
@@ -608,12 +580,20 @@ func (a *app) modelsPage(c *ui.Context, m locales.Messages, pal palette) {
 	ui.Text(c, m.AutoSaveNote()).FontSize(11.5).TextColor(pal.muted)
 }
 
-func (a *app) translationPage(c *ui.Context, m locales.Messages, pal palette) {
+// voicePage is the app's one feature in its two modes: dictation, and
+// translation, which differs only in its key and in what the rewrite
+// does, with what both share below them.
+func (a *app) voicePage(c *ui.Context, m locales.Messages, pal palette) {
 	labels := make([]string, len(prompt.Languages))
 	for i, l := range prompt.Languages {
 		labels[i] = l.Label
 	}
-	group(c, pal, "", func(g *rows) {
+	group(c, pal, m.SectionDictation(), func(g *rows) {
+		g.row(c, m.ShortcutDictate(), "", func() { keycaps(c, pal, "fn") })
+		g.row(c, m.ShortcutCancel(), m.CancelNote(), func() { keycaps(c, pal, "esc") })
+	})
+	group(c, pal, m.SectionTranslate(), func(g *rows) {
+		g.row(c, m.ShortcutTranslate(), m.TranslateNote(), func() { keycaps(c, pal, "fn", m.KeyLeftShift()) })
 		g.row(c, m.FieldChineseTo(), "", func() {
 			dropdown(c.Key("zh"), m.FieldChineseTo(), &a.form.zhTo, labels, same, nil, 160, a.commit)
 		})
@@ -623,19 +603,45 @@ func (a *app) translationPage(c *ui.Context, m locales.Messages, pal palette) {
 		g.row(c, m.FieldOtherTo(), "", func() {
 			dropdown(c.Key("default"), m.FieldOtherTo(), &a.form.defaultTo, labels, same, nil, 160, a.commit)
 		})
-		g.row(c, m.FieldRemember(), m.RememberNote(), func() {
-			ui.Switch(c.Key("remember"), &a.form.remember).Label(m.FieldRemember()).OnChange(a.commit)
-		})
-	})
-	group(c, pal, m.SectionTargets(), func(g *rows) {
+		g.row(c, m.ShortcutSwitch(), m.TargetsTabNote(), func() { keycaps(c, pal, "tab") })
 		g.block(c, func() {
-			ui.Grid(c).Columns(3).GapX(16).GapY(12).Children(func() {
+			ui.Grid(c).Columns(3).GapX(16).GapY(12).Label(m.SectionTargets()).Children(func() {
 				for i, l := range prompt.Languages {
 					ui.Checkbox(c.Key("target-"+l.Code), &a.form.targets[i], l.Label).OnChange(a.commit)
 				}
 			})
 		})
+		g.row(c, m.FieldRemember(), m.RememberNote(), func() {
+			ui.Switch(c.Key("remember"), &a.form.remember).Label(m.FieldRemember()).OnChange(a.commit)
+		})
 	})
+	group(c, pal, m.SectionVoiceBar(), func(g *rows) {
+		g.row(c, m.FieldWhileRecording(), m.WhileRecordingNote(), func() {
+			ui.Segmented(c.Key("while-recording"), &a.form.whileRec,
+				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).
+				Label(m.FieldWhileRecording()).OnChange(a.commit)
+		})
+		g.row(c, m.FieldShowTimings(), m.ShowTimingsNote(), func() {
+			ui.Switch(c.Key("show-timings"), &a.form.showTimings).Label(m.FieldShowTimings()).OnChange(a.commit)
+		})
+	})
+	if s, note := a.status, noteText(m, a.status); s.Text != "" || note != "" {
+		group(c, pal, m.SectionLast(), func(g *rows) {
+			g.block(c, func() {
+				ui.Column(c).Gap(6).Children(func() {
+					if note != "" {
+						ui.Text(c, note).FontSize(12).TextColor(pal.muted)
+					}
+					if s.Timings != (controller.Timings{}) {
+						ui.Text(c, lastTimingsText(m, s)).FontSize(12).TextColor(pal.muted)
+					}
+					if s.Text != "" {
+						ui.Text(c, s.Text).Selectable()
+					}
+				})
+			})
+		})
+	}
 }
 
 func (a *app) dictionaryPage(c *ui.Context, m locales.Messages, pal palette) {

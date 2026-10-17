@@ -115,7 +115,7 @@ func TestSettingsPages(t *testing.T) {
 	a.form = formFrom(a.store.Get(), apiKeys{})
 	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"通用", "权限", "模型", "翻译", "词典", "界面语言", "外观", "快捷键", "fn", "esc"} {
+	for _, want := range []string{"通用", "听写与翻译", "历史", "词典", "模型", "权限", "界面语言", "外观", "强调色"} {
 		if !tt.HasText(want) {
 			t.Errorf("general page: no %q in %q", want, tt.Texts())
 		}
@@ -123,7 +123,7 @@ func TestSettingsPages(t *testing.T) {
 	for _, step := range []struct{ item, want string }{
 		{"权限", "辅助功能"},
 		{"模型", "API Key"},
-		{"翻译", "说中文时译成"},
+		{"听写与翻译", "说中文时译成"},
 		{"词典", "词典里的名字和术语会按原样拼写。"},
 	} {
 		if err := tt.Click(step.item); err != nil {
@@ -140,7 +140,7 @@ func TestSettingsFollowLanguage(t *testing.T) {
 	a.form = formFrom(a.store.Get(), apiKeys{})
 	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
 	tt.SetLocale("en")
-	for _, want := range []string{"General", "Language", "System default", "Appearance", "Light", "Dark", "Shortcuts"} {
+	for _, want := range []string{"General", "Language", "System default", "Appearance", "Light", "Dark", "Accent color", "Dictation & Translation"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}
@@ -254,7 +254,8 @@ func TestSettingsTimingsSwitch(t *testing.T) {
 	if !a.form.showTimings {
 		t.Fatal("timings are hidden by default")
 	}
-	tt := ui.NewTester(a.settingsView, settingsWidth, settingsHeight)
+	a.page = pageVoice
+	tt := ui.NewTester(a.settingsView, settingsWidth, 1000)
 	tt.SetLocale("zh-Hans")
 	if !tt.HasText("在语音条上显示耗时") {
 		t.Fatalf("no timings switch in %q", tt.Texts())
@@ -431,6 +432,7 @@ func TestWhileRecordingSetting(t *testing.T) {
 	}
 	a := testApp(t)
 	a.form = formFrom(a.store.Get(), apiKeys{})
+	a.page = pageVoice
 	tt := ui.NewTester(a.settingsView, settingsWidth, 900)
 	tt.SetLocale("zh-Hans")
 	for _, want := range []string{"录音时的其他声音", "静音", "调低", "不处理"} {
