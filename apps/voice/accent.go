@@ -101,6 +101,10 @@ var iconChevron = icon(`<path d="M4.5 6.5L8 10l3.5-3.5"/>`)
 // system is the accent macOS has, for the "System" swatch.
 func (a *app) accentSelect(c *ui.Context, m locales.Messages, system ui.Color) {
 	t := c.Theme()
+	ids := make([]string, len(accentChoices))
+	for i, choice := range accentChoices {
+		ids[i] = choice.id
+	}
 	swatch := func(id string) {
 		col, ok := accentColor(id, t.Dark)
 		if !ok {
@@ -108,28 +112,7 @@ func (a *app) accentSelect(c *ui.Context, m locales.Messages, system ui.Color) {
 		}
 		ui.Box(c).Size(12, 12).Radius(6).Background(col).Border(1, ui.RGBA(0, 0, 0, 0.12))
 	}
-	sel := ui.SelectBase(c.Key("accent"), &a.accent)
-	sel.Trigger.Width(180).Gap(8).Padding(5, 10).Radius(t.Radius).Background(t.Surface).
-		Border(1, t.Border).AlignItems(ui.Center).Label(m.FieldAccent()).Children(func() {
-		swatch(a.accent)
-		ui.Text(c, accentName(m, a.accent)).Grow(1).SingleLine()
-		ui.Icon(c, iconChevron).FontSize(14).TextColor(t.TextMuted)
-	})
-	sel.Trigger.OnChange(func() {
+	dropdown(c.Key("accent"), &a.accent, ids, func(id string) string { return accentName(m, id) }, swatch, 180, func() {
 		_ = a.store.Update(func(s *store.Settings) { s.AccentColor = a.accent })
-	})
-	sel.Popup(func(panel ui.Element) {
-		panel.Margin(4, 0, 0, 0).Padding(4).Radius(10).Background(t.Background).Border(1, t.Border).
-			Shadow(0, 8, 24, 0, ui.RGBA(0, 0, 0, 0.18)).Width(180)
-		for _, choice := range accentChoices {
-			item := sel.Item(choice.id).Gap(8).Padding(5, 8).Radius(6).AlignItems(ui.Center)
-			if item.Highlighted() {
-				item.Background(t.Accent.Alpha(0.14))
-			}
-			item.Children(func() {
-				swatch(choice.id)
-				ui.Text(c, accentName(m, choice.id)).Grow(1).SingleLine()
-			})
-		}
 	})
 }

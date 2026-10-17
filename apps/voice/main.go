@@ -43,20 +43,19 @@ type app struct {
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
-	status          controller.Status
-	hideSeq         int
-	form            settingsForm
-	perms           permissions
-	saved           saveResult
-	uiLanguage      string   // "" follows the system
-	accent          string   // the accent color's id, bound to its select
-	systemAccent    ui.Color // macOS's accent, for the "System" swatch
-	appearance      int      // index in appearances, bound to its control
-	uiLanguageLabel string   // bound to the language select
-	page            string   // the settings page shown
-	hist            historyView
-	levels          [waveBars]float32 // the voice bar's waveform, oldest first
-	levelAt         time.Time         // when levels last moved
+	status       controller.Status
+	hideSeq      int
+	form         settingsForm
+	perms        permissions
+	saved        saveResult
+	uiLanguage   string   // "" follows the system
+	accent       string   // the accent color's id, bound to its select
+	systemAccent ui.Color // macOS's accent, for the "System" swatch
+	appearance   int      // index in appearances, bound to its control
+	page         string   // the settings page shown
+	hist         historyView
+	levels       [waveBars]float32 // the voice bar's waveform, oldest first
+	levelAt      time.Time         // when levels last moved
 }
 
 func main() {

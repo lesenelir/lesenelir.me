@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/plugins/glass"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/voice/internal/controller"
@@ -274,16 +275,21 @@ func (a *app) setAppearance(i int) {
 // uiLanguages are the interface languages, "" for the system's.
 var uiLanguages = []string{"", "en", "zh-Hans"}
 
-func uiLanguageLabels(m locales.Messages) []string {
-	return []string{m.LanguageSystem(), "English", "简体中文"}
+// languageLabel names an interface language in itself, or the system's.
+func languageLabel(m locales.Messages, tag string) string {
+	switch tag {
+	case "en":
+		return "English"
+	case "zh-Hans":
+		return "简体中文"
+	}
+	return m.LanguageSystem()
 }
 
-// setUILanguage switches the interface at once and keeps the choice.
-func (a *app) setUILanguage(tag string) {
-	if tag == a.uiLanguage {
-		return
-	}
-	a.uiLanguage = tag
+// applyUILanguage switches the interface to the language chosen, at once,
+// and keeps the choice.
+func (a *app) applyUILanguage() {
+	tag := a.uiLanguage
 	_ = a.store.Update(func(s *store.Settings) { s.UILanguage = tag })
 	mygo.App.SetLocale(tag)
 }
@@ -331,14 +337,12 @@ func (a *app) settingsView(c *ui.Context) {
 		}
 		side.Children(func() { a.settingsSidebar(c, m) })
 		ui.Box(c).Width(1).Background(pal.border)
-		ui.Column(c).Grow(1).MinWidth(0).Background(pal.pane).Children(func() {
-			bar := c.TitleBar()
-			ui.Row(c).Height(headerHeight).Shrink(0).AlignItems(ui.Center).
-				Padding(0, bar.Right+24, 0, 28).DragWindow().Children(func() {
-				ui.Text(c, pageTitle(m, a.page)).FontSize(15).Bold().SingleLine()
-			})
-			ui.Scroll(c.Key("page-" + a.page)).Grow(1).Children(func() {
-				ui.Column(c).Padding(4, 28, 28, 28).Gap(22).Children(func() {
+		// The page scrolls under its title bar: the content fades out under
+		// the bar's scroll edge, and the title floats over it on Liquid
+		// Glass, as in macOS 26's own windows.
+		ui.Box(c).Grow(1).MinWidth(0).Background(pal.pane).Clip().Children(func() {
+			ui.Scroll(c.Key("page-"+a.page)).Fill().ScrollbarInsets(headerHeight, 0, 0).Children(func() {
+				ui.Column(c).Padding(headerHeight+8, 28, 28, 28).Gap(22).Children(func() {
 					switch a.page {
 					case pageHistory:
 						a.historyPage(c, m, pal)
@@ -357,6 +361,13 @@ func (a *app) settingsView(c *ui.Context) {
 						ui.Text(c, note).FontSize(12).TextColor(t.Danger)
 					}
 				})
+			})
+			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Height(headerHeight + 10).PassThrough().
+				Material(glass.ScrollEdge{Background: pal.pane})
+			// The bar drags the window, as a title bar does.
+			ui.Box(c).Absolute().Top(0).Left(0).Right(0).Height(headerHeight).DragWindow()
+			ui.Row(c).Absolute().Top(0).Left(28).Height(headerHeight).AlignItems(ui.Center).DragWindow().Children(func() {
+				ui.Text(c, pageTitle(m, a.page)).FontSize(15).Bold().SingleLine()
 			})
 		})
 	})
@@ -463,18 +474,8 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 }
 
 func (a *app) languageSelect(c *ui.Context, m locales.Messages) {
-	labels := uiLanguageLabels(m)
-	// The label of the system option changes with the language; pick the
-	// current choice again when the bound label no longer matches one.
-	if !slices.Contains(labels, a.uiLanguageLabel) {
-		i := max(0, slices.Index(uiLanguages, a.uiLanguage))
-		a.uiLanguageLabel = labels[i]
-	}
-	ui.Select(c.Key("ui-language"), &a.uiLanguageLabel, labels).Width(180).OnChange(func() {
-		if i := slices.Index(labels, a.uiLanguageLabel); i >= 0 {
-			a.setUILanguage(uiLanguages[i])
-		}
-	})
+	dropdown(c.Key("ui-language"), &a.uiLanguage, uiLanguages,
+		func(tag string) string { return languageLabel(m, tag) }, nil, 180, a.applyUILanguage)
 }
 
 func (a *app) permissionsPage(c *ui.Context, m locales.Messages, pal palette) {
@@ -587,13 +588,13 @@ func (a *app) translationPage(c *ui.Context, m locales.Messages, pal palette) {
 	}
 	group(c, pal, "", func(g *rows) {
 		g.row(c, m.FieldChineseTo(), "", func() {
-			ui.Select(c.Key("zh"), &a.form.zhTo, labels).Width(160).OnChange(a.commit)
+			dropdown(c.Key("zh"), &a.form.zhTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldEnglishTo(), "", func() {
-			ui.Select(c.Key("en"), &a.form.enTo, labels).Width(160).OnChange(a.commit)
+			dropdown(c.Key("en"), &a.form.enTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldOtherTo(), "", func() {
-			ui.Select(c.Key("default"), &a.form.defaultTo, labels).Width(160).OnChange(a.commit)
+			dropdown(c.Key("default"), &a.form.defaultTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldRemember(), m.RememberNote(), func() {
 			ui.Switch(c.Key("remember"), &a.form.remember).Label(m.FieldRemember()).OnChange(a.commit)
@@ -701,3 +702,6 @@ func micText(m locales.Messages, s darwin.MicStatus) string {
 	}
 	return m.MicAsk()
 }
+
+// same is a dropdown label for options that are their own labels.
+func same(s string) string { return s }
