@@ -4,7 +4,6 @@ package main
 
 import (
 	"slices"
-	"strconv"
 	"strings"
 	"time"
 
@@ -66,18 +65,18 @@ type settingsForm struct {
 	sonioxKey   string
 	asrService  int // index in asrServices
 	sonioxModel string
-	sonioxLangs string
+	sonioxLangs []string
 	asrModel    string
 	asrLang     string
 	llmModel    string
-	providers   string
-	timeout     string
-	targets     []bool // by prompt.Languages
-	defaultTo   string // language labels, as the selects show them
+	providers   []string
+	timeout     float64 // seconds
+	targets     []bool  // by prompt.Languages
+	defaultTo   string  // language labels, as the selects show them
 	zhTo        string
 	enTo        string
 	remember    bool
-	dictionary  string
+	dictionary  []string
 	showTimings bool
 	whileRec    int // index in whileRecording
 	saveHistory bool
@@ -103,18 +102,18 @@ func formFrom(s store.Settings, keys apiKeys) settingsForm {
 		sonioxKey:   keys.soniox,
 		asrService:  max(0, slices.Index(asrServices, s.ASRService)),
 		sonioxModel: s.SonioxModel,
-		sonioxLangs: strings.Join(s.SonioxLanguages, ", "),
+		sonioxLangs: slices.Clone(s.SonioxLanguages),
 		asrModel:    s.ASRModel,
 		asrLang:     s.ASRLanguage,
 		llmModel:    s.LLMModel,
-		providers:   strings.Join(s.Providers, ", "),
-		timeout:     strconv.FormatFloat(s.LLMTimeout, 'f', -1, 64),
+		providers:   slices.Clone(s.Providers),
+		timeout:     s.Timeout().Seconds(),
 		targets:     make([]bool, len(prompt.Languages)),
 		defaultTo:   prompt.LanguageFor(s.DefaultTarget).Label,
 		zhTo:        prompt.LanguageFor(s.TargetFor("zh")).Label,
 		enTo:        prompt.LanguageFor(s.TargetFor("en")).Label,
 		remember:    s.RememberTarget,
-		dictionary:  strings.Join(s.Dictionary, "\n"),
+		dictionary:  slices.Clone(s.Dictionary),
 		showTimings: !s.HideTimings,
 		whileRec:    max(0, slices.Index(whileRecording, s.WhileRecording)),
 		saveHistory: !s.NoHistory,
@@ -134,11 +133,13 @@ func codeFor(label string) string {
 	return "en"
 }
 
-func splitList(s string, sep func(rune) bool) []string {
+// cleanList trims the items of a token field, dropping empty and repeated
+// ones.
+func cleanList(items []string) []string {
 	var out []string
-	for _, part := range strings.FieldsFunc(s, sep) {
-		if p := strings.TrimSpace(part); p != "" {
-			out = append(out, p)
+	for _, item := range items {
+		if item = strings.TrimSpace(item); item != "" && !slices.Contains(out, item) {
+			out = append(out, item)
 		}
 	}
 	return out
@@ -146,8 +147,8 @@ func splitList(s string, sep func(rune) bool) []string {
 
 // apply copies the form into the settings.
 func (f settingsForm) apply(s *store.Settings) {
-	timeout, err := strconv.ParseFloat(strings.TrimSpace(f.timeout), 64)
-	if err != nil || timeout <= 0 {
+	timeout := f.timeout
+	if timeout <= 0 {
 		timeout = store.Defaults().LLMTimeout
 	}
 	var targets []string
@@ -162,11 +163,11 @@ func (f settingsForm) apply(s *store.Settings) {
 	}
 	s.ASRService = asrServices[f.asrService]
 	s.SonioxModel = strings.TrimSpace(f.sonioxModel)
-	s.SonioxLanguages = splitList(f.sonioxLangs, func(r rune) bool { return r == ',' || r == ' ' })
+	s.SonioxLanguages = cleanList(f.sonioxLangs)
 	s.ASRModel = strings.TrimSpace(f.asrModel)
 	s.ASRLanguage = strings.TrimSpace(f.asrLang)
 	s.LLMModel = strings.TrimSpace(f.llmModel)
-	s.Providers = splitList(f.providers, func(r rune) bool { return r == ',' || r == ' ' })
+	s.Providers = cleanList(f.providers)
 	s.LLMTimeout = timeout
 	s.Targets = targets
 	s.DefaultTarget = defaultTo
@@ -176,7 +177,7 @@ func (f settingsForm) apply(s *store.Settings) {
 	s.Rules["zh"] = codeFor(f.zhTo)
 	s.Rules["en"] = codeFor(f.enTo)
 	s.RememberTarget = f.remember
-	s.Dictionary = splitList(f.dictionary, func(r rune) bool { return r == '\n' })
+	s.Dictionary = cleanList(f.dictionary)
 	s.HideTimings = !f.showTimings
 	s.WhileRecording = whileRecording[f.whileRec]
 	s.NoHistory = !f.saveHistory
@@ -437,12 +438,13 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 		g.row(c, m.FieldAppearance(), "", func() {
 			ui.Segmented(c.Key("appearance"), &a.appearance,
 				m.AppearanceSystem(), m.AppearanceLight(), m.AppearanceDark()).
-				OnChange(func() { a.setAppearance(a.appearance) })
+				Label(m.FieldAppearance()).OnChange(func() { a.setAppearance(a.appearance) })
 		})
 		g.row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
 		g.row(c, m.FieldWhileRecording(), m.WhileRecordingNote(), func() {
 			ui.Segmented(c.Key("while-recording"), &a.form.whileRec,
-				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).OnChange(a.commit)
+				m.WhileRecordingMute(), m.WhileRecordingLower(), m.WhileRecordingNone()).
+				Label(m.FieldWhileRecording()).OnChange(a.commit)
 		})
 		g.row(c, m.FieldShowTimings(), m.ShowTimingsNote(), func() {
 			ui.Switch(c.Key("show-timings"), &a.form.showTimings).Label(m.FieldShowTimings()).OnChange(a.commit)
@@ -474,7 +476,7 @@ func (a *app) generalPage(c *ui.Context, m locales.Messages, pal palette) {
 }
 
 func (a *app) languageSelect(c *ui.Context, m locales.Messages) {
-	dropdown(c.Key("ui-language"), &a.uiLanguage, uiLanguages,
+	dropdown(c.Key("ui-language"), m.FieldLanguage(), &a.uiLanguage, uiLanguages,
 		func(tag string) string { return languageLabel(m, tag) }, nil, 180, a.applyUILanguage)
 }
 
@@ -483,10 +485,10 @@ func (a *app) permissionsPage(c *ui.Context, m locales.Messages, pal palette) {
 	group(c, pal, "", func(g *rows) {
 		g.row(c, m.PermAccessibility(), m.PermAccessibilityNote(), func() {
 			if a.perms.accessibility {
-				pill(c, m.StatusAllowed(), t.Success)
+				badge(c, m.StatusAllowed(), t.Success)
 				return
 			}
-			pill(c, m.StatusNeeded(), t.Danger)
+			badge(c, m.StatusNeeded(), t.Danger)
 			if ui.Button(c, m.OpenSettings()).Clicked() {
 				darwin.OpenAccessibilitySettings()
 			}
@@ -494,21 +496,21 @@ func (a *app) permissionsPage(c *ui.Context, m locales.Messages, pal palette) {
 		g.row(c, m.PermMicrophone(), micText(m, a.perms.microphone), func() {
 			switch a.perms.microphone {
 			case darwin.MicAuthorized:
-				pill(c, m.StatusAllowed(), t.Success)
+				badge(c, m.StatusAllowed(), t.Success)
 			case darwin.MicDenied, darwin.MicRestricted:
-				pill(c, m.StatusNeeded(), t.Danger)
+				badge(c, m.StatusNeeded(), t.Danger)
 				if ui.Button(c, m.OpenSettings()).Clicked() {
 					darwin.OpenMicrophoneSettings()
 				}
 			default:
-				pill(c, m.StatusWaiting(), t.TextMuted)
+				badge(c, m.StatusWaiting(), t.TextMuted)
 			}
 		})
 		g.row(c, m.PermHotkeys(), m.PermHotkeysNote(), func() {
 			if a.perms.tapRunning {
-				pill(c, m.StatusRunning(), t.Success)
+				badge(c, m.StatusRunning(), t.Success)
 			} else {
-				pill(c, m.StatusWaiting(), t.TextMuted)
+				badge(c, m.StatusWaiting(), t.TextMuted)
 			}
 		})
 	})
@@ -521,61 +523,86 @@ func (a *app) permissionsPage(c *ui.Context, m locales.Messages, pal palette) {
 	})
 }
 
+// Suggestions for the model and provider fields: OpenRouter's IDs that suit
+// voice input, which the user may change for any other.
+var (
+	asrModelSuggestions = []string{
+		"qwen/qwen3-asr-1.7b", "openai/gpt-4o-mini-transcribe", "openai/gpt-4o-transcribe",
+		"microsoft/mai-transcribe-2", "elevenlabs/scribe-v2", "openai/whisper-large-v3-turbo",
+	}
+	llmModelSuggestions = []string{
+		"openai/gpt-oss-120b", "anthropic/claude-haiku-5.5", "google/gemini-3.1-flash-lite", "openai/gpt-oss-20b",
+	}
+	providerSuggestions = []string{"cerebras", "groq", "together", "deepinfra", "fireworks", "sambanova"}
+)
+
+// languageCodes are the codes of the languages the app knows.
+func languageCodes() []string {
+	codes := make([]string, len(prompt.Languages))
+	for i, l := range prompt.Languages {
+		codes[i] = l.Code
+	}
+	return codes
+}
+
 func (a *app) modelsPage(c *ui.Context, m locales.Messages, pal palette) {
 	const fieldWidth = 240
 	streaming := asrServices[a.form.asrService] == "soniox"
 	group(c, pal, m.SectionSpeech(), func(g *rows) {
 		g.row(c, m.FieldAsrService(), m.AsrServiceNote(), func() {
-			ui.Segmented(c.Key("asr-service"), &a.form.asrService, "Soniox", "OpenRouter").OnChange(a.commit)
+			ui.Segmented(c.Key("asr-service"), &a.form.asrService, "Soniox", "OpenRouter").
+				Label(m.FieldAsrService()).OnChange(a.commit)
 		})
 	})
 	if streaming {
 		group(c, pal, "Soniox", func(g *rows) {
 			g.row(c, m.FieldSonioxKey(), m.SonioxKeyNote(), func() {
 				ui.TextInput(c.Key("soniox-key"), &a.form.sonioxKey).Password().Placeholder("Soniox API key").
-					Width(fieldWidth).OnChange(func() { a.commitKey(a.sonioxKey, a.form.sonioxKey) })
+					Label("Soniox " + m.FieldSonioxKey()).Width(fieldWidth).
+					OnChange(func() { a.commitKey(a.sonioxKey, a.form.sonioxKey) })
 			})
 			g.row(c, m.FieldSonioxModel(), "", func() {
-				ui.TextInput(c.Key("soniox-model"), &a.form.sonioxModel).Placeholder(soniox.DefaultModel).
-					Width(fieldWidth).OnChange(a.commit)
+				ui.Autocomplete(c.Key("soniox-model"), &a.form.sonioxModel, []string{soniox.DefaultModel}).
+					Placeholder(soniox.DefaultModel).Label("Soniox " + m.FieldSonioxModel()).Width(fieldWidth).OnChange(a.commit)
 			})
 			g.row(c, m.FieldSonioxLanguages(), m.SonioxLanguagesNote(), func() {
-				ui.TextInput(c.Key("soniox-langs"), &a.form.sonioxLangs).Placeholder("zh, en").
-					Width(fieldWidth).OnChange(a.commit)
+				ui.TokenField(c.Key("soniox-langs"), &a.form.sonioxLangs, languageCodes()).
+					Label(m.FieldSonioxLanguages()).Width(fieldWidth).OnChange(a.commit)
 			})
 		})
 	}
 	group(c, pal, m.SectionOpenRouter(), func(g *rows) {
 		g.row(c, m.FieldApiKey(), m.OpenRouterKeyNote(), func() {
 			ui.TextInput(c.Key("api-key"), &a.form.apiKey).Password().Placeholder("sk-or-…").
-				Width(fieldWidth).OnChange(func() { a.commitKey(a.openrouterKey, a.form.apiKey) })
+				Label("OpenRouter " + m.FieldApiKey()).Width(fieldWidth).
+				OnChange(func() { a.commitKey(a.openrouterKey, a.form.apiKey) })
 		})
-		note := m.AsrModelNote()
+		note := ""
 		if streaming {
 			note = m.AsrFallbackNote()
 		}
 		g.row(c, m.FieldAsrModel(), note, func() {
-			ui.TextInput(c.Key("asr-model"), &a.form.asrModel).Placeholder("qwen/qwen3-asr-1.7b").
-				Width(fieldWidth).OnChange(a.commit)
+			ui.Autocomplete(c.Key("asr-model"), &a.form.asrModel, asrModelSuggestions).
+				Placeholder(asrModelSuggestions[0]).Label(m.FieldAsrModel()).Width(fieldWidth).OnChange(a.commit)
 		})
 		if !streaming {
 			g.row(c, m.FieldAsrLanguage(), m.AsrLanguagePlaceholder(), func() {
-				ui.TextInput(c.Key("asr-lang"), &a.form.asrLang).Placeholder("zh, en…").
-					Width(fieldWidth).OnChange(a.commit)
+				ui.Autocomplete(c.Key("asr-lang"), &a.form.asrLang, languageCodes()).Placeholder("zh, en…").
+					Label(m.FieldAsrLanguage()).Width(fieldWidth).OnChange(a.commit)
 			})
 		}
 	})
 	group(c, pal, m.SectionRewrite(), func(g *rows) {
-		g.row(c, m.FieldLlmModel(), m.LlmModelNote(), func() {
-			ui.TextInput(c.Key("llm-model"), &a.form.llmModel).Placeholder("openai/gpt-oss-120b").
-				Width(fieldWidth).OnChange(a.commit)
+		g.row(c, m.FieldLlmModel(), "", func() {
+			ui.Autocomplete(c.Key("llm-model"), &a.form.llmModel, llmModelSuggestions).
+				Placeholder(llmModelSuggestions[0]).Label(m.FieldLlmModel()).Width(fieldWidth).OnChange(a.commit)
 		})
-		g.row(c, m.FieldProviders(), "", func() {
-			ui.TextInput(c.Key("providers"), &a.form.providers).Placeholder("cerebras, groq").
-				Width(fieldWidth).OnChange(a.commit)
+		g.row(c, m.FieldProviders(), m.ProvidersNote(), func() {
+			ui.TokenField(c.Key("providers"), &a.form.providers, providerSuggestions).
+				Label(m.FieldProviders()).Width(fieldWidth).OnChange(a.commit)
 		})
 		g.row(c, m.FieldTimeout(), m.TimeoutNote(), func() {
-			ui.TextInput(c.Key("timeout"), &a.form.timeout).Width(72).OnChange(a.commit)
+			ui.NumberInput(c.Key("timeout"), &a.form.timeout, 1, 60, 0.5).Label(m.FieldTimeout()).OnChange(a.commit)
 		})
 	})
 	ui.Text(c, m.AutoSaveNote()).FontSize(11.5).TextColor(pal.muted)
@@ -588,13 +615,13 @@ func (a *app) translationPage(c *ui.Context, m locales.Messages, pal palette) {
 	}
 	group(c, pal, "", func(g *rows) {
 		g.row(c, m.FieldChineseTo(), "", func() {
-			dropdown(c.Key("zh"), &a.form.zhTo, labels, same, nil, 160, a.commit)
+			dropdown(c.Key("zh"), m.FieldChineseTo(), &a.form.zhTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldEnglishTo(), "", func() {
-			dropdown(c.Key("en"), &a.form.enTo, labels, same, nil, 160, a.commit)
+			dropdown(c.Key("en"), m.FieldEnglishTo(), &a.form.enTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldOtherTo(), "", func() {
-			dropdown(c.Key("default"), &a.form.defaultTo, labels, same, nil, 160, a.commit)
+			dropdown(c.Key("default"), m.FieldOtherTo(), &a.form.defaultTo, labels, same, nil, 160, a.commit)
 		})
 		g.row(c, m.FieldRemember(), m.RememberNote(), func() {
 			ui.Switch(c.Key("remember"), &a.form.remember).Label(m.FieldRemember()).OnChange(a.commit)
@@ -614,8 +641,8 @@ func (a *app) translationPage(c *ui.Context, m locales.Messages, pal palette) {
 func (a *app) dictionaryPage(c *ui.Context, m locales.Messages, pal palette) {
 	group(c, pal, "", func(g *rows) {
 		g.block(c, func() {
-			ui.TextArea(c.Key("dictionary"), &a.form.dictionary).Height(240).
-				Placeholder(m.DictionaryPlaceholder()).OnChange(a.commit)
+			ui.TokenField(c.Key("dictionary"), &a.form.dictionary, nil).Label(m.NavDictionary()).
+				Placeholder(m.DictionaryAdd()).MinHeight(120).OnChange(a.commit)
 		})
 	})
 	ui.Text(c, m.DictionaryNote()).FontSize(11.5).TextColor(pal.muted)
@@ -678,10 +705,9 @@ func keycaps(c *ui.Context, pal palette, keys ...string) {
 	})
 }
 
-// pill shows a status in its color.
-func pill(c *ui.Context, text string, color ui.Color) {
-	ui.Text(c, text).FontSize(11.5).Padding(2, 9).Radius(999).
-		Background(ui.RGBA(color.R, color.G, color.B, 0.14)).TextColor(color).SingleLine()
+// badge shows a status in its color.
+func badge(c *ui.Context, text string, color ui.Color) {
+	ui.Badge(c, text).Background(color.Alpha(0.14)).TextColor(color)
 }
 
 // lastTimingsText says how long the last session's requests took.

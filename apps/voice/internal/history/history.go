@@ -112,6 +112,21 @@ func (s *Store) Delete(id string) error {
 	return s.write(kept)
 }
 
+// Restore puts back an entry Delete took out, in its place by time.
+func (s *Store) Restore(e Entry) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	entries, err := s.read()
+	if err != nil {
+		return err
+	}
+	if slices.ContainsFunc(entries, func(x Entry) bool { return x.ID == e.ID }) {
+		return nil
+	}
+	i, _ := slices.BinarySearchFunc(entries, e, func(a, b Entry) int { return a.Time.Compare(b.Time) })
+	return s.write(slices.Insert(entries, i, e))
+}
+
 // Clear deletes the history file.
 func (s *Store) Clear() error {
 	s.mu.Lock()

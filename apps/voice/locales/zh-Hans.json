@@ -22,11 +22,9 @@
   "sectionOpenRouter": "OpenRouter",
   "fieldApiKey": "API Key",
   "fieldAsrModel": "转写模型",
-  "asrModelNote": "也可用 openai/gpt-4o-mini-transcribe",
   "fieldAsrLanguage": "转写语言提示",
   "asrLanguagePlaceholder": "留空自动识别（中英混说建议留空）",
   "fieldLlmModel": "整理 / 翻译模型",
-  "llmModelNote": "备选：anthropic/claude-haiku-5.5",
   "fieldProviders": "优先供应商",
   "fieldTimeout": "整理超时（秒）",
   "timeoutNote": "超时就粘贴原始转写。",
@@ -35,7 +33,6 @@
   "fieldOtherTo": "其他语言译成",
   "fieldRemember": "记住上次选择",
   "rememberNote": "开启后，翻译从上次在语音条上选的语言开始。",
-  "dictionaryPlaceholder": "每行一个：人名、产品名、术语…",
   "sectionLast": "最近一次",
   "saveKeyFailed": "保存 API Key 失败：{error}",
   "saveFailed": "保存失败：{error}",
@@ -125,5 +122,12 @@
   "accentPurple": "紫色",
   "accentOrange": "橙色",
   "accentPink": "粉色",
-  "accentBrown": "棕色"
+  "accentBrown": "棕色",
+  "deleted": "已删除",
+  "undo": "撤销",
+  "copyTranscript": "复制原始转写",
+  "searchHistory": "搜索历史",
+  "historyNoMatch": "没有匹配的记录",
+  "providersNote": "按顺序优先使用；留空由 OpenRouter 自动选择。",
+  "dictionaryAdd": "输入词条后按回车"
 }

@@ -7,14 +7,14 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// dropdown is a select whose menu is a pane of Liquid Glass over the page:
+// dropdown is a select, named name for assistive technology, whose menu is a pane of Liquid Glass over the page:
 // the cards under it show through, frosted, as macOS 26's menus do. The
 // choice is checked, the option the pointer or the arrows are on is filled
 // with the accent. lead, if set, draws before a label, as a swatch.
-func dropdown[T comparable](c *ui.Context, selected *T, options []T, label func(T) string, lead func(T), width float32, onChange func()) {
+func dropdown[T comparable](c *ui.Context, name string, selected *T, options []T, label func(T) string, lead func(T), width float32, onChange func()) {
 	t := c.Theme()
 	sel := ui.SelectBase(c, selected)
-	sel.Trigger.Width(width).Gap(8).Padding(5, 10).Radius(t.Radius).Background(t.Surface).
+	sel.Trigger.Label(name).Width(width).Gap(8).Padding(5, 10).Radius(t.Radius).Background(t.Surface).
 		Border(1, t.Border).AlignItems(ui.Center).Children(func() {
 		if lead != nil {
 			lead(*selected)

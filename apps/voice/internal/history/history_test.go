@@ -81,3 +81,24 @@ func TestSkipsBrokenLines(t *testing.T) {
 		t.Fatalf("%+v, %v", entries, err)
 	}
 }
+
+func TestRestore(t *testing.T) {
+	s := Open(filepath.Join(t.TempDir(), "history.jsonl"))
+	base := time.Date(2026, 10, 17, 9, 0, 0, 0, time.UTC)
+	var middle Entry
+	for i, text := range []string{"a", "b", "c"} {
+		e, _ := s.Add(Entry{Time: base.Add(time.Duration(i) * time.Minute), Text: text})
+		if text == "b" {
+			middle = e
+		}
+	}
+	_ = s.Delete(middle.ID)
+	if err := s.Restore(middle); err != nil {
+		t.Fatal(err)
+	}
+	_ = s.Restore(middle) // twice: kept once
+	got, _ := s.List()
+	if len(got) != 3 || got[0].Text != "c" || got[1].Text != "b" || got[2].Text != "a" {
+		t.Fatalf("after restore %+v", got)
+	}
+}

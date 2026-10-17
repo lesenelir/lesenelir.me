@@ -112,7 +112,7 @@ func (a *app) accentSelect(c *ui.Context, m locales.Messages, system ui.Color) {
 		}
 		ui.Box(c).Size(12, 12).Radius(6).Background(col).Border(1, ui.RGBA(0, 0, 0, 0.12))
 	}
-	dropdown(c.Key("accent"), &a.accent, ids, func(id string) string { return accentName(m, id) }, swatch, 180, func() {
+	dropdown(c.Key("accent"), m.FieldAccent(), &a.accent, ids, func(id string) string { return accentName(m, id) }, swatch, 180, func() {
 		_ = a.store.Update(func(s *store.Settings) { s.AccentColor = a.accent })
 	})
 }

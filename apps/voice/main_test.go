@@ -165,7 +165,9 @@ func TestSettingsSaveAsTheyChange(t *testing.T) {
 	if !ok {
 		t.Fatalf("no timeout row in %q", tt.Texts())
 	}
-	tt.ClickAt(settingsWidth-28-14-30, note.Y+note.H/2-8)
+	// The number input has its stepper on the right: click its text, left
+	// of it.
+	tt.ClickAt(settingsWidth-28-14-110, note.Y+note.H/2-8)
 	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Type("8")
 	tt.Frame()
@@ -177,14 +179,14 @@ func TestSettingsSaveAsTheyChange(t *testing.T) {
 func TestFormRoundTrip(t *testing.T) {
 	s := store.Defaults()
 	f := formFrom(s, apiKeys{openrouter: "sk-or-1"})
-	if f.zhTo != "English" || f.enTo != "简体中文" || f.providers != "cerebras, groq" {
+	if f.zhTo != "English" || f.enTo != "简体中文" || !slices.Equal(f.providers, []string{"cerebras", "groq"}) || f.timeout != 5 {
 		t.Fatalf("form %+v", f)
 	}
 	f.llmModel = " anthropic/claude-haiku-5.5 "
 	f.enTo = "日本語"
-	f.providers = "groq,cerebras  together"
-	f.timeout = "oops"
-	f.dictionary = "MyGo\n\n OpenRouter \n"
+	f.providers = []string{"groq", " cerebras ", "", "together", "groq"}
+	f.timeout = 0
+	f.dictionary = []string{"MyGo", "", " OpenRouter "}
 	f.targets = make([]bool, len(prompt.Languages)) // none ticked
 	f.apply(&s)
 
@@ -352,11 +354,11 @@ func TestModelsPageFollowsService(t *testing.T) {
 func TestFormSonioxFields(t *testing.T) {
 	s := store.Defaults()
 	f := formFrom(s, apiKeys{soniox: "sx"})
-	if f.asrService != 0 || f.sonioxLangs != "zh, en" || f.sonioxModel != "stt-rt-v5" || f.sonioxKey != "sx" {
+	if f.asrService != 0 || !slices.Equal(f.sonioxLangs, []string{"zh", "en"}) || f.sonioxModel != "stt-rt-v5" || f.sonioxKey != "sx" {
 		t.Fatalf("form %+v", f)
 	}
 	f.asrService = 1
-	f.sonioxLangs = "zh,en, ja"
+	f.sonioxLangs = []string{"zh", "en", "ja"}
 	f.apply(&s)
 	if s.ASRService != "openrouter" || !slices.Equal(s.SonioxLanguages, []string{"zh", "en", "ja"}) {
 		t.Fatalf("settings %+v", s)
@@ -553,5 +555,60 @@ func TestAccentSelect(t *testing.T) {
 	tt.Frame()
 	if a.accent != "purple" || a.store.Get().AccentColor != "purple" {
 		t.Fatalf("chose %q, saved %q", a.accent, a.store.Get().AccentColor)
+	}
+}
+
+func TestHistorySearchDeleteUndo(t *testing.T) {
+	a := testApp(t)
+	a.form = formFrom(a.store.Get(), apiKeys{})
+	a.page = pageHistory
+	for _, text := range []string{"我们周四开会。", "We ship tomorrow."} {
+		if _, err := a.history.Add(history.Entry{Mode: "dictate", Text: text}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a.loadHistory()
+	tt := ui.NewTester(a.settingsView, settingsWidth, 900)
+	tt.SetLocale("zh-Hans")
+
+	// Search narrows the list.
+	a.hist.query = "ship"
+	tt.Frame()
+	if !tt.HasText("We ship tomorrow.") || tt.HasText("我们周四开会。") {
+		t.Fatalf("search: %q", tt.Texts())
+	}
+	a.hist.query = "nothing like it"
+	tt.Frame()
+	if !tt.HasText("没有匹配的记录") {
+		t.Fatalf("no match: %q", tt.Texts())
+	}
+	a.hist.query = ""
+	tt.Frame()
+
+	// Delete from the right-click menu, then undo from the toast. The
+	// entry's selectable text keeps its own copy menu; the rest of the card,
+	// as its badge, opens the entry's. The newest entry comes first.
+	if err := tt.RightClick("听写"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tt.ChooseMenuItem("删除"); err != nil {
+		t.Fatalf("%v; menu %q", err, tt.Menu())
+	}
+	tt.Frame()
+	if got, _ := a.history.List(); len(got) != 1 {
+		t.Fatalf("after delete: %+v", got)
+	}
+	if !tt.HasText("已删除") {
+		t.Fatalf("no toast: %q", tt.Texts())
+	}
+	if err := tt.Click("撤销"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if got, _ := a.history.List(); len(got) != 2 || got[0].Text != "We ship tomorrow." {
+		t.Fatalf("after undo: %+v", got)
+	}
+	if !tt.HasText("We ship tomorrow.") {
+		t.Fatalf("the page did not get the entry back: %q", tt.Texts())
 	}
 }

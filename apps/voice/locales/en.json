@@ -31,11 +31,9 @@
   "sectionOpenRouter": "OpenRouter",
   "fieldApiKey": "API key",
   "fieldAsrModel": "Speech model",
-  "asrModelNote": "Also: openai/gpt-4o-mini-transcribe",
   "fieldAsrLanguage": "Speech language hint",
   "asrLanguagePlaceholder": "Empty to detect automatically",
   "fieldLlmModel": "Cleanup and translation model",
-  "llmModelNote": "Alternative: anthropic/claude-haiku-5.5",
   "fieldProviders": "Preferred providers",
   "fieldTimeout": "Cleanup timeout (seconds)",
   "timeoutNote": "After this, the raw transcript is pasted.",
@@ -44,7 +42,6 @@
   "fieldOtherTo": "Other speech into",
   "fieldRemember": "Remember last choice",
   "rememberNote": "Start translations in the language last picked on the voice bar.",
-  "dictionaryPlaceholder": "One per line: names, products, terms…",
   "sectionLast": "Last result",
   "saveKeyFailed": "Couldn't save the API key: {error}",
   "saveFailed": "Couldn't save: {error}",
@@ -147,5 +144,12 @@
   "accentPurple": "Purple",
   "accentOrange": "Orange",
   "accentPink": "Pink",
-  "accentBrown": "Brown"
+  "accentBrown": "Brown",
+  "deleted": "Deleted",
+  "undo": "Undo",
+  "copyTranscript": "Copy Raw Transcript",
+  "searchHistory": "Search history",
+  "historyNoMatch": "No matches",
+  "providersNote": "Tried first, in order. Empty lets OpenRouter choose.",
+  "dictionaryAdd": "Type a term, then Enter"
 }

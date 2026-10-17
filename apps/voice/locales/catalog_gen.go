@@ -266,16 +266,6 @@ func (msgs Messages) FieldAsrModel() string {
 	return Catalog.Format(msgs.locale, "fieldAsrModel", nil)
 }
 
-// AsrModelNote says "Also: openai/gpt-4o-mini-transcribe"
-// in the language the app shows.
-func AsrModelNote() string { return In(i18n.Locale()).AsrModelNote() }
-
-// AsrModelNote says "Also: openai/gpt-4o-mini-transcribe"
-// in the language of msgs.
-func (msgs Messages) AsrModelNote() string {
-	return Catalog.Format(msgs.locale, "asrModelNote", nil)
-}
-
 // FieldAsrLanguage says "Speech language hint"
 // in the language the app shows.
 func FieldAsrLanguage() string { return In(i18n.Locale()).FieldAsrLanguage() }
@@ -304,16 +294,6 @@ func FieldLlmModel() string { return In(i18n.Locale()).FieldLlmModel() }
 // in the language of msgs.
 func (msgs Messages) FieldLlmModel() string {
 	return Catalog.Format(msgs.locale, "fieldLlmModel", nil)
-}
-
-// LlmModelNote says "Alternative: anthropic/claude-haiku-5.5"
-// in the language the app shows.
-func LlmModelNote() string { return In(i18n.Locale()).LlmModelNote() }
-
-// LlmModelNote says "Alternative: anthropic/claude-haiku-5.5"
-// in the language of msgs.
-func (msgs Messages) LlmModelNote() string {
-	return Catalog.Format(msgs.locale, "llmModelNote", nil)
 }
 
 // FieldProviders says "Preferred providers"
@@ -394,16 +374,6 @@ func RememberNote() string { return In(i18n.Locale()).RememberNote() }
 // in the language of msgs.
 func (msgs Messages) RememberNote() string {
 	return Catalog.Format(msgs.locale, "rememberNote", nil)
-}
-
-// DictionaryPlaceholder says "One per line: names, products, terms…"
-// in the language the app shows.
-func DictionaryPlaceholder() string { return In(i18n.Locale()).DictionaryPlaceholder() }
-
-// DictionaryPlaceholder says "One per line: names, products, terms…"
-// in the language of msgs.
-func (msgs Messages) DictionaryPlaceholder() string {
-	return Catalog.Format(msgs.locale, "dictionaryPlaceholder", nil)
 }
 
 // SectionLast says "Last result"
@@ -1314,4 +1284,74 @@ func AccentBrown() string { return In(i18n.Locale()).AccentBrown() }
 // in the language of msgs.
 func (msgs Messages) AccentBrown() string {
 	return Catalog.Format(msgs.locale, "accentBrown", nil)
+}
+
+// Deleted says "Deleted"
+// in the language the app shows.
+func Deleted() string { return In(i18n.Locale()).Deleted() }
+
+// Deleted says "Deleted"
+// in the language of msgs.
+func (msgs Messages) Deleted() string {
+	return Catalog.Format(msgs.locale, "deleted", nil)
+}
+
+// Undo says "Undo"
+// in the language the app shows.
+func Undo() string { return In(i18n.Locale()).Undo() }
+
+// Undo says "Undo"
+// in the language of msgs.
+func (msgs Messages) Undo() string {
+	return Catalog.Format(msgs.locale, "undo", nil)
+}
+
+// CopyTranscript says "Copy Raw Transcript"
+// in the language the app shows.
+func CopyTranscript() string { return In(i18n.Locale()).CopyTranscript() }
+
+// CopyTranscript says "Copy Raw Transcript"
+// in the language of msgs.
+func (msgs Messages) CopyTranscript() string {
+	return Catalog.Format(msgs.locale, "copyTranscript", nil)
+}
+
+// SearchHistory says "Search history"
+// in the language the app shows.
+func SearchHistory() string { return In(i18n.Locale()).SearchHistory() }
+
+// SearchHistory says "Search history"
+// in the language of msgs.
+func (msgs Messages) SearchHistory() string {
+	return Catalog.Format(msgs.locale, "searchHistory", nil)
+}
+
+// HistoryNoMatch says "No matches"
+// in the language the app shows.
+func HistoryNoMatch() string { return In(i18n.Locale()).HistoryNoMatch() }
+
+// HistoryNoMatch says "No matches"
+// in the language of msgs.
+func (msgs Messages) HistoryNoMatch() string {
+	return Catalog.Format(msgs.locale, "historyNoMatch", nil)
+}
+
+// ProvidersNote says "Tried first, in order. Empty lets OpenRouter choose."
+// in the language the app shows.
+func ProvidersNote() string { return In(i18n.Locale()).ProvidersNote() }
+
+// ProvidersNote says "Tried first, in order. Empty lets OpenRouter choose."
+// in the language of msgs.
+func (msgs Messages) ProvidersNote() string {
+	return Catalog.Format(msgs.locale, "providersNote", nil)
+}
+
+// DictionaryAdd says "Type a term, then Enter"
+// in the language the app shows.
+func DictionaryAdd() string { return In(i18n.Locale()).DictionaryAdd() }
+
+// DictionaryAdd says "Type a term, then Enter"
+// in the language of msgs.
+func (msgs Messages) DictionaryAdd() string {
+	return Catalog.Format(msgs.locale, "dictionaryAdd", nil)
 }
