@@ -1,0 +1,12 @@
+{
+  "name": "@lesenelir/voice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Voice input for macOS: dictate with Fn, translate with Fn + Left Shift",
+  "scripts": {
+    "dev": "go tool mygo dev",
+    "build": "go tool mygo build",
+    "test": "go test ./...",
+    "vet": "go vet ./..."
+  }
+}
