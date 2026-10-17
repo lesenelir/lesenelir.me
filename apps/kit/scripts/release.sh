@@ -33,6 +33,9 @@ cd "$(dirname "$0")/.."
 tag="kit-v$version"
 identity="${KIT_SIGNING_IDENTITY:-Kit Local Signing}"
 dmg="build/darwin-universal/Kit $version.dmg"
+# GitHub turns the spaces of an uploaded file's name into dots; the release
+# gets a copy named without them.
+asset="build/darwin-universal/Kit-$version.dmg"
 
 step "Checking"
 [[ $(git rev-parse --abbrev-ref HEAD) == master ]] || die "releases are made from master"
@@ -76,12 +79,13 @@ rm -rf build/darwin-universal
 go tool mygo build -sign "$identity" -platform darwin/universal
 [[ -f $dmg ]] || die "the build made no $dmg"
 codesign --verify --deep --strict build/darwin-universal/Kit.app
+cp "$dmg" "$asset"
 
 body="$notes
 
 ## Install
 
-1. Open \`Kit $version.dmg\` and drag Kit to Applications.
+1. Open \`Kit-$version.dmg\` and drag Kit to Applications.
 2. Kit is signed by its author but not notarized by Apple, so macOS blocks it the first time. Run once:
    \`\`\`sh
    xattr -dr com.apple.quarantine /Applications/Kit.app
@@ -92,7 +96,7 @@ body="$notes
 
 ## 安装
 
-1. 打开 \`Kit $version.dmg\`，把 Kit 拖到「应用程序」。
+1. 打开 \`Kit-$version.dmg\`，把 Kit 拖到「应用程序」。
 2. Kit 由作者签名，但没有经过 Apple 公证，第一次打开会被 macOS 拦截。在终端执行一次：
    \`\`\`sh
    xattr -dr com.apple.quarantine /Applications/Kit.app
@@ -102,7 +106,7 @@ body="$notes
 
 if ((dry_run)); then
   step "Dry run: not tagged, pushed or released"
-  echo "Would tag $tag, push master and it, and release $dmg with these notes:"
+  echo "Would tag $tag, push master and it, and release $asset with these notes:"
   echo
   echo "$body"
   ((bumped)) && echo && echo "(The version change of mygo.json and package.json is undone.)"
@@ -116,6 +120,6 @@ git push origin master "$tag"
 step "Creating the release"
 # --latest=false: the repository's latest release stays the website's or
 # another app's, as Kit's tags have a prefix of their own.
-gh release create "$tag" "$dmg" --title "Kit $version" --notes "$body" --latest=false
+gh release create "$tag" "$asset" --title "Kit $version" --notes "$body" --latest=false
 echo
 echo "Released Kit $version: $(gh release view "$tag" --json url -q .url)"
