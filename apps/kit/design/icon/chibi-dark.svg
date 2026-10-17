@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><title>Kit icon (dark)</title>
+<defs>
+<linearGradient id="qdbg" x1="100" y1="100" x2="924" y2="924" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#26304A"/><stop offset="1" stop-color="#0E1220"/></linearGradient>
+<radialGradient id="qdglow" cx="300" cy="140" r="640" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="qdrim" x1="0" y1="100" x2="0" y2="924" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+<linearGradient id="qdskin" x1="0" y1="480" x2="0" y2="900" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFE8D6"/><stop offset="1" stop-color="#F9C9A8"/></linearGradient>
+<linearGradient id="qdhair" x1="0" y1="400" x2="0" y2="760" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9A6040"/><stop offset="1" stop-color="#5E3626"/></linearGradient>
+<linearGradient id="qdhood" x1="0" y1="840" x2="0" y2="1000" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFD54F"/><stop offset="1" stop-color="#FFB020"/></linearGradient>
+<linearGradient id="qdiris" x1="0" y1="660" x2="0" y2="756" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2A1A26"/><stop offset=".6" stop-color="#4A2E3A"/><stop offset="1" stop-color="#9A6A48"/></linearGradient>
+<clipPath id="qdclip"><path d="M382.8 100L641.2 100C722.63 100 763.34 100 807.17 113.86C855.03 131.29 892.71 168.97 910.14 216.83C924 260.66 924 301.37 924 382.8L924 641.2C924 722.63 924 763.34 910.14 807.17C892.71 855.03 855.03 892.71 807.17 910.14C763.34 924 722.63 924 641.2 924L382.8 924C301.37 924 260.66 924 216.83 910.14C168.97 892.71 131.29 855.03 113.86 807.17C100 763.34 100 722.63 100 641.2L100 382.8C100 301.37 100 260.66 113.86 216.83C131.29 168.97 168.97 131.29 216.83 113.86C260.66 100 301.37 100 382.8 100Z"/></clipPath>
+<filter id="qdbodysh" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse"><feGaussianBlur in="SourceAlpha" stdDeviation="14"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".32"/></feComponentTransfer></filter>
+<filter id="qdcsh" x="0" y="0" width="1024" height="1200" filterUnits="userSpaceOnUse"><feGaussianBlur in="SourceAlpha" stdDeviation="20"/><feOffset dx="-10" dy="14"/><feFlood flood-color="#0B2A7A" flood-opacity=".35"/><feComposite operator="in" in2="SourceAlpha" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="qdcsh2" x="0" y="0" width="1100" height="1200" filterUnits="userSpaceOnUse"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="-6"/><feFlood flood-color="#3A2433" flood-opacity=".18"/><feComposite operator="in" in2="SourceAlpha" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="qdgray"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.08" intercept=".04"/><feFuncG type="linear" slope="1.08" intercept=".04"/><feFuncB type="linear" slope="1.08" intercept=".04"/></feComponentTransfer></filter>
+</defs>
+<path d="M382.8 100L641.2 100C722.63 100 763.34 100 807.17 113.86C855.03 131.29 892.71 168.97 910.14 216.83C924 260.66 924 301.37 924 382.8L924 641.2C924 722.63 924 763.34 910.14 807.17C892.71 855.03 855.03 892.71 807.17 910.14C763.34 924 722.63 924 641.2 924L382.8 924C301.37 924 260.66 924 216.83 910.14C168.97 892.71 131.29 855.03 113.86 807.17C100 763.34 100 722.63 100 641.2L100 382.8C100 301.37 100 260.66 113.86 216.83C131.29 168.97 168.97 131.29 216.83 113.86C260.66 100 301.37 100 382.8 100Z" filter="url(#qdbodysh)"/>
+<g clip-path="url(#qdclip)">
+<g id="background"><path d="M382.8 100L641.2 100C722.63 100 763.34 100 807.17 113.86C855.03 131.29 892.71 168.97 910.14 216.83C924 260.66 924 301.37 924 382.8L924 641.2C924 722.63 924 763.34 910.14 807.17C892.71 855.03 855.03 892.71 807.17 910.14C763.34 924 722.63 924 641.2 924L382.8 924C301.37 924 260.66 924 216.83 910.14C168.97 892.71 131.29 855.03 113.86 807.17C100 763.34 100 722.63 100 641.2L100 382.8C100 301.37 100 260.66 113.86 216.83C131.29 168.97 168.97 131.29 216.83 113.86C260.66 100 301.37 100 382.8 100Z" fill="url(#qdbg)"/><path d="M382.8 100L641.2 100C722.63 100 763.34 100 807.17 113.86C855.03 131.29 892.71 168.97 910.14 216.83C924 260.66 924 301.37 924 382.8L924 641.2C924 722.63 924 763.34 910.14 807.17C892.71 855.03 855.03 892.71 807.17 910.14C763.34 924 722.63 924 641.2 924L382.8 924C301.37 924 260.66 924 216.83 910.14C168.97 892.71 131.29 855.03 113.86 807.17C100 763.34 100 722.63 100 641.2L100 382.8C100 301.37 100 260.66 113.86 216.83C131.29 168.97 168.97 131.29 216.83 113.86C260.66 100 301.37 100 382.8 100Z" fill="url(#qdglow)"/>
+<path d="M300 254Q308.28 291.72 346 300Q308.28 308.28 300 346Q291.72 308.28 254 300Q291.72 291.72 300 254Z" fill="#fff" fill-opacity="0.9"/><path d="M214 408Q217.96 426.04 236 430Q217.96 433.96 214 452Q210.04 433.96 192 430Q210.04 426.04 214 408Z" fill="#fff" fill-opacity="0.7"/><path d="M392 198Q394.88 211.12 408 214Q394.88 216.88 392 230Q389.12 216.88 376 214Q389.12 211.12 392 198Z" fill="#fff" fill-opacity="0.6"/></g>
+<g id="mascot">
+<g id="char" transform="translate(18 -14) rotate(-5 640 760) scale(1.05) translate(-30 -36)">
+ <g filter="url(#qdcsh)">
+  <!-- back hair -->
+  <ellipse cx="630" cy="640" rx="228" ry="215" fill="url(#qdhair)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+  <!-- ears -->
+  <circle cx="436" cy="700" r="34" fill="url(#qdskin)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="824" cy="700" r="34" fill="url(#qdskin)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+  <!-- hoodie torso -->
+  <path d="M400 1040Q410 872 630 858Q850 872 870 1040Z" fill="url(#qdhood)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+  <!-- face -->
+  <ellipse cx="630" cy="660" rx="198" ry="176" fill="url(#qdskin)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+ </g>
+ <!-- bangs -->
+ <path d="M402 640A228 215 0 0 1 858 640Q864 700 826 718Q804 652 790 606Q768 646 732 630Q714 584 690 568Q668 612 634 616Q612 574 590 566Q568 618 530 630Q492 646 470 606Q458 660 436 718Q398 700 402 640Z" fill="url(#qdhair)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+ <path d="M600 436C592 384 640 360 680 372C650 386 638 406 644 432Z" fill="url(#qdhair)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+ <path d="M500 480Q560 446 630 442" stroke="#fff" stroke-opacity=".35" stroke-width="16" stroke-linecap="round" fill="none"/>
+ <!-- eyes -->
+ <g>
+  <ellipse cx="560" cy="708" rx="37" ry="48" fill="url(#qdiris)"/>
+  <ellipse cx="702" cy="708" rx="37" ry="48" fill="url(#qdiris)"/>
+  <path d="M508 680L520 690A40 50 0 0 1 600 690" stroke="#3A2433" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M754 680L742 690A40 50 0 0 0 662 690" stroke="#3A2433" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="548" cy="692" r="14" fill="#fff"/><circle cx="574" cy="728" r="6" fill="#fff" fill-opacity=".85"/>
+  <circle cx="690" cy="692" r="14" fill="#fff"/><circle cx="716" cy="728" r="6" fill="#fff" fill-opacity=".85"/>
+ </g>
+ <ellipse cx="500" cy="774" rx="34" ry="18" fill="#FF8C9E" fill-opacity=".5"/>
+ <ellipse cx="762" cy="774" rx="34" ry="18" fill="#FF8C9E" fill-opacity=".5"/>
+ <path d="M612 770Q631 798 650 770Q631 776 612 770Z" fill="#9A3A4A" stroke="#3A2433" stroke-width="5" stroke-linejoin="round"/>
+ <!-- sleeves -->
+ <g filter="url(#qdcsh2)">
+  <path d="M360 960L548 884" stroke="#3A2433" stroke-width="120" stroke-linecap="round"/>
+  <path d="M360 960L548 884" stroke="url(#qdhood)" stroke-width="104" stroke-linecap="round"/>
+  <path d="M920 966L716 884" stroke="#3A2433" stroke-width="120" stroke-linecap="round"/>
+  <path d="M920 966L716 884" stroke="url(#qdhood)" stroke-width="104" stroke-linecap="round"/>
+  <!-- hands under the chin -->
+  <ellipse cx="584" cy="846" rx="54" ry="44" fill="url(#qdskin)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+  <ellipse cx="680" cy="846" rx="54" ry="44" fill="url(#qdskin)" stroke="#3A2433" stroke-width="8" stroke-linejoin="round"/>
+ </g>
+ <path d="M566 830q4 18 0 34M600 828q4 18 0 34M664 828q-4 18 0 34M698 830q-4 18 0 34" stroke="#3A2433" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" fill="none"/>
+</g></g>
+</g>
+<path d="M382.8 100L641.2 100C722.63 100 763.34 100 807.17 113.86C855.03 131.29 892.71 168.97 910.14 216.83C924 260.66 924 301.37 924 382.8L924 641.2C924 722.63 924 763.34 910.14 807.17C892.71 855.03 855.03 892.71 807.17 910.14C763.34 924 722.63 924 641.2 924L382.8 924C301.37 924 260.66 924 216.83 910.14C168.97 892.71 131.29 855.03 113.86 807.17C100 763.34 100 722.63 100 641.2L100 382.8C100 301.37 100 260.66 113.86 216.83C131.29 168.97 168.97 131.29 216.83 113.86C260.66 100 301.37 100 382.8 100Z" fill="none" stroke="url(#qdrim)" stroke-width="4"/>
+</svg>
