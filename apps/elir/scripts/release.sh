@@ -104,24 +104,39 @@ body="$notes
 
 ## Install
 
-1. Open \`Elir-$version.dmg\` and drag Elir to Applications.
-2. Elir is signed by its author but not notarized by Apple, so macOS blocks it the first time. Run once:
+Elir is signed by its author but not notarized by Apple, so macOS refuses to open the disk image at first ("Apple
+could not verify … is free of malware").
+
+1. Download \`Elir-$version.dmg\`, then in Terminal clear the mark macOS put on it:
+   \`\`\`sh
+   xattr -d com.apple.quarantine ~/Downloads/Elir-$version.dmg
+   \`\`\`
+   (Or, after macOS refused it, open System Settings → Privacy & Security and click Open Anyway.)
+2. Open the disk image and drag Elir to Applications. Should macOS refuse to open Elir too, clear it the same way:
    \`\`\`sh
    xattr -dr com.apple.quarantine /Applications/Elir.app
    \`\`\`
-   or open Elir, then System Settings → Privacy & Security → Open Anyway.
-3. Allow Accessibility, Screen Recording and Microphone when Elir asks, and add your OpenRouter API key (and a Soniox one,
-   for faster speech to text) in Settings → Models.
+3. Allow Accessibility, Screen Recording and Microphone when Elir asks, and add your OpenRouter API key (and a Soniox
+   one, for faster speech to text) in Settings → Models.
+
+Later versions install from Settings → General → Check for Updates, with none of this.
 
 ## 安装
 
-1. 打开 \`Elir-$version.dmg\`，把 Elir 拖到「应用程序」。
-2. Elir 由作者签名，但没有经过 Apple 公证，第一次打开会被 macOS 拦截。在终端执行一次：
+Elir 由作者签名，但没有经过 Apple 公证，所以 macOS 一开始会拒绝打开磁盘映像（提示「Apple 无法验证……不含恶意软件」）。
+
+1. 下载 \`Elir-$version.dmg\` 后，在终端清除 macOS 给它加的标记：
+   \`\`\`sh
+   xattr -d com.apple.quarantine ~/Downloads/Elir-$version.dmg
+   \`\`\`
+   （或者在被拒绝后，到 系统设置 → 隐私与安全性 里点「仍要打开」。）
+2. 打开磁盘映像，把 Elir 拖到「应用程序」。如果打开 Elir 时也被拒绝，同样清除一次：
    \`\`\`sh
    xattr -dr com.apple.quarantine /Applications/Elir.app
    \`\`\`
-   或者先打开一次 Elir，再到 系统设置 → 隐私与安全性 → 仍要打开。
-3. 按提示允许辅助功能、屏幕录制和麦克风，并在 设置 → 模型 中填入 OpenRouter API Key（填 Soniox 的 Key 转写更快）。"
+3. 按提示允许辅助功能、屏幕录制和麦克风，并在 设置 → 模型 中填入 OpenRouter API Key（填 Soniox 的 Key 转写更快）。
+
+以后的版本在 设置 → 通用 → 检查更新 里一键安装，不用再这样操作。"
 
 if ((dry_run)); then
   step "Dry run: not tagged, pushed or released"
