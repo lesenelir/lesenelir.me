@@ -30,16 +30,24 @@ func (a *App) setupTray() {
 	mygo.App.OnWillQuit(func(*mygo.QuitEvent) { a.tray.Destroy() })
 }
 
-// trayMenu is the menu bar icon's menu, in the language the app shows.
+// trayMenu is the menu bar icon's menu, in the language the app shows,
+// led by the update found, if any. Main thread only.
 func (a *App) trayMenu() *mygo.Menu {
-	return mygo.NewMenu([]*mygo.MenuItem{
+	var items []*mygo.MenuItem
+	if a.upd.state == updateAvailable {
+		items = append(items,
+			&mygo.MenuItem{Label: locales.TrayUpdate(a.upd.rel.Version()), Click: func(*mygo.MenuItem, *mygo.Window) { a.showSettings("general") }},
+			mygo.Separator())
+	}
+	return mygo.NewMenu(append(items, []*mygo.MenuItem{
 		{Label: locales.TraySettings(), Click: func(*mygo.MenuItem, *mygo.Window) { a.showSettings("") }},
 		mygo.Separator(),
 		{Label: locales.TrayQuit(), Click: func(*mygo.MenuItem, *mygo.Window) { mygo.App.Quit() }},
-	})
+	}...))
 }
 
-// localizeTray says the tray's words again after the language changes.
+// localizeTray says the tray's words again, after the language changes or
+// an update is found.
 func (a *App) localizeTray() {
 	if a.tray == nil {
 		return

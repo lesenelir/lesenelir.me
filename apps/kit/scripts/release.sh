@@ -2,7 +2,10 @@
 # Releases Kit to GitHub: syncs the version, tests, builds a universal disk
 # image signed with the local identity, tags kit-v<version>, pushes, and
 # creates the release with the image and the CHANGELOG.md section of the
-# version as its notes.
+# version as its notes. The installed apps update from the kit-updates
+# release, a fixed URL (mygo.json updates.url) that the GitHub API's rate
+# limit does not touch: it gets the signed update archive, its deltas from
+# earlier versions, and last the manifest that points the apps at them.
 #
 #   pnpm release:kit 0.1.0             # from the repo root
 #   pnpm release:kit 0.1.0 --dry-run   # all but the tag, push and release
@@ -32,6 +35,8 @@ done
 cd "$(dirname "$0")/.."
 tag="kit-v$version"
 identity="${KIT_SIGNING_IDENTITY:-Kit Local Signing}"
+update_key="${KIT_UPDATE_KEY:-$HOME/Library/Application Support/mygo/update-keys/kit/mygo-update.key}"
+feed_tag="kit-updates"
 dmg="build/darwin-universal/Kit $version.dmg"
 # GitHub turns the spaces of an uploaded file's name into dots; the release
 # gets a copy named without them.
@@ -55,6 +60,8 @@ notes=$(awk -v v="$version" '
   found { print }
 ' CHANGELOG.md)
 [[ -n ${notes//[[:space:]]/} ]] || die "CHANGELOG.md has no \"## $version\" section"
+[[ -n ${MYGO_UPDATER_PRIVATE_KEY:-} || -f $update_key ]] ||
+  die "no update signing key at $update_key: installed apps only take updates signed with it"
 
 step "Setting the version to $version"
 for file in mygo.json package.json; do
@@ -76,8 +83,18 @@ CGO_ENABLED=0 go test ./...
 step "Building"
 ./scripts/signing-identity.sh
 rm -rf build/darwin-universal
+if [[ -z ${MYGO_UPDATER_PRIVATE_KEY:-} ]]; then
+  MYGO_UPDATER_PRIVATE_KEY=$(<"$update_key")
+  export MYGO_UPDATER_PRIVATE_KEY
+fi
 go tool mygo build -sign "$identity" -platform darwin/universal
 [[ -f $dmg ]] || die "the build made no $dmg"
+manifest="build/darwin-universal/update-darwin-universal.json"
+[[ -f $manifest ]] || die "the build made no update manifest"
+shopt -s nullglob
+update_files=(build/darwin-universal/*.tar.gz build/darwin-universal/*.delta)
+shopt -u nullglob
+((${#update_files[@]})) || die "the build made no update archive"
 codesign --verify --deep --strict build/darwin-universal/Kit.app
 cp "$dmg" "$asset"
 
@@ -106,7 +123,10 @@ body="$notes
 
 if ((dry_run)); then
   step "Dry run: not tagged, pushed or released"
-  echo "Would tag $tag, push master and it, and release $asset with these notes:"
+  echo "Would tag $tag, push master and it, release $asset, and give the $feed_tag release:"
+  printf '  %s\n' "${update_files[@]}" "$manifest"
+  echo
+  echo "The notes of $tag:"
   echo
   echo "$body"
   ((bumped)) && echo && echo "(The version change of mygo.json and package.json is undone.)"
@@ -121,5 +141,14 @@ step "Creating the release"
 # --latest=false: the repository's latest release stays the website's or
 # another app's, as Kit's tags have a prefix of their own.
 gh release create "$tag" "$asset" --title "Kit $version" --notes "$body" --latest=false
+
+step "Publishing the update"
+if ! gh release view "$feed_tag" >/dev/null 2>&1; then
+  gh release create "$feed_tag" --prerelease --latest=false --title "Kit updates" \
+    --notes "The update feed of Kit, which installed apps check: signed update archives and the manifest of the newest version. To install Kit, download the disk image of the newest kit-v release instead."
+fi
+# The archives first, then the manifest that points at them.
+gh release upload "$feed_tag" "${update_files[@]}" --clobber
+gh release upload "$feed_tag" "$manifest" --clobber
 echo
 echo "Released Kit $version: $(gh release view "$tag" --json url -q .url)"

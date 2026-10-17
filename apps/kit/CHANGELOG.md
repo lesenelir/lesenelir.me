@@ -2,6 +2,13 @@
 
 Kit's versions, newest first. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.2.0
+
+- Kit updates itself: Settings → General checks for a new version, shows what's new and installs it with one click,
+  then relaunches. It checks by itself once a day, which the same page can turn off; the menu bar menu shows an update
+  that is waiting.
+- Coming from 0.1.0, download this version once by hand: 0.1.0 cannot update itself.
+
 ## 0.1.0
 
 The first release of Kit, a menu bar toolbox for macOS.

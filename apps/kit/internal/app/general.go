@@ -3,8 +3,11 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/markdown"
 
 	"github.com/lesenelir/lesenelir.me/apps/kit/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/kit/locales"
@@ -36,6 +39,7 @@ func (a *App) generalPage() Page {
 					ui.Switch(c.Key("open-at-login"), &a.openAtLogin).Label(m.FieldOpenAtLogin()).OnChange(a.setOpenAtLogin)
 				})
 			})
+			a.updatesGroup(c, m, pal)
 		},
 	}
 }
@@ -98,4 +102,63 @@ func (a *App) applyUILanguage() {
 	tag := a.uiLanguage
 	a.update(func(s *Settings) { s.UILanguage = tag })
 	mygo.App.SetLocale(tag)
+}
+
+// updatesGroup shows the version, and checks for and installs updates.
+func (a *App) updatesGroup(c *ui.Context, m locales.Messages, pal widget.Palette) {
+	u := &a.upd
+	widget.Group(c, pal, m.SectionUpdates(), func(g *widget.Rows) {
+		g.Row(c, m.AppVersion(mygo.App.Version()), a.updateNote(m), func() {
+			switch {
+			case u.state == updateAvailable, u.state == updateFailed && u.rel != nil:
+				if ui.PrimaryButton(c.Key("install-update"), m.ButtonInstallUpdate()).Clicked() {
+					u.state = updateAvailable
+					a.installUpdate()
+				}
+			case u.state == updateInstalling:
+				ui.Progress(c, u.progress).Width(120).Label(m.ButtonInstallUpdate())
+			case u.state == updateChecking:
+				ui.Spinner(c).Label(m.UpdateChecking())
+			default:
+				if ui.Button(c.Key("check-updates"), m.ButtonCheckUpdates()).Disabled(!a.updater.Enabled()).Clicked() {
+					a.checkUpdates(true)
+				}
+			}
+		})
+		if u.rel != nil && u.rel.Notes() != "" {
+			g.Block(c, func() {
+				ui.Collapsible(c.Key("whats-new"), m.WhatsNew(), &u.notesOn, func() {
+					markdown.View(c, u.rel.Notes(), nil)
+				})
+			})
+		}
+		g.Row(c, m.FieldCheckUpdates(), m.CheckUpdatesNote(), func() {
+			ui.Switch(c.Key("check-updates-auto"), &a.checkAuto).Label(m.FieldCheckUpdates()).
+				Disabled(!a.updater.Enabled()).OnChange(a.setCheckUpdates)
+		})
+	})
+}
+
+// updateNote says where updating stands, under the version.
+func (a *App) updateNote(m locales.Messages) string {
+	u := a.upd
+	switch {
+	case !a.updater.Enabled() && mygo.IsDev():
+		return m.UpdatesDev()
+	case !a.updater.Enabled():
+		return m.UpdatesUnwritable()
+	case u.state == updateChecking:
+		return m.UpdateChecking()
+	case u.state == updateLatest && u.manual:
+		return m.UpdateLatest()
+	case u.state == updateAvailable:
+		return m.UpdateAvailable(u.rel.Version())
+	case u.state == updateInstalling:
+		return m.UpdateDownloading(fmt.Sprintf("%.0f", 100*u.progress))
+	case u.state == updateFailed && u.rel != nil:
+		return m.UpdateFailed(u.err.Error())
+	case u.state == updateFailed:
+		return m.UpdateCheckFailed(u.err.Error())
+	}
+	return ""
 }

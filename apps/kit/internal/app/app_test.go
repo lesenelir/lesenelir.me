@@ -46,8 +46,8 @@ func testApp(t *testing.T, features ...Feature) *App {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := &App{store: st, features: features}
-	if a.settings, err = store.NewSection(st, settingsSection, Settings{}, nil); err != nil {
+	a := &App{store: st, features: features, updater: &fakeUpdater{}}
+	if a.settings, err = store.NewSection(st, settingsSection, defaultSettings(), nil); err != nil {
 		t.Fatal(err)
 	}
 	a.pages = a.collectPages()

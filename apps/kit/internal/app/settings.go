@@ -16,4 +16,11 @@ type Settings struct {
 	// AccentColor is the accent color's name ("blue", "green"…), or "" to
 	// follow the one chosen in macOS.
 	AccentColor string `json:"accentColor"`
+	// CheckUpdates checks for a new version a while after launch and
+	// then daily.
+	CheckUpdates bool `json:"checkUpdates"`
 }
+
+// defaultSettings are the settings of a new install, and of those the
+// file lacks.
+func defaultSettings() Settings { return Settings{CheckUpdates: true} }

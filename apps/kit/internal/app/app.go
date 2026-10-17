@@ -30,22 +30,25 @@ type App struct {
 	tray     *mygo.Tray
 	keys     keys
 	tap      *darwin.EventTap
+	updater  updater
 	quitting bool
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
-	page         string   // the settings page shown
-	uiLanguage   string   // "" follows the system
-	appearance   int      // index in appearances, bound to its control
-	accent       string   // the accent color's id, bound to its select
-	openAtLogin  bool     // as the system has it, bound to its switch
+	page         string // the settings page shown
+	uiLanguage   string // "" follows the system
+	appearance   int    // index in appearances, bound to its control
+	accent       string // the accent color's id, bound to its select
+	openAtLogin  bool   // as the system has it, bound to its switch
+	checkAuto    bool   // bound to the switch of Settings.CheckUpdates
+	upd          updates
 	systemAccent ui.Color // macOS's accent, for the "System" swatch
 	perms        permissions
 	saveErr      error
 }
 
 // New returns the app, without features.
-func New() *App { return &App{} }
+func New() *App { return &App{updater: mygoUpdater{}} }
 
 // Add adds a feature, before Run. Features show in the sidebar in the
 // order they are added.
@@ -77,7 +80,7 @@ func (a *App) ready() {
 	if !a.store.Existed() {
 		migrateFromVoice(dir, a.store)
 	}
-	a.settings, err = store.NewSection(a.store, settingsSection, Settings{}, nil)
+	a.settings, err = store.NewSection(a.store, settingsSection, defaultSettings(), nil)
 	if err != nil {
 		log.Printf("settings %q: %v", settingsSection, err)
 	}
@@ -87,6 +90,7 @@ func (a *App) ready() {
 	a.appearance = max(0, slices.Index(appearances, s.Appearance))
 	a.accent = s.AccentColor
 	a.openAtLogin = mygo.App.OpenAtLogin()
+	a.checkAuto = s.CheckUpdates
 
 	a.window = mygo.NewWindow(mygo.WindowOptions{
 		Title:     locales.SettingsTitle(),
@@ -144,6 +148,7 @@ func (a *App) ready() {
 	// Ask for Accessibility once; macOS shows its own dialog.
 	darwin.AccessibilityTrusted(true)
 	go a.watchPermissions()
+	go a.watchUpdates()
 	if a.needsSetup() || !darwin.AccessibilityTrusted(false) {
 		a.showSettings("")
 	}

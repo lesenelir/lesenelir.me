@@ -58,6 +58,15 @@ login keychain the first time. macOS keeps an app's permissions by its signature
 signed with the same identity, rebuilds keep them. Builds signed with an identity run under the hardened runtime, so
 `entitlements.plist` asks for the microphone.
 
+## Updates
+
+Settings → General shows the version and checks for a new one, shows its notes and installs it with "Update and
+Relaunch"; Kit also checks once a day (a switch there turns it off), and an update found shows in the menu bar menu.
+Updates are MyGo's (`mygo.Updater`): signed with the private key of `updates.publicKey` in `mygo.json`, kept outside
+the repo at `~/Library/Application Support/mygo/update-keys/kit/mygo-update.key`, and served from the `kit-updates`
+pre-release at the fixed URL of `updates.url`, which the GitHub API's rate limit for anonymous requests cannot block.
+Keep a copy of the key somewhere safe: installed copies of Kit only take updates signed with it.
+
 ## Releasing
 
 Add a `## <version>` section to `CHANGELOG.md`, commit it on `master`, then from the repo root:
@@ -69,7 +78,8 @@ pnpm release:kit 0.1.0             # the same, then tags kit-v0.1.0, pushes and 
 
 `scripts/release.sh` sets the version in `mygo.json` and `package.json` (committing it when it changed), builds
 `Kit <version>.dmg` for Apple silicon and Intel, signed with the local identity, and attaches it to the release, whose
-notes are the changelog section and how to install. Kit is self-signed, not notarized: on another Mac it opens after
+notes are the changelog section and how to install. It also signs the update with the key above and uploads it, and
+then its manifest, to the `kit-updates` release, where installed copies find it. Kit is self-signed, not notarized: on another Mac it opens after
 `xattr -dr com.apple.quarantine /Applications/Kit.app`, as the notes say.
 
 ## Permissions

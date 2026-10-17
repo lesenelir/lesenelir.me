@@ -1675,3 +1675,163 @@ func OpenAtLoginNote() string { return In(i18n.Locale()).OpenAtLoginNote() }
 func (msgs Messages) OpenAtLoginNote() string {
 	return Catalog.Format(msgs.locale, "openAtLoginNote", nil)
 }
+
+// SectionUpdates says "Updates"
+// in the language the app shows.
+func SectionUpdates() string { return In(i18n.Locale()).SectionUpdates() }
+
+// SectionUpdates says "Updates"
+// in the language of msgs.
+func (msgs Messages) SectionUpdates() string {
+	return Catalog.Format(msgs.locale, "sectionUpdates", nil)
+}
+
+// AppVersion says "Kit {version}"
+// in the language the app shows.
+func AppVersion(version string) string { return In(i18n.Locale()).AppVersion(version) }
+
+// AppVersion says "Kit {version}"
+// in the language of msgs.
+func (msgs Messages) AppVersion(version string) string {
+	return Catalog.Format(msgs.locale, "appVersion", map[string]any{"version": version})
+}
+
+// ButtonCheckUpdates says "Check for Updates"
+// in the language the app shows.
+func ButtonCheckUpdates() string { return In(i18n.Locale()).ButtonCheckUpdates() }
+
+// ButtonCheckUpdates says "Check for Updates"
+// in the language of msgs.
+func (msgs Messages) ButtonCheckUpdates() string {
+	return Catalog.Format(msgs.locale, "buttonCheckUpdates", nil)
+}
+
+// UpdateChecking says "Checking for updates…"
+// in the language the app shows.
+func UpdateChecking() string { return In(i18n.Locale()).UpdateChecking() }
+
+// UpdateChecking says "Checking for updates…"
+// in the language of msgs.
+func (msgs Messages) UpdateChecking() string {
+	return Catalog.Format(msgs.locale, "updateChecking", nil)
+}
+
+// UpdateLatest says "Kit is up to date."
+// in the language the app shows.
+func UpdateLatest() string { return In(i18n.Locale()).UpdateLatest() }
+
+// UpdateLatest says "Kit is up to date."
+// in the language of msgs.
+func (msgs Messages) UpdateLatest() string {
+	return Catalog.Format(msgs.locale, "updateLatest", nil)
+}
+
+// UpdateAvailable says "Kit {version} is available."
+// in the language the app shows.
+func UpdateAvailable(version string) string { return In(i18n.Locale()).UpdateAvailable(version) }
+
+// UpdateAvailable says "Kit {version} is available."
+// in the language of msgs.
+func (msgs Messages) UpdateAvailable(version string) string {
+	return Catalog.Format(msgs.locale, "updateAvailable", map[string]any{"version": version})
+}
+
+// ButtonInstallUpdate says "Update and Relaunch"
+// in the language the app shows.
+func ButtonInstallUpdate() string { return In(i18n.Locale()).ButtonInstallUpdate() }
+
+// ButtonInstallUpdate says "Update and Relaunch"
+// in the language of msgs.
+func (msgs Messages) ButtonInstallUpdate() string {
+	return Catalog.Format(msgs.locale, "buttonInstallUpdate", nil)
+}
+
+// UpdateDownloading says "Downloading the update… {percent}%"
+// in the language the app shows.
+func UpdateDownloading(percent string) string { return In(i18n.Locale()).UpdateDownloading(percent) }
+
+// UpdateDownloading says "Downloading the update… {percent}%"
+// in the language of msgs.
+func (msgs Messages) UpdateDownloading(percent string) string {
+	return Catalog.Format(msgs.locale, "updateDownloading", map[string]any{"percent": percent})
+}
+
+// UpdateFailed says "Couldn’t update: {error}"
+// in the language the app shows.
+func UpdateFailed(error string) string { return In(i18n.Locale()).UpdateFailed(error) }
+
+// UpdateFailed says "Couldn’t update: {error}"
+// in the language of msgs.
+func (msgs Messages) UpdateFailed(error string) string {
+	return Catalog.Format(msgs.locale, "updateFailed", map[string]any{"error": error})
+}
+
+// UpdateCheckFailed says "Couldn’t check for updates: {error}"
+// in the language the app shows.
+func UpdateCheckFailed(error string) string { return In(i18n.Locale()).UpdateCheckFailed(error) }
+
+// UpdateCheckFailed says "Couldn’t check for updates: {error}"
+// in the language of msgs.
+func (msgs Messages) UpdateCheckFailed(error string) string {
+	return Catalog.Format(msgs.locale, "updateCheckFailed", map[string]any{"error": error})
+}
+
+// UpdatesDev says "Development builds don’t update."
+// in the language the app shows.
+func UpdatesDev() string { return In(i18n.Locale()).UpdatesDev() }
+
+// UpdatesDev says "Development builds don’t update."
+// in the language of msgs.
+func (msgs Messages) UpdatesDev() string {
+	return Catalog.Format(msgs.locale, "updatesDev", nil)
+}
+
+// UpdatesUnwritable says "Move Kit to Applications to update it here."
+// in the language the app shows.
+func UpdatesUnwritable() string { return In(i18n.Locale()).UpdatesUnwritable() }
+
+// UpdatesUnwritable says "Move Kit to Applications to update it here."
+// in the language of msgs.
+func (msgs Messages) UpdatesUnwritable() string {
+	return Catalog.Format(msgs.locale, "updatesUnwritable", nil)
+}
+
+// FieldCheckUpdates says "Check for updates automatically"
+// in the language the app shows.
+func FieldCheckUpdates() string { return In(i18n.Locale()).FieldCheckUpdates() }
+
+// FieldCheckUpdates says "Check for updates automatically"
+// in the language of msgs.
+func (msgs Messages) FieldCheckUpdates() string {
+	return Catalog.Format(msgs.locale, "fieldCheckUpdates", nil)
+}
+
+// CheckUpdatesNote says "Once a day. Kit asks before it installs one."
+// in the language the app shows.
+func CheckUpdatesNote() string { return In(i18n.Locale()).CheckUpdatesNote() }
+
+// CheckUpdatesNote says "Once a day. Kit asks before it installs one."
+// in the language of msgs.
+func (msgs Messages) CheckUpdatesNote() string {
+	return Catalog.Format(msgs.locale, "checkUpdatesNote", nil)
+}
+
+// WhatsNew says "What’s new"
+// in the language the app shows.
+func WhatsNew() string { return In(i18n.Locale()).WhatsNew() }
+
+// WhatsNew says "What’s new"
+// in the language of msgs.
+func (msgs Messages) WhatsNew() string {
+	return Catalog.Format(msgs.locale, "whatsNew", nil)
+}
+
+// TrayUpdate says "Update to Kit {version}…"
+// in the language the app shows.
+func TrayUpdate(version string) string { return In(i18n.Locale()).TrayUpdate(version) }
+
+// TrayUpdate says "Update to Kit {version}…"
+// in the language of msgs.
+func (msgs Messages) TrayUpdate(version string) string {
+	return Catalog.Format(msgs.locale, "trayUpdate", map[string]any{"version": version})
+}

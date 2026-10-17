@@ -204,5 +204,21 @@
   "pasteTerminals": "Into Claude Code and other terminals",
   "pasteTerminalsNote": "A terminal’s ⌘V pastes text only.",
   "fieldOpenAtLogin": "Open at login",
-  "openAtLoginNote": "Kit waits in the menu bar from the moment you log in."
+  "openAtLoginNote": "Kit waits in the menu bar from the moment you log in.",
+  "sectionUpdates": "Updates",
+  "appVersion": "Kit {version}",
+  "buttonCheckUpdates": "Check for Updates",
+  "updateChecking": "Checking for updates…",
+  "updateLatest": "Kit is up to date.",
+  "updateAvailable": "Kit {version} is available.",
+  "buttonInstallUpdate": "Update and Relaunch",
+  "updateDownloading": "Downloading the update… {percent}%",
+  "updateFailed": "Couldn’t update: {error}",
+  "updateCheckFailed": "Couldn’t check for updates: {error}",
+  "updatesDev": "Development builds don’t update.",
+  "updatesUnwritable": "Move Kit to Applications to update it here.",
+  "fieldCheckUpdates": "Check for updates automatically",
+  "checkUpdatesNote": "Once a day. Kit asks before it installs one.",
+  "whatsNew": "What’s new",
+  "trayUpdate": "Update to Kit {version}…"
 }
