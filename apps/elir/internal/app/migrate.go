@@ -13,6 +13,7 @@ import (
 
 	"github.com/egoist/mygo"
 
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 )
 
@@ -59,7 +60,7 @@ func migrateFromKit(dir string) (bool, error) {
 
 // migrateFromVoice brings what Voice kept into a new install of Elir: its
 // settings, history and API keys. Voice's own data is left as it was.
-func migrateFromVoice(dir string, st *store.Store) {
+func migrateFromVoice(dir string, st *store.Store, secrets *secret.Store) {
 	old := previousDataDir(dir, "Voice")
 	ok, err := migrateFiles(old, dir, st)
 	if err != nil {
@@ -72,7 +73,7 @@ func migrateFromVoice(dir string, st *store.Store) {
 	if strings.HasSuffix(filepath.Base(dir), " Dev") {
 		service += ".dev"
 	}
-	migrateSecrets(mygo.Secrets.Service(service), mygo.Secrets)
+	migrateSecrets(mygo.Secrets.Service(service), secrets)
 	log.Printf("migrated from Voice: %s", old)
 }
 
@@ -106,18 +107,15 @@ func migrateFiles(old, dir string, st *store.Store) (bool, error) {
 }
 
 // migrateSecrets copies Voice's API keys from its Keychain service into
-// Elir's, unless Elir has them already.
-func migrateSecrets(from, to mygo.SecretsModule) {
+// Elir's file of keys, unless Elir has them already.
+func migrateSecrets(from mygo.SecretsModule, to *secret.Store) {
 	for _, name := range voiceSecrets {
-		if v, err := to.Get(name); err == nil && len(v) > 0 {
-			continue
-		}
 		v, err := from.Get(name)
 		if err != nil || len(v) == 0 {
 			continue
 		}
-		if err := to.Set(name, v); err != nil {
-			log.Printf("migrate from Voice: keychain %s: %v", name, err)
+		if _, err := to.Import(name, strings.TrimSpace(string(v))); err != nil {
+			log.Printf("migrate from Voice: %s: %v", name, err)
 		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -63,6 +64,8 @@ type Page struct {
 type Host struct {
 	// Store is the settings file, of which a feature keeps a section.
 	Store *store.Store
+	// Secrets is the file of API keys, which only the user can read.
+	Secrets *secret.Store
 	// DataDir is the app's data directory; a feature keeps its files in a
 	// subdirectory named after it.
 	DataDir string

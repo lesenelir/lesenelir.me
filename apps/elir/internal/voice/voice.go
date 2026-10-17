@@ -92,8 +92,8 @@ func (v *Voice) Start(h *app.Host) error {
 	v.loadHistory()
 	quiet := &quieter{settings: v.settings.Get, path: filepath.Join(dir, "output-to-restore.json")}
 	quiet.recover()
-	v.openrouterKey.Load()
-	v.sonioxKey.Load()
+	v.openrouterKey.Load(h.Secrets)
+	v.sonioxKey.Load(h.Secrets)
 
 	client := &openrouter.Client{Key: v.openrouterKey.Get, HTTP: &http.Client{Timeout: 60 * time.Second}}
 	sonioxClient := &soniox.Client{Key: v.sonioxKey.Get}

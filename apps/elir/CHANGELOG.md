@@ -2,6 +2,11 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.2.4
+
+- API keys are kept in a file of Elir's data that only you can read, instead of the Keychain, which asked for your
+  login password after every update. Moving them may ask one last time.
+
 ## 0.2.3
 
 - The install steps clear the mark macOS puts on the downloaded disk image first, so that it opens. The app is as in

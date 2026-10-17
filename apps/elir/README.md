@@ -14,8 +14,8 @@ A personal toolbox for macOS: a menu bar app whose tools share one settings wind
 
 Speech is transcribed while you talk by [Soniox](https://soniox.com/) real-time speech to text, so the text is
 nearly ready when you stop. The cleanup and translation go through [OpenRouter](https://openrouter.ai/), which also
-transcribes the whole recording when Soniox has no key or fails. Set both API keys in Settings → Models (stored in
-the Keychain), or export `SONIOX_API_KEY` and `OPENROUTER_API_KEY` for development.
+transcribes the whole recording when Soniox has no key or fails. Set both API keys in Settings → Models (kept in
+`~/Library/Application Support/Elir/secrets.json`, which only you can read), or export `SONIOX_API_KEY` and `OPENROUTER_API_KEY` for development.
 
 The text of each dictation and translation is kept in `~/Library/Application Support/Elir/voice/history.jsonl` (text
 only, never audio; the latest 1,000). Settings → History shows it, and can copy, delete, clear it all, or stop keeping
@@ -103,7 +103,7 @@ internal/app                  the shell: settings window and sidebar, General an
                               the Feature interface tools implement, migration from Voice
 internal/widget               the settings window's building blocks: grouped rows, glass dropdown, badges, keycaps
 internal/store                the settings JSON, a typed section per part
-internal/secret               API keys in the Keychain
+internal/secret               API keys in a file only the user can read
 internal/openrouter           OpenRouter client
 internal/platform/darwin      CGEventTap, AudioQueue, CoreAudio, Cmd+V, permissions (purego)
 internal/voice                voice input: the feature, voice bar, its settings pages, pipeline adapters

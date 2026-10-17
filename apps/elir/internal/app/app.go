@@ -15,6 +15,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
@@ -85,12 +86,16 @@ func (a *App) ready() {
 	} else if ok {
 		log.Printf("migrated from Kit: %s", dir)
 	}
+	secrets, err := secret.OpenStore(filepath.Join(dir, "secrets.json"))
+	if err != nil {
+		log.Printf("secrets: %v", err)
+	}
 	a.store, err = store.Open(filepath.Join(dir, "settings.json"))
 	if err != nil {
 		log.Printf("settings: %v; using defaults", err)
 	}
 	if !a.store.Existed() {
-		migrateFromVoice(dir, a.store)
+		migrateFromVoice(dir, a.store, secrets)
 	}
 	a.settings, err = store.NewSection(a.store, settingsSection, defaultSettings(), nil)
 	if err != nil {
@@ -135,6 +140,7 @@ func (a *App) ready() {
 
 	host := &Host{
 		Store:        a.store,
+		Secrets:      secrets,
 		DataDir:      dir,
 		Settings:     a.window,
 		ShowSettings: a.showSettings,

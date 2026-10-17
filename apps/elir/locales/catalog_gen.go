@@ -872,11 +872,11 @@ func (msgs Messages) FieldSonioxKey() string {
 	return Catalog.Format(msgs.locale, "fieldSonioxKey", nil)
 }
 
-// SonioxKeyNote says "Create one at console.soniox.com. Stored in the Keychain."
+// SonioxKeyNote says "Create one at console.soniox.com. Kept on this Mac only."
 // in the language the app shows.
 func SonioxKeyNote() string { return In(i18n.Locale()).SonioxKeyNote() }
 
-// SonioxKeyNote says "Create one at console.soniox.com. Stored in the Keychain."
+// SonioxKeyNote says "Create one at console.soniox.com. Kept on this Mac only."
 // in the language of msgs.
 func (msgs Messages) SonioxKeyNote() string {
 	return Catalog.Format(msgs.locale, "sonioxKeyNote", nil)
@@ -922,11 +922,11 @@ func (msgs Messages) AsrFallbackNote() string {
 	return Catalog.Format(msgs.locale, "asrFallbackNote", nil)
 }
 
-// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Stored in the Keychain."
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this Mac only."
 // in the language the app shows.
 func OpenRouterKeyNote() string { return In(i18n.Locale()).OpenRouterKeyNote() }
 
-// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Stored in the Keychain."
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this Mac only."
 // in the language of msgs.
 func (msgs Messages) OpenRouterKeyNote() string {
 	return Catalog.Format(msgs.locale, "openRouterKeyNote", nil)
