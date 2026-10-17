@@ -156,21 +156,21 @@ func (msgs Messages) MicAllowed() string {
 	return Catalog.Format(msgs.locale, "micAllowed", nil)
 }
 
-// MicDenied says "Denied; allow it in System Settings"
+// MicDenied says "Unavailable; check the microphone and system privacy settings"
 // in the language the app shows.
 func MicDenied() string { return In(i18n.Locale()).MicDenied() }
 
-// MicDenied says "Denied; allow it in System Settings"
+// MicDenied says "Unavailable; check the microphone and system privacy settings"
 // in the language of msgs.
 func (msgs Messages) MicDenied() string {
 	return Catalog.Format(msgs.locale, "micDenied", nil)
 }
 
-// MicAsk says "macOS asks on the first recording"
+// MicAsk says "Record once to check microphone access"
 // in the language the app shows.
 func MicAsk() string { return In(i18n.Locale()).MicAsk() }
 
-// MicAsk says "macOS asks on the first recording"
+// MicAsk says "Record once to check microphone access"
 // in the language of msgs.
 func (msgs Messages) MicAsk() string {
 	return Catalog.Format(msgs.locale, "micAsk", nil)
@@ -186,11 +186,11 @@ func (msgs Messages) PermHotkeys() string {
 	return Catalog.Format(msgs.locale, "permHotkeys", nil)
 }
 
-// PermHotkeysNote says "Start once Accessibility is allowed"
+// PermHotkeysNote says "Global keyboard shortcuts"
 // in the language the app shows.
 func PermHotkeysNote() string { return In(i18n.Locale()).PermHotkeysNote() }
 
-// PermHotkeysNote says "Start once Accessibility is allowed"
+// PermHotkeysNote says "Global keyboard shortcuts"
 // in the language of msgs.
 func (msgs Messages) PermHotkeysNote() string {
 	return Catalog.Format(msgs.locale, "permHotkeysNote", nil)
@@ -872,11 +872,11 @@ func (msgs Messages) FieldSonioxKey() string {
 	return Catalog.Format(msgs.locale, "fieldSonioxKey", nil)
 }
 
-// SonioxKeyNote says "Create one at console.soniox.com. Kept on this Mac only."
+// SonioxKeyNote says "Create one at console.soniox.com. Kept on this computer only."
 // in the language the app shows.
 func SonioxKeyNote() string { return In(i18n.Locale()).SonioxKeyNote() }
 
-// SonioxKeyNote says "Create one at console.soniox.com. Kept on this Mac only."
+// SonioxKeyNote says "Create one at console.soniox.com. Kept on this computer only."
 // in the language of msgs.
 func (msgs Messages) SonioxKeyNote() string {
 	return Catalog.Format(msgs.locale, "sonioxKeyNote", nil)
@@ -922,11 +922,11 @@ func (msgs Messages) AsrFallbackNote() string {
 	return Catalog.Format(msgs.locale, "asrFallbackNote", nil)
 }
 
-// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this Mac only."
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this computer only."
 // in the language the app shows.
 func OpenRouterKeyNote() string { return In(i18n.Locale()).OpenRouterKeyNote() }
 
-// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this Mac only."
+// OpenRouterKeyNote says "For cleanup, translation and backup transcription. Kept on this computer only."
 // in the language of msgs.
 func (msgs Messages) OpenRouterKeyNote() string {
 	return Catalog.Format(msgs.locale, "openRouterKeyNote", nil)
@@ -1056,11 +1056,11 @@ func (msgs Messages) ClearHistoryTitle() string {
 	return Catalog.Format(msgs.locale, "clearHistoryTitle", nil)
 }
 
-// ClearHistoryMessage says "This deletes the saved text from this Mac. You can’t undo it."
+// ClearHistoryMessage says "This deletes the saved text from this computer. You can’t undo it."
 // in the language the app shows.
 func ClearHistoryMessage() string { return In(i18n.Locale()).ClearHistoryMessage() }
 
-// ClearHistoryMessage says "This deletes the saved text from this Mac. You can’t undo it."
+// ClearHistoryMessage says "This deletes the saved text from this computer. You can’t undo it."
 // in the language of msgs.
 func (msgs Messages) ClearHistoryMessage() string {
 	return Catalog.Format(msgs.locale, "clearHistoryMessage", nil)
@@ -1386,11 +1386,11 @@ func (msgs Messages) CancelNote() string {
 	return Catalog.Format(msgs.locale, "cancelNote", nil)
 }
 
-// TranslateNote says "Speak any language; the text comes out translated. Fn finishes."
+// TranslateNote says "Speak any language; the text comes out translated. The dictation shortcut finishes."
 // in the language the app shows.
 func TranslateNote() string { return In(i18n.Locale()).TranslateNote() }
 
-// TranslateNote says "Speak any language; the text comes out translated. Fn finishes."
+// TranslateNote says "Speak any language; the text comes out translated. The dictation shortcut finishes."
 // in the language of msgs.
 func (msgs Messages) TranslateNote() string {
 	return Catalog.Format(msgs.locale, "translateNote", nil)
@@ -1426,11 +1426,11 @@ func (msgs Messages) ShortcutCapture() string {
 	return Catalog.Format(msgs.locale, "shortcutCapture", nil)
 }
 
-// CaptureNote says "Copied to the clipboard."
+// CaptureNote says "Drag to select an area; press Esc to cancel."
 // in the language the app shows.
 func CaptureNote() string { return In(i18n.Locale()).CaptureNote() }
 
-// CaptureNote says "Copied to the clipboard."
+// CaptureNote says "Drag to select an area; press Esc to cancel."
 // in the language of msgs.
 func (msgs Messages) CaptureNote() string {
 	return Catalog.Format(msgs.locale, "captureNote", nil)
@@ -1516,11 +1516,11 @@ func (msgs Messages) ClearScreenshotsTitle() string {
 	return Catalog.Format(msgs.locale, "clearScreenshotsTitle", nil)
 }
 
-// ClearScreenshotsMessage says "This deletes them from this Mac. You can’t undo it."
+// ClearScreenshotsMessage says "This deletes them from this computer. You can’t undo it."
 // in the language the app shows.
 func ClearScreenshotsMessage() string { return In(i18n.Locale()).ClearScreenshotsMessage() }
 
-// ClearScreenshotsMessage says "This deletes them from this Mac. You can’t undo it."
+// ClearScreenshotsMessage says "This deletes them from this computer. You can’t undo it."
 // in the language of msgs.
 func (msgs Messages) ClearScreenshotsMessage() string {
 	return Catalog.Format(msgs.locale, "clearScreenshotsMessage", nil)
@@ -1536,11 +1536,11 @@ func (msgs Messages) ScreenshotFailed(error string) string {
 	return Catalog.Format(msgs.locale, "screenshotFailed", map[string]any{"error": error})
 }
 
-// ScreenshotsEmpty says "No screenshots yet. Press ⌘⇧2 to take one."
+// ScreenshotsEmpty says "No screenshots yet. Use the capture shortcut above to take one."
 // in the language the app shows.
 func ScreenshotsEmpty() string { return In(i18n.Locale()).ScreenshotsEmpty() }
 
-// ScreenshotsEmpty says "No screenshots yet. Press ⌘⇧2 to take one."
+// ScreenshotsEmpty says "No screenshots yet. Use the capture shortcut above to take one."
 // in the language of msgs.
 func (msgs Messages) ScreenshotsEmpty() string {
 	return Catalog.Format(msgs.locale, "screenshotsEmpty", nil)
@@ -1606,11 +1606,11 @@ func (msgs Messages) SectionCapture() string {
 	return Catalog.Format(msgs.locale, "sectionCapture", nil)
 }
 
-// ShortcutWindow says "Capture a window instead"
+// ShortcutWindow says "Capture the window under the pointer"
 // in the language the app shows.
 func ShortcutWindow() string { return In(i18n.Locale()).ShortcutWindow() }
 
-// ShortcutWindow says "Capture a window instead"
+// ShortcutWindow says "Capture the window under the pointer"
 // in the language of msgs.
 func (msgs Messages) ShortcutWindow() string {
 	return Catalog.Format(msgs.locale, "shortcutWindow", nil)
@@ -1646,11 +1646,11 @@ func (msgs Messages) PasteTerminals() string {
 	return Catalog.Format(msgs.locale, "pasteTerminals", nil)
 }
 
-// PasteTerminalsNote says "A terminal’s ⌘V pastes text only."
+// PasteTerminalsNote says "The paste shortcut depends on your terminal; you can also drag the image into it."
 // in the language the app shows.
 func PasteTerminalsNote() string { return In(i18n.Locale()).PasteTerminalsNote() }
 
-// PasteTerminalsNote says "A terminal’s ⌘V pastes text only."
+// PasteTerminalsNote says "The paste shortcut depends on your terminal; you can also drag the image into it."
 // in the language of msgs.
 func (msgs Messages) PasteTerminalsNote() string {
 	return Catalog.Format(msgs.locale, "pasteTerminalsNote", nil)
@@ -1666,11 +1666,11 @@ func (msgs Messages) FieldOpenAtLogin() string {
 	return Catalog.Format(msgs.locale, "fieldOpenAtLogin", nil)
 }
 
-// OpenAtLoginNote says "Elir waits in the menu bar from the moment you log in."
+// OpenAtLoginNote says "Keep Elir ready in the system tray after you log in."
 // in the language the app shows.
 func OpenAtLoginNote() string { return In(i18n.Locale()).OpenAtLoginNote() }
 
-// OpenAtLoginNote says "Elir waits in the menu bar from the moment you log in."
+// OpenAtLoginNote says "Keep Elir ready in the system tray after you log in."
 // in the language of msgs.
 func (msgs Messages) OpenAtLoginNote() string {
 	return Catalog.Format(msgs.locale, "openAtLoginNote", nil)
@@ -1928,11 +1928,11 @@ func (msgs Messages) RewriteCancelNote() string {
 	return Catalog.Format(msgs.locale, "rewriteCancelNote", nil)
 }
 
-// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection, and ⌘Z undoes it. The model and the OpenRo…"
+// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection. Use your app’s Undo command to undo it. Th…"
 // in the language the app shows.
 func RewriteHowNote() string { return In(i18n.Locale()).RewriteHowNote() }
 
-// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection, and ⌘Z undoes it. The model and the OpenRo…"
+// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection. Use your app’s Undo command to undo it. Th…"
 // in the language of msgs.
 func (msgs Messages) RewriteHowNote() string {
 	return Catalog.Format(msgs.locale, "rewriteHowNote", nil)
@@ -1996,4 +1996,14 @@ func RewriteTimedOut() string { return In(i18n.Locale()).RewriteTimedOut() }
 // in the language of msgs.
 func (msgs Messages) RewriteTimedOut() string {
 	return Catalog.Format(msgs.locale, "rewriteTimedOut", nil)
+}
+
+// UpdatesManual says "Windows updates are installed manually from a new build."
+// in the language the app shows.
+func UpdatesManual() string { return In(i18n.Locale()).UpdatesManual() }
+
+// UpdatesManual says "Windows updates are installed manually from a new build."
+// in the language of msgs.
+func (msgs Messages) UpdatesManual() string {
+	return Catalog.Format(msgs.locale, "updatesManual", nil)
 }

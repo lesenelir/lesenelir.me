@@ -1,14 +1,15 @@
-//go:build darwin
+//go:build darwin || windows
 
 package app
 
 import (
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
@@ -27,7 +28,7 @@ type permissions struct {
 // permissions in System Settings.
 func (a *App) watchPermissions() {
 	for {
-		trusted := darwin.AccessibilityTrusted(false)
+		trusted := platform.AccessibilityTrusted(false)
 		running := a.tap.Running()
 		if !running && trusted {
 			if err := a.tap.Start(); err != nil {
@@ -54,16 +55,18 @@ func (a *App) permissionsPage() Page {
 		View: func(c *ui.Context, m locales.Messages, pal widget.Palette) {
 			t := c.Theme()
 			widget.Group(c, pal, "", func(g *widget.Rows) {
-				g.Row(c, m.PermAccessibility(), m.PermAccessibilityNote(), func() {
-					if a.perms.accessibility {
-						widget.Badge(c, m.StatusAllowed(), t.Success)
-						return
-					}
-					widget.Badge(c, m.StatusNeeded(), t.Danger)
-					if ui.Button(c, m.OpenSettings()).Clicked() {
-						darwin.OpenAccessibilitySettings()
-					}
-				})
+				if runtime.GOOS == "darwin" {
+					g.Row(c, m.PermAccessibility(), m.PermAccessibilityNote(), func() {
+						if a.perms.accessibility {
+							widget.Badge(c, m.StatusAllowed(), t.Success)
+							return
+						}
+						widget.Badge(c, m.StatusNeeded(), t.Danger)
+						if ui.Button(c, m.OpenSettings()).Clicked() {
+							platform.OpenAccessibilitySettings()
+						}
+					})
+				}
 				g.Row(c, m.PermHotkeys(), m.PermHotkeysNote(), func() {
 					if a.perms.tapRunning {
 						widget.Badge(c, m.StatusRunning(), t.Success)

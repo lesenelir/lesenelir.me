@@ -1,5 +1,7 @@
 package screenshot
 
+import "runtime"
+
 // macOS virtual key codes (Carbon kVK_*) and CGEventFlags bits.
 const (
 	key2        = 19 // kVK_ANSI_2: the key of 2 on any layout
@@ -20,7 +22,11 @@ func (s *shortcut) FlagsChanged(int64, uint64) bool { return false }
 
 func (s *shortcut) KeyDown(keycode int64, flags uint64, repeat bool) bool {
 	mods := flags & (flagShift | flagControl | flagOption | flagCommand)
-	if keycode != key2 || mods != flagCommand|flagShift {
+	captureMod := uint64(flagCommand)
+	if runtime.GOOS == "windows" {
+		captureMod = flagControl
+	}
+	if keycode != key2 || mods != captureMod|flagShift {
 		return false
 	}
 	s.down = true

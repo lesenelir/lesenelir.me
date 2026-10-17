@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Elir is a personal toolbox for macOS: a menu bar app whose tools share one
 // settings window. Its tools are voice input, translating and polishing

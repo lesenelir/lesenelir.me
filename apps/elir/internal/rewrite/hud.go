@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 package rewrite
 
@@ -6,13 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -178,7 +179,7 @@ func noteText(m locales.Messages, err error) string {
 		return m.NoteNoSelection()
 	case errors.Is(err, errNoKey), errors.Is(err, openrouter.ErrNoKey):
 		return m.NoteNoKey()
-	case errors.Is(err, darwin.ErrNotTrusted):
+	case runtime.GOOS == "darwin" && errors.Is(err, platform.ErrNotTrusted):
 		return m.NoteNeedsAccessibility()
 	case errors.Is(err, context.Canceled):
 		return m.NoteCancelled()

@@ -1,9 +1,10 @@
-//go:build darwin
+//go:build darwin || windows
 
 package screenshot
 
 import (
 	"os"
+	"runtime"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -50,7 +51,13 @@ func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette)
 	// itself on ⌃V.
 	widget.Group(c, pal, m.SectionPaste(), func(g *widget.Rows) {
 		g.Row(c, m.PasteApps(), "", func() { widget.Keycaps(c, pal, "⌘", "V") })
-		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(), func() { widget.Keycaps(c, pal, "⌃", "V") })
+		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(), func() {
+			if runtime.GOOS == "windows" {
+				widget.Keycaps(c, pal, "Ctrl", "Shift", "V")
+			} else {
+				widget.Keycaps(c, pal, "⌃", "V")
+			}
+		})
 	})
 	widget.Group(c, pal, m.SectionScreenshots(), func(g *widget.Rows) {
 		g.Row(c, m.FieldKeep(), m.KeepNote(), func() {

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 package app
 
@@ -6,7 +6,7 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
@@ -77,5 +77,5 @@ type Host struct {
 	ShowSettings func(page string)
 	// HandleKeys adds a handler of the global keyboard events, in Start.
 	// Its methods run on the main thread and must return quickly.
-	HandleKeys func(h darwin.KeyHandler)
+	HandleKeys func(h platform.KeyHandler)
 }

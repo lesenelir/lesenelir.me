@@ -1,16 +1,17 @@
-//go:build darwin
+//go:build darwin || windows
 
 package voice
 
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
@@ -256,7 +257,7 @@ func noteText(m locales.Messages, s controller.Status) string {
 	case controller.NoteASRFailed:
 		return m.NoteAsrFailed(detail)
 	case controller.NotePasteFailed:
-		if errors.Is(s.Err, darwin.ErrNotTrusted) {
+		if runtime.GOOS == "darwin" && errors.Is(s.Err, platform.ErrNotTrusted) {
 			return m.NotePasteNeedsAccessibility()
 		}
 		return m.NotePasteFailed(detail)

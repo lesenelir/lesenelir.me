@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package screenshot is Elir's screenshot tool. ⌘⇧2 runs macOS's own area
 // and window capture; the screenshot goes to the clipboard, ready to paste
@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sync/atomic"
 	"time"
@@ -23,7 +24,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -136,8 +137,8 @@ func (s *Screenshot) take() {
 	go func() {
 		defer s.busy.Store(false)
 		// Without the permission, macOS captures the desktop alone.
-		if !darwin.ScreenCaptureAllowed() {
-			darwin.RequestScreenCapture()
+		if !platform.ScreenCaptureAllowed() {
+			platform.RequestScreenCapture()
 			s.host.ShowSettings("permissions")
 			return
 		}
@@ -305,16 +306,19 @@ func (s *Screenshot) remove(path string) {
 // PermissionRows shows the Screen Recording permission, without which
 // macOS captures the desktop but no window.
 func (s *Screenshot) PermissionRows(c *ui.Context, m locales.Messages, pal widget.Palette, g *widget.Rows) {
+	if runtime.GOOS == "windows" {
+		return
+	}
 	t := c.Theme()
 	g.Row(c, m.PermScreenRecording(), m.PermScreenRecordingNote(), func() {
-		if darwin.ScreenCaptureAllowed() {
+		if platform.ScreenCaptureAllowed() {
 			widget.Badge(c, m.StatusAllowed(), t.Success)
 			return
 		}
 		widget.Badge(c, m.StatusNeeded(), t.Danger)
 		if ui.Button(c.Key("screen-recording"), m.OpenSettings()).Clicked() {
-			darwin.RequestScreenCapture()
-			darwin.OpenScreenRecordingSettings()
+			platform.RequestScreenCapture()
+			platform.OpenScreenRecordingSettings()
 		}
 	})
 }

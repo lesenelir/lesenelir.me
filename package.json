@@ -12,6 +12,8 @@
   "author": "lesenelir <hi@lesenelir.me>",
   "type": "module",
   "scripts": {
+    "dev:elir:windows": "pnpm --filter @lesenelir/elir dev:windows",
+    "build:elir:windows": "pnpm --filter @lesenelir/elir build:windows",
     "build:website": "pnpm --filter @lesenelir/website build",
     "dev:website": "pnpm --filter @lesenelir/website dev",
     "build:elir": "pnpm --filter @lesenelir/elir build",

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package secret keeps API keys in a file of the app's data that only the
 // user can read, or takes them from an environment variable in
@@ -21,8 +21,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/egoist/mygo"
 )
 
 // TypingDelay is how long typing must pause before SetLater writes a key,
@@ -41,7 +39,7 @@ type Store struct {
 // OpenStore reads the keys at path. A missing file is an empty store.
 func OpenStore(path string) (*Store, error) {
 	st := &Store{path: path, values: map[string]string{}}
-	data, err := os.ReadFile(path)
+	data, err := readSecretFile(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return st, nil
 	}
@@ -72,7 +70,7 @@ func (st *Store) put(name, value string) error {
 		return err
 	}
 	tmp := st.path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+	if err := writeSecretFile(tmp, data); err != nil {
 		return err
 	}
 	return os.Rename(tmp, st.path)
@@ -127,16 +125,6 @@ func (s *Secret) Load(st *Store) {
 	s.mu.Lock()
 	s.st, s.value = st, v
 	s.mu.Unlock()
-}
-
-// fromKeychain reads a key the app kept in the Keychain before, "" when
-// there is none.
-func fromKeychain(name string) string {
-	b, err := mygo.Secrets.Get(name)
-	if err != nil && !errors.Is(err, mygo.ErrSecretNotFound) {
-		log.Printf("keychain %s: %v", name, err)
-	}
-	return strings.TrimSpace(string(b))
 }
 
 // Get returns the secret, "" when there is none. It reads the store, so

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package rewrite is Elir's tool for selected text. Select text in any
 // app and press ⌥T to translate it or ⌥R to polish it: the result replaces
@@ -18,10 +18,11 @@ import (
 	"time"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/transfer"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
@@ -144,7 +145,7 @@ func (r *Rewrite) run(ctx context.Context, mode Mode) {
 		r.show(hud{state: hudNote, err: err})
 		return
 	}
-	if err := (darwin.Paster{}).Paste(out); err != nil {
+	if err := (platform.Paster{}).Paste(out); err != nil {
 		r.show(hud{state: hudNote, err: err})
 		return
 	}
@@ -183,7 +184,10 @@ func (r *Rewrite) rewrite(ctx context.Context, mode Mode, text, target string, s
 // clipboard back as it was.
 func copySelection() (string, error) {
 	saved, err := mygo.Clipboard.Read()
-	keep := err == nil && len(saved.Items()) > 0
+	if err != nil {
+		return "", err
+	}
+	keep := len(saved.Items()) > 0
 	restore := func() {
 		if keep {
 			_ = mygo.Clipboard.Write(saved)
@@ -191,8 +195,10 @@ func copySelection() (string, error) {
 			mygo.Clipboard.Clear()
 		}
 	}
-	mygo.Clipboard.Clear()
-	if err := darwin.CopySelection(); err != nil {
+	if err := mygo.Clipboard.Write(transfer.Data{}); err != nil {
+		return "", err
+	}
+	if err := platform.CopySelection(); err != nil {
 		restore()
 		return "", err
 	}

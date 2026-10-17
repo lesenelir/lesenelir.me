@@ -19,7 +19,7 @@ import (
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
@@ -155,7 +155,7 @@ func TestOverlayFollowsLanguage(t *testing.T) {
 	if !tt.HasText("Transcribing…") {
 		t.Errorf("English bar %q", tt.Texts())
 	}
-	v.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: darwin.ErrNotTrusted}
+	v.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: platform.ErrNotTrusted}
 	tt.Frame()
 	if !tt.HasText("Couldn't paste without Accessibility; the text is on the clipboard") {
 		t.Errorf("English note %q", tt.Texts())

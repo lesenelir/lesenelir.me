@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package voice is Elir's voice input. Tap Fn, speak, tap Fn again: the
 // speech is transcribed, cleaned up and pasted where the cursor is. Fn +
@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -20,7 +21,7 @@ import (
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
@@ -37,7 +38,7 @@ type Voice struct {
 	host     *app.Host
 	settings *store.Section[config.Settings]
 	ctrl     *controller.Controller
-	rec      *darwin.Recorder
+	rec      *platform.Recorder
 	keys     *hotkeys
 	overlay  *mygo.Window
 
@@ -68,7 +69,7 @@ var _ interface {
 // New returns voice input, to Add to the app.
 func New() *Voice {
 	return &Voice{
-		rec:           &darwin.Recorder{},
+		rec:           &platform.Recorder{},
 		keys:          &hotkeys{},
 		openrouterKey: secret.New("openrouter-api-key", "OPENROUTER_API_KEY"),
 		sonioxKey:     secret.New("soniox-api-key", "SONIOX_API_KEY"),
@@ -102,7 +103,7 @@ func (v *Voice) Start(h *app.Host) error {
 		Streamer:    &streamer{client: sonioxClient, settings: v.settings.Get, key: v.sonioxKey.Get},
 		Transcriber: &transcriber{client: client, settings: v.settings.Get},
 		Rewriter:    rewriter{client: client, settings: v.settings.Get},
-		Paster:      darwin.Paster{},
+		Paster:      platform.Paster{},
 		Settings:    v.settings.Get,
 		Capture:     v.keys.detector.Capture,
 		OnChange:    v.onStatus,
@@ -152,15 +153,15 @@ func (v *Voice) SettingsBlurred() { v.flushKeys() }
 // PermissionRows shows the microphone permission.
 func (v *Voice) PermissionRows(c *ui.Context, m locales.Messages, pal widget.Palette, g *widget.Rows) {
 	t := c.Theme()
-	mic := darwin.Microphone()
+	mic := platform.Microphone()
 	g.Row(c, m.PermMicrophone(), micText(m, mic), func() {
 		switch mic {
-		case darwin.MicAuthorized:
+		case platform.MicAuthorized:
 			widget.Badge(c, m.StatusAllowed(), t.Success)
-		case darwin.MicDenied, darwin.MicRestricted:
+		case platform.MicDenied, platform.MicRestricted:
 			widget.Badge(c, m.StatusNeeded(), t.Danger)
 			if ui.Button(c, m.OpenSettings()).Clicked() {
-				darwin.OpenMicrophoneSettings()
+				platform.OpenMicrophoneSettings()
 			}
 		default:
 			widget.Badge(c, m.StatusWaiting(), t.TextMuted)
@@ -168,11 +169,11 @@ func (v *Voice) PermissionRows(c *ui.Context, m locales.Messages, pal widget.Pal
 	})
 }
 
-func micText(m locales.Messages, s darwin.MicStatus) string {
+func micText(m locales.Messages, s platform.MicStatus) string {
 	switch s {
-	case darwin.MicAuthorized:
+	case platform.MicAuthorized:
 		return m.MicAllowed()
-	case darwin.MicDenied, darwin.MicRestricted:
+	case platform.MicDenied, platform.MicRestricted:
 		return m.MicDenied()
 	}
 	return m.MicAsk()
@@ -181,10 +182,13 @@ func micText(m locales.Messages, s darwin.MicStatus) string {
 // PermissionTips tells how to keep the Globe key from macOS, which would
 // otherwise open the emoji picker or start its own dictation on Fn.
 func (v *Voice) PermissionTips(c *ui.Context, m locales.Messages, pal widget.Palette) {
+	if runtime.GOOS == "windows" {
+		return
+	}
 	widget.Group(c, pal, m.StatusTip(), func(g *widget.Rows) {
 		g.Row(c, m.PermGlobe(), m.PermGlobeNote(), func() {
 			if ui.Button(c, m.OpenKeyboardSettings()).Clicked() {
-				darwin.OpenKeyboardSettings()
+				platform.OpenKeyboardSettings()
 			}
 		})
 	})

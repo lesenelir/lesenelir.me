@@ -1,7 +1,43 @@
 # Elir
 
-A personal toolbox for macOS: a menu bar app whose tools share one settings window, built with
+A personal toolbox for macOS and Windows: a tray app whose tools share one settings window, built with
 [MyGo](https://mygo.egoist.dev/) native UI. Its tools are voice input and screenshots.
+
+## Windows
+
+Windows 10/11 on amd64 is supported. The native UI does not need a web frontend.
+From the repository root:
+
+```powershell
+pnpm dev:elir:windows
+pnpm build:elir:windows
+```
+
+The build writes `apps/elir/build/windows-amd64/Elir.exe` and an NSIS installer
+alongside it. MyGo downloads NSIS on the first build. You can also build a plain
+development executable with `go build -o build/Elir.exe .` from `apps/elir`.
+
+| Key | Action |
+| --- | --- |
+| `F8` | Start or finish dictation |
+| `Left Shift` + `F8` | Start translation; `F8` finishes |
+| `Alt+T` / `Alt+R` | Translate / polish selected text |
+| `Ctrl+Shift+2` | Select a screenshot area; `Space` captures the window under the pointer |
+| `Esc` / `Tab` | Cancel / switch the translation language |
+
+F8 is reserved while Elir runs; Fn is usually handled by keyboard firmware on
+Windows. Pasting uses Ctrl+V. Windows can block automatic paste into an app running
+with higher privileges; paste manually from the clipboard in that case.
+
+Settings, history and screenshots use MyGo's Windows user-data directory under
+`%APPDATA%`. API keys in `secrets.json` are encrypted with Windows DPAPI and can
+only be decrypted with that Windows user's credentials. They are not portable to
+another account. Screenshot selection uses built-in Windows PowerShell and
+WinForms; environments that disable these cannot use screenshot capture.
+
+Windows updates are installed manually. The existing signed update feed and
+`scripts/release.sh` remain the macOS release path. The sections below describe
+macOS shortcuts and paths.
 
 ## Voice input
 
@@ -75,6 +111,8 @@ Updates are MyGo's (`mygo.Updater`): signed with the private key of `updates.pub
 the repo at `~/Library/Application Support/mygo/update-keys/kit/mygo-update.key`, and served from the `kit-updates`
 pre-release at the fixed URL of `updates.url`, which the GitHub API's rate limit for anonymous requests cannot block.
 Keep a copy of the key somewhere safe: installed copies of Elir only take updates signed with it.
+The release script loads it into `MYGO_UPDATER_PRIVATE_KEY`; ordinary builds do
+not require the private key.
 
 ## Releasing
 
@@ -113,6 +151,7 @@ internal/widget               the settings window's building blocks: grouped row
 internal/store                the settings JSON, a typed section per part
 internal/secret               API keys in a file only the user can read
 internal/openrouter           OpenRouter client
+internal/platform             platform boundary, Windows hooks/recording/paste/volume and macOS aliases
 internal/platform/darwin      CGEventTap, AudioQueue, CoreAudio, Cmd+V, permissions (purego)
 internal/voice                voice input: the feature, voice bar, its settings pages, pipeline adapters
 internal/voice/config         its settings section

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 package voice
 
@@ -10,7 +10,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 )
 
@@ -27,7 +27,7 @@ type quieter struct {
 	path     string
 
 	mu    sync.Mutex
-	state darwin.OutputState
+	state platform.OutputState
 }
 
 // Recording is the controller's Recording hook.
@@ -45,7 +45,7 @@ func (q *quieter) Recording(on bool) {
 	case "lower":
 		level = lowerLevel
 	}
-	state, err := darwin.QuietOutput(level)
+	state, err := platform.QuietOutput(level)
 	if err != nil {
 		log.Printf("quiet output: %v", err)
 		return
@@ -63,10 +63,10 @@ func (q *quieter) restore() {
 	if q.state.Kind == "" {
 		return
 	}
-	if err := darwin.RestoreOutput(q.state); err != nil {
+	if err := platform.RestoreOutput(q.state); err != nil {
 		log.Printf("restore output: %v", err)
 	}
-	q.state = darwin.OutputState{}
+	q.state = platform.OutputState{}
 	_ = os.Remove(q.path)
 }
 
@@ -76,7 +76,7 @@ func (q *quieter) recover() {
 	if errors.Is(err, fs.ErrNotExist) {
 		return
 	}
-	var state darwin.OutputState
+	var state platform.OutputState
 	if err == nil {
 		err = json.Unmarshal(b, &state)
 	}

@@ -4,7 +4,11 @@
 // empty states, in colors over the theme's.
 package widget
 
-import "github.com/egoist/mygo/ui"
+import (
+	"github.com/egoist/mygo/ui"
+	"runtime"
+	"strings"
+)
 
 // Icon parses a 16×16 line icon drawn in the text's color.
 func Icon(shapes string) *ui.SVG {
@@ -90,6 +94,24 @@ func (g *Rows) Block(c *ui.Context, content func()) {
 
 // Keycaps shows a shortcut as keys.
 func Keycaps(c *ui.Context, pal Palette, keys ...string) {
+	if runtime.GOOS == "windows" {
+		keys = append([]string(nil), keys...)
+		for i, k := range keys {
+			switch k {
+			case "fn":
+				keys[i] = "F8"
+			case "⌘", "⌃":
+				keys[i] = "Ctrl"
+			case "⌥":
+				keys[i] = "Alt"
+			case "⇧":
+				keys[i] = "Shift"
+			default:
+				keys[i] = strings.ReplaceAll(k, "⇧", "Shift")
+			}
+		}
+	}
+
 	ui.Row(c).Gap(4).AlignItems(ui.Center).Children(func() {
 		for _, k := range keys {
 			ui.Text(c, k).FontSize(12).Padding(2, 8).Radius(5).Border(1, pal.Border).

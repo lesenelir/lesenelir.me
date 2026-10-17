@@ -1,10 +1,11 @@
-//go:build darwin
+//go:build darwin || windows
 
 package app
 
 import (
 	"context"
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -41,7 +42,7 @@ type release interface {
 // mygoUpdater is mygo.Updater as an updater.
 type mygoUpdater struct{}
 
-func (mygoUpdater) Enabled() bool { return mygo.Updater.Enabled() }
+func (mygoUpdater) Enabled() bool { return runtime.GOOS == "darwin" && mygo.Updater.Enabled() }
 
 func (mygoUpdater) Check(ctx context.Context) (release, error) {
 	u, err := mygo.Updater.Check(ctx)
