@@ -35,7 +35,7 @@ show in Finder or delete, and clears them all.
 ## The app
 
 The interface is in English or Simplified Chinese, light or dark, in an accent color: Settings → General switches
-them at once, or follows the system. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
+them at once, or follows the system. It also makes Kit open at login. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
 `go tool mygo generate` (also run by `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
 Settings are kept in `~/Library/Application Support/Kit/settings.json`, a section per part: `app` for the app itself,
@@ -52,6 +52,12 @@ cd apps/kit && go test ./...
 
 Go 1.27.1 or later is required; with an older Go, `GOTOOLCHAIN=auto` (the default) downloads it.
 
+Both scripts sign Kit with "Kit Local Signing", a self-signed identity that `scripts/signing-identity.sh` creates in the
+login keychain the first time. macOS keeps an app's permissions by its signature: signed ad hoc, as
+`go tool mygo dev` alone does, each rebuild is a new app that has to be allowed Accessibility and Screen Recording again;
+signed with the same identity, rebuilds keep them. Builds signed with an identity run under the hardened runtime, so
+`entitlements.plist` asks for the microphone.
+
 ## Permissions
 
 - **Accessibility**: watching `Fn`/`Esc`/`Tab` and pressing `Cmd+V`.
@@ -60,7 +66,8 @@ Go 1.27.1 or later is required; with an older Go, `GOTOOLCHAIN=auto` (the defaul
   relaunch after it is allowed.
 - Set System Settings → Keyboard → "Press 🌐 key to" → "Do Nothing", or `Fn` also switches the input source.
 
-Builds are ad-hoc signed, so macOS may ask for Accessibility again after a rebuild.
+Signed with the local identity (above), rebuilds keep these permissions; allow them once more after the first such
+build.
 
 ## Layout
 

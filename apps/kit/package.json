@@ -2,10 +2,10 @@
   "name": "@lesenelir/kit",
   "version": "0.1.0",
   "private": true,
-  "description": "A personal toolbox for macOS: voice input, and more tools to come",
+  "description": "A personal toolbox for macOS: voice input, screenshots, and more tools to come",
   "scripts": {
-    "dev": "go tool mygo dev",
-    "build": "go tool mygo build",
+    "dev": "./scripts/signing-identity.sh && go tool mygo dev -sign \"Kit Local Signing\"",
+    "build": "./scripts/signing-identity.sh && go tool mygo build -sign \"Kit Local Signing\"",
     "test": "go test ./...",
     "vet": "go vet ./..."
   }

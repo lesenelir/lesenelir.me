@@ -6,6 +6,7 @@
   "i18n": { "dir": "locales", "source": "en" },
   "macos": {
     "minimumSystemVersion": "13.0",
+    "entitlements": "entitlements.plist",
     "infoPlist": {
       "LSUIElement": true,
       "NSMicrophoneUsageDescription": "Kit’s voice input records what you say to turn it into text."
