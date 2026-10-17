@@ -2,6 +2,11 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.2.3
+
+- The install steps clear the mark macOS puts on the downloaded disk image first, so that it opens. The app is as in
+  0.2.2.
+
 ## 0.2.2
 
 - The menu bar icon is now the head of the character of Elir's icon, tinted to match a light or dark menu bar.
