@@ -72,6 +72,11 @@ Pressing Fn starts dictation and Fn + Left Shift starts translation. The audio i
 - Every pasted result goes to the controller's `OnResult` hook, and `historypage.go` appends it to `voice/history.jsonl` in the user data directory (`internal/voice/history`: one JSON object per line, text only, never audio, newest 1000 kept) unless `noHistory` is set. Settings → History lists, searches, copies, deletes (with undo) and clears it.
 - `pages.go` and `form.go` are its settings pages (Dictation & Translation, History, Dictionary, Models), saved as they change; `overlay.go` is the voice bar.
 
+### Translate and polish (`internal/rewrite`)
+
+- ⌥T translates and ⌥R polishes the text selected in any app (`shortcut.go`; Esc too, but only while a rewrite runs). `copySelection` saves the clipboard, clears it, presses ⌘C (`darwin.CopySelection`), waits up to 600 ms for text and puts the clipboard back; the result goes in with `darwin.Paster`, replacing the selection, and the bar (`hud.go`, voice bar style) offers to copy it where it could not be pasted.
+- It has no settings of its own: it reads voice input's section afresh (`store.Raw(config.Section)`) for the chat model, providers, reasoning, dictionary and translation rules (`TargetFor(prompt.DetectLanguage(text))`), and shares the OpenRouter key, which `secret.Secret.Get` reads through the file so that both tools' copies agree. Its prompts are its own (`prompt.go`, `<text>` envelope), made for written text rather than speech; the timeout is at least 30 s.
+
 ### Screenshots (`internal/screenshot`)
 
 - ⌘⇧2 (`shortcut.go`, swallowed with its key up) runs `/usr/sbin/screencapture -i` into the `Library` (`library.go`: PNGs in `screenshot/` of the user data directory, never the Desktop; the file's modification time is when it was taken). A cancelled capture leaves no file. Without the Screen Recording permission it asks for it and opens the Permissions page instead of capturing.

@@ -2,6 +2,12 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.3.0
+
+- Translate and polish selected text: select text in any app and press `⌥T` to translate it, or `⌥R` to polish it.
+  The result replaces the selection (`⌘Z` undoes it); `Esc` cancels. Translation follows the languages of Dictation &
+  Translation, and both use the model and API key of Models. See Settings → Translate & Polish.
+
 ## 0.2.4
 
 - API keys are kept in a file of Elir's data that only you can read, instead of the Keychain, which asked for your

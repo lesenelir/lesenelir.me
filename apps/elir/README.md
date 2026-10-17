@@ -21,6 +21,14 @@ The text of each dictation and translation is kept in `~/Library/Application Sup
 only, never audio; the latest 1,000). Settings → History shows it, and can copy, delete, clear it all, or stop keeping
 it.
 
+## Translate and polish selected text
+
+Select text in any app and press `⌥T` to translate it, or `⌥R` to polish it (spelling, grammar and wording, in the
+same language): the result replaces the selection, and `⌘Z` undoes it. `Esc` cancels while it runs; where the
+selection cannot be replaced, as in a web page, the bar at the bottom of the screen copies the result. Translation
+follows the languages of Dictation & Translation (Chinese into English, English into Chinese, …), and both use the
+chat model and OpenRouter API key of Models. While Elir runs, `⌥T` and `⌥R` no longer type `†` and `®`.
+
 ## Screenshots
 
 `⌘⇧2` runs macOS's own capture, as `⌘⇧4` does: drag over an area, or press `Space` and click a window; `Esc`
@@ -114,6 +122,7 @@ internal/voice/soniox         Soniox real-time streaming client
 internal/voice/prompt         prompts and spoken-language detection
 internal/voice/history        local history of pasted text
 internal/voice/audio          WAV and FLAC encoding, levels
+internal/rewrite              translating and polishing selected text: ⌥T, ⌥R, the bar, prompts
 internal/screenshot           screenshots: ⌘⇧2, capture, clipboard, corner thumbnail, the kept screenshots
 locales                       interface strings (en, zh-Hans) and their generated accessors
 ```

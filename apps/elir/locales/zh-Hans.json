@@ -178,5 +178,19 @@
   "whatsNew": "更新内容",
   "trayUpdate": "更新到 Elir {version}…",
   "fieldShowInDock": "在程序坞中显示",
-  "showInDockNote": "也会出现在 ⌘Tab 中，菜单栏图标始终保留。"
+  "showInDockNote": "也会出现在 ⌘Tab 中，菜单栏图标始终保留。",
+  "navRewrite": "翻译与润色",
+  "sectionSelectedText": "在任何应用里选中的文字",
+  "shortcutTranslateText": "翻译",
+  "translateTextNote": "中文译成{zh}，英文译成{en}，其他译成{other}，跟随「听写与翻译」的设置。",
+  "shortcutPolishText": "润色",
+  "polishTextNote": "修正错别字、语法和用词，保持原来的语言。",
+  "rewriteCancelNote": "翻译或润色进行中时都可以取消。",
+  "rewriteHowNote": "选中文字后按快捷键，结果会直接替换原文，⌘Z 可以撤销。模型和 OpenRouter API Key 用的是「模型」页的设置。Elir 运行时，⌥T 和 ⌥R 不再输入 † 和 ®。",
+  "stagePolishing": "润色中…",
+  "rewriteReplaced": "已替换",
+  "noteNoSelection": "请先选中文字",
+  "noteNeedsAccessibility": "请先在设置中允许辅助功能",
+  "rewriteFailed": "没能完成：{error}",
+  "rewriteTimedOut": "模型响应超时"
 }

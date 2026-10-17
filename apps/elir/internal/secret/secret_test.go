@@ -65,3 +65,21 @@ func TestSetBeforeLoad(t *testing.T) {
 		t.Fatal("set a key with nowhere to keep it")
 	}
 }
+
+// Two secrets of one name, as two tools hold for one API key, agree.
+func TestSharedSecret(t *testing.T) {
+	st, err := OpenStore(filepath.Join(t.TempDir(), "secrets.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = st.Import("openrouter-api-key", "sk-1")
+	a, b := New("openrouter-api-key", ""), New("openrouter-api-key", "")
+	a.Load(st)
+	b.Load(st)
+	if err := a.Set("sk-2"); err != nil {
+		t.Fatal(err)
+	}
+	if b.Get() != "sk-2" {
+		t.Fatalf("the other secret has %q", b.Get())
+	}
+}

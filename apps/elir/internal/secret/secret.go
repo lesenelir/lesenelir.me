@@ -139,11 +139,21 @@ func fromKeychain(name string) string {
 	return strings.TrimSpace(string(b))
 }
 
-// Get returns the secret, "" when there is none.
+// Get returns the secret, "" when there is none. It reads the store, so
+// that secrets of the same name, as two tools have for one API key, agree.
 func (s *Secret) Get() string {
 	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.value
+	st, v := s.st, s.value
+	s.mu.RUnlock()
+	if st != nil {
+		if stored, ok := st.lookup(s.name); ok {
+			if stored == "" {
+				return os.Getenv(s.env)
+			}
+			return stored
+		}
+	}
+	return v
 }
 
 // Set keeps the secret, or removes it when empty.

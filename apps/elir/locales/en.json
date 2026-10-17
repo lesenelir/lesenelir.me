@@ -222,5 +222,19 @@
   "whatsNew": "What’s new",
   "trayUpdate": "Update to Elir {version}…",
   "fieldShowInDock": "Show in Dock",
-  "showInDockNote": "Also in ⌘Tab. The menu bar icon always stays."
+  "showInDockNote": "Also in ⌘Tab. The menu bar icon always stays.",
+  "navRewrite": "Translate & Polish",
+  "sectionSelectedText": "Selected text, in any app",
+  "shortcutTranslateText": "Translate",
+  "translateTextNote": "Chinese into {zh}, English into {en}, others into {other}, as Dictation & Translation sets.",
+  "shortcutPolishText": "Polish",
+  "polishTextNote": "Fixes spelling, grammar and wording, in the same language.",
+  "rewriteCancelNote": "While translating or polishing.",
+  "rewriteHowNote": "Select text, then press the shortcut: the result replaces the selection, and ⌘Z undoes it. The model and the OpenRouter API key are those of Models. While Elir runs, ⌥T and ⌥R no longer type † and ®.",
+  "stagePolishing": "Polishing…",
+  "rewriteReplaced": "Replaced",
+  "noteNoSelection": "Select some text first",
+  "noteNeedsAccessibility": "Allow Accessibility in Settings first",
+  "rewriteFailed": "Couldn’t do it: {error}",
+  "rewriteTimedOut": "the model took too long"
 }

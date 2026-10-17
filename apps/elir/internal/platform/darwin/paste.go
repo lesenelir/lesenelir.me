@@ -12,6 +12,7 @@ const (
 	cgHIDEventTap               = 0
 	cgEventSourceStateHIDSystem = 1
 	cgEventFlagMaskCommand      = 0x100000
+	keyC                        = 8 // kVK_ANSI_C
 	keyV                        = 9 // kVK_ANSI_V
 )
 
@@ -36,7 +37,7 @@ func (Paster) Paste(text string) error {
 	if !axIsProcessTrusted() {
 		return ErrNotTrusted
 	}
-	pressCmdV()
+	pressCmd(keyV)
 	time.AfterFunc(restoreDelay, func() {
 		// The user may have copied something meanwhile; leave it be.
 		if mygo.Clipboard.ReadText() != text {
@@ -51,18 +52,32 @@ func (Paster) Paste(text string) error {
 	return nil
 }
 
-func pressCmdV() {
+// CopySelection presses Cmd+C in the app in front, which copies what is
+// selected there. It needs the Accessibility permission.
+func CopySelection() error {
+	if err := load(); err != nil {
+		return err
+	}
+	if !axIsProcessTrusted() {
+		return ErrNotTrusted
+	}
+	pressCmd(keyC)
+	return nil
+}
+
+// pressCmd presses Command with a key.
+func pressCmd(key uint16) {
 	source := cgEventSourceCreate(cgEventSourceStateHIDSystem)
 	if source != 0 {
 		defer cfRelease(source)
 	}
 	for _, down := range []bool{true, false} {
-		ev := cgEventCreateKeyboardEvent(source, keyV, down)
+		ev := cgEventCreateKeyboardEvent(source, key, down)
 		if ev == 0 {
 			continue
 		}
-		// Only Command: a Shift still held from Fn + Left Shift must not
-		// turn this into Cmd+Shift+V.
+		// Only Command: a Shift still held from Fn + Left Shift, or the
+		// Option of a hotkey, must not turn this into another shortcut.
 		cgEventSetFlags(ev, cgEventFlagMaskCommand)
 		cgEventSetIntegerValueField(ev, fieldEventSourceUserData, syntheticTag)
 		cgEventPost(cgHIDEventTap, ev)

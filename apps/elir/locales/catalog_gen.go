@@ -1855,3 +1855,145 @@ func ShowInDockNote() string { return In(i18n.Locale()).ShowInDockNote() }
 func (msgs Messages) ShowInDockNote() string {
 	return Catalog.Format(msgs.locale, "showInDockNote", nil)
 }
+
+// NavRewrite says "Translate & Polish"
+// in the language the app shows.
+func NavRewrite() string { return In(i18n.Locale()).NavRewrite() }
+
+// NavRewrite says "Translate & Polish"
+// in the language of msgs.
+func (msgs Messages) NavRewrite() string {
+	return Catalog.Format(msgs.locale, "navRewrite", nil)
+}
+
+// SectionSelectedText says "Selected text, in any app"
+// in the language the app shows.
+func SectionSelectedText() string { return In(i18n.Locale()).SectionSelectedText() }
+
+// SectionSelectedText says "Selected text, in any app"
+// in the language of msgs.
+func (msgs Messages) SectionSelectedText() string {
+	return Catalog.Format(msgs.locale, "sectionSelectedText", nil)
+}
+
+// ShortcutTranslateText says "Translate"
+// in the language the app shows.
+func ShortcutTranslateText() string { return In(i18n.Locale()).ShortcutTranslateText() }
+
+// ShortcutTranslateText says "Translate"
+// in the language of msgs.
+func (msgs Messages) ShortcutTranslateText() string {
+	return Catalog.Format(msgs.locale, "shortcutTranslateText", nil)
+}
+
+// TranslateTextNote says "Chinese into {zh}, English into {en}, others into {other}, as Dictation & Translation sets."
+// in the language the app shows.
+func TranslateTextNote(zh string, en string, other string) string {
+	return In(i18n.Locale()).TranslateTextNote(zh, en, other)
+}
+
+// TranslateTextNote says "Chinese into {zh}, English into {en}, others into {other}, as Dictation & Translation sets."
+// in the language of msgs.
+func (msgs Messages) TranslateTextNote(zh string, en string, other string) string {
+	return Catalog.Format(msgs.locale, "translateTextNote", map[string]any{"zh": zh, "en": en, "other": other})
+}
+
+// ShortcutPolishText says "Polish"
+// in the language the app shows.
+func ShortcutPolishText() string { return In(i18n.Locale()).ShortcutPolishText() }
+
+// ShortcutPolishText says "Polish"
+// in the language of msgs.
+func (msgs Messages) ShortcutPolishText() string {
+	return Catalog.Format(msgs.locale, "shortcutPolishText", nil)
+}
+
+// PolishTextNote says "Fixes spelling, grammar and wording, in the same language."
+// in the language the app shows.
+func PolishTextNote() string { return In(i18n.Locale()).PolishTextNote() }
+
+// PolishTextNote says "Fixes spelling, grammar and wording, in the same language."
+// in the language of msgs.
+func (msgs Messages) PolishTextNote() string {
+	return Catalog.Format(msgs.locale, "polishTextNote", nil)
+}
+
+// RewriteCancelNote says "While translating or polishing."
+// in the language the app shows.
+func RewriteCancelNote() string { return In(i18n.Locale()).RewriteCancelNote() }
+
+// RewriteCancelNote says "While translating or polishing."
+// in the language of msgs.
+func (msgs Messages) RewriteCancelNote() string {
+	return Catalog.Format(msgs.locale, "rewriteCancelNote", nil)
+}
+
+// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection, and ⌘Z undoes it. The model and the OpenRo…"
+// in the language the app shows.
+func RewriteHowNote() string { return In(i18n.Locale()).RewriteHowNote() }
+
+// RewriteHowNote says "Select text, then press the shortcut: the result replaces the selection, and ⌘Z undoes it. The model and the OpenRo…"
+// in the language of msgs.
+func (msgs Messages) RewriteHowNote() string {
+	return Catalog.Format(msgs.locale, "rewriteHowNote", nil)
+}
+
+// StagePolishing says "Polishing…"
+// in the language the app shows.
+func StagePolishing() string { return In(i18n.Locale()).StagePolishing() }
+
+// StagePolishing says "Polishing…"
+// in the language of msgs.
+func (msgs Messages) StagePolishing() string {
+	return Catalog.Format(msgs.locale, "stagePolishing", nil)
+}
+
+// RewriteReplaced says "Replaced"
+// in the language the app shows.
+func RewriteReplaced() string { return In(i18n.Locale()).RewriteReplaced() }
+
+// RewriteReplaced says "Replaced"
+// in the language of msgs.
+func (msgs Messages) RewriteReplaced() string {
+	return Catalog.Format(msgs.locale, "rewriteReplaced", nil)
+}
+
+// NoteNoSelection says "Select some text first"
+// in the language the app shows.
+func NoteNoSelection() string { return In(i18n.Locale()).NoteNoSelection() }
+
+// NoteNoSelection says "Select some text first"
+// in the language of msgs.
+func (msgs Messages) NoteNoSelection() string {
+	return Catalog.Format(msgs.locale, "noteNoSelection", nil)
+}
+
+// NoteNeedsAccessibility says "Allow Accessibility in Settings first"
+// in the language the app shows.
+func NoteNeedsAccessibility() string { return In(i18n.Locale()).NoteNeedsAccessibility() }
+
+// NoteNeedsAccessibility says "Allow Accessibility in Settings first"
+// in the language of msgs.
+func (msgs Messages) NoteNeedsAccessibility() string {
+	return Catalog.Format(msgs.locale, "noteNeedsAccessibility", nil)
+}
+
+// RewriteFailed says "Couldn’t do it: {error}"
+// in the language the app shows.
+func RewriteFailed(error string) string { return In(i18n.Locale()).RewriteFailed(error) }
+
+// RewriteFailed says "Couldn’t do it: {error}"
+// in the language of msgs.
+func (msgs Messages) RewriteFailed(error string) string {
+	return Catalog.Format(msgs.locale, "rewriteFailed", map[string]any{"error": error})
+}
+
+// RewriteTimedOut says "the model took too long"
+// in the language the app shows.
+func RewriteTimedOut() string { return In(i18n.Locale()).RewriteTimedOut() }
+
+// RewriteTimedOut says "the model took too long"
+// in the language of msgs.
+func (msgs Messages) RewriteTimedOut() string {
+	return Catalog.Format(msgs.locale, "rewriteTimedOut", nil)
+}
