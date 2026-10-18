@@ -63,8 +63,13 @@ func (q *quieter) Recording(on bool) {
 		return
 	}
 	q.state = state
-	if b, err := json.Marshal(state); err == nil {
-		_ = os.WriteFile(q.path, b, 0o644)
+	b, err := json.Marshal(state)
+	if err == nil {
+		err = os.WriteFile(q.path, b, 0o644)
+	}
+	if err != nil {
+		log.Printf("save output recovery: %v", err)
+		q.restore()
 	}
 }
 

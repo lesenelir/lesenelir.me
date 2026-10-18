@@ -33,6 +33,7 @@ type App struct {
 	tap      *platform.EventTap
 	updater  updater
 	quitting bool
+	stopDone chan struct{}
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
@@ -71,9 +72,34 @@ func (a *App) Run() error {
 			a.showSettings("")
 		}
 	})
-	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) { a.quitting = true })
+	mygo.App.OnBeforeQuit(a.beforeQuit)
 	mygo.App.WhenReady(a.ready)
 	return mygo.App.Run()
+}
+
+func (a *App) beforeQuit(e *mygo.QuitEvent) {
+	if a.stopDone != nil {
+		select {
+		case <-a.stopDone:
+			a.quitting = true
+			return
+		default:
+			e.PreventDefault()
+			return
+		}
+	}
+	e.PreventDefault()
+	a.stopDone = make(chan struct{})
+	// macOS recorder cancellation needs the UI loop to keep serving RunOnMain.
+	go func() {
+		for _, f := range a.features {
+			if s, ok := f.(Stopper); ok {
+				s.Stop()
+			}
+		}
+		close(a.stopDone)
+		mygo.App.Quit()
+	}()
 }
 
 func (a *App) ready() {

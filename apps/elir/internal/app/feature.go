@@ -26,6 +26,8 @@ type Feature interface {
 
 // Optional parts of a Feature, which the app calls when it has them.
 type (
+	// Stopper releases background resources before quit, off the main thread.
+	Stopper interface{ Stop() }
 	// NeedsSetup reports whether the feature lacks something to work, as
 	// an API key: the settings window then opens at launch.
 	NeedsSetup interface{ NeedsSetup() bool }

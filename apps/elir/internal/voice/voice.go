@@ -62,6 +62,7 @@ type Voice struct {
 
 var _ interface {
 	app.Feature
+	app.Stopper
 	app.NeedsSetup
 	app.SettingsShown
 	app.SettingsBlurred
@@ -126,6 +127,13 @@ func (v *Voice) Start(h *app.Host) error {
 	h.Shortcuts.Register(shortcut.VoiceCancel, v.cancelable.Load, func() { v.ctrl.Handle(hotkey.Cancel) })
 	h.Shortcuts.Register(shortcut.CycleTarget, v.cycling.Load, func() { v.ctrl.Handle(hotkey.CycleTarget) })
 	return nil
+}
+
+// Stop waits until recording has ended and output restoration has run.
+func (v *Voice) Stop() {
+	if v.ctrl != nil {
+		v.ctrl.Close()
+	}
 }
 
 // NeedsSetup reports whether the OpenRouter key, which cleanup and

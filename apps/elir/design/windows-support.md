@@ -29,13 +29,15 @@ Windows 默认 F8／左 Shift+F8 启动听写／翻译，Alt+T／Alt+R 处理选
 
 DPAPI 保护当前用户持久化的 API key，不抵御以同一用户身份运行的进程。密钥文件读取、解密或 JSON 解析失败后拒绝覆盖；写盘成功后才发布新 key，失败保留原密文和内存值，不自动重置损坏文件。
 
+共享 settings.json 同样保留首次读取或整文件解析错误：加载失败时使用默认值，但 SetRaw 和 Section.Update 均拒绝写入，内存值也不发布，避免切换主题等操作覆盖词典、快捷键和其他原配置。用户修复文件后需重启以重新加载；不自动重置或尝试拼接损坏内容。
+
 自动粘贴临时文本请求排除 Windows 剪贴板历史／云同步；显式复制保持现有行为。这不阻止本机其他程序读取当前剪贴板。普通权限程序向更高权限目标粘贴可能被系统阻止，沿用手动粘贴提示。
 
 PR #8 曾对截图 helper 使用系统路径、系统模块范围并移除 API key 环境变量。这是历史实现的约束；PR #9 已删除脚本、C# 编译和子进程环境通道，当前不保留此旁路。
 
 参考：[DLL 搜索安全](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-security)、[剪贴板历史／同步排除格式](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats#cloud-clipboard-and-clipboard-history-formats)。
 
-## 启动音量恢复
+## 音量恢复与退出
 
 调用链为 `Voice.Start → quieter.recover → RestoreOutput → withOutput`。MyGo Windows 主线程已是 STA，录音回调常在未初始化或 MTA 工作线程执行。
 
@@ -43,6 +45,10 @@ PR #8 曾对截图 helper 使用系统路径、系统模块范围并移除 API k
 2. 每次成功初始化（包括 S_FALSE）配对一次 CoUninitialize，不改变或释放调用者持有的 COM apartment。
 3. 恢复失败保留有效恢复记录与内存状态；再次录音调整音量前先重试，未恢复则不覆盖待恢复设备／状态。
 4. 恢复成功才清空状态并删除记录。schema 和 Darwin 后端不变，无效 JSON 沿既有逻辑丢弃。
+
+录音开始时，静音或降低音量后必须检查恢复记录的序列化与写入结果。保存失败记录错误并立即调用 restore；恢复也失败则保留内存状态，在录音结束或下一次调整音量前重试。若保存与恢复持续失败且进程随后退出，仍没有可用的持久化恢复保证。
+
+正常退出链为 `App.beforeQuit → Voice.Stop → Controller.Close → endSession → Recorder.Cancel → Recording(false)`。首次退出先 PreventDefault，在后台取消控制器并等待录音、音量恢复回调和流关闭完成，之后再次请求 MyGo Quit；等待中的重复退出也被拦住。清理期间保持 UI 循环运行，因为 Darwin Recorder.Cancel 通过 RunOnMain 释放录音资源。未启动的 Voice 和重复 Close 均可安全处理；强制终止仍由下次启动恢复记录兜底。
 
 原生回归使用无效设备 ID，覆盖未初始化、已有 MTA／STA 线程，不改真实音量；通过后续 apartment 切换检查 S_FALSE 引用平衡。修复前 STA 复现 HRESULT 0x80010106，修复后通过。共享 quieter 测试用假 API 验证失败保留、重试和成功清理。
 
@@ -60,6 +66,8 @@ PR #8 曾对截图 helper 使用系统路径、系统模块范围并移除 API k
 | 当时独立评审 | 修复并复查剪贴板失败、权限提示、DLL 依赖搜索与 COM 问题后通过 |
 
 完整测试曾受沙箱回环 socket／临时文件 rename 限制，在正常本地权限下重跑通过；没有放松业务保护。
+
+2026-10-18 三项审查修复已完成：退出等待清理、配置加载失败禁止覆盖、恢复记录写入失败立即回滚。新增回归覆盖阻塞恢复回调时等待退出、重复退出、配置读取／解析失败的文件及内存保护、修复后重新打开、恢复记录不可写后的立即恢复及失败重试。Windows `CGO_ENABLED=0 go test ./...`、相关四包 `go test -race` 和 `go tool mygo vet .` 通过；macOS arm64/amd64 的 `go build ./...` 及相关四包测试二进制编译通过。本轮测试使用假录音／音量 API，没有修改真实系统音量；下一步是真机录音中从托盘退出验收，未重新打包安装版。
 
 ## 构建与剩余验收
 

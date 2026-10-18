@@ -23,10 +23,11 @@ type Store struct {
 
 	mu       sync.Mutex
 	sections map[string]json.RawMessage
+	loadErr  error
 }
 
 // Open reads the settings at path. A missing file is an empty store; a
-// corrupt one is too, with the error.
+// corrupt or unreadable one uses defaults and rejects writes until reopened.
 func Open(path string) (*Store, error) {
 	st := &Store{path: path, sections: map[string]json.RawMessage{}}
 	data, err := os.ReadFile(path)
@@ -35,10 +36,12 @@ func Open(path string) (*Store, error) {
 	}
 	st.existed = true
 	if err != nil {
+		st.loadErr = err
 		return st, err
 	}
 	if err := json.Unmarshal(data, &st.sections); err != nil {
 		st.sections = map[string]json.RawMessage{}
+		st.loadErr = err
 		return st, err
 	}
 	if st.sections == nil {
@@ -62,6 +65,9 @@ func (st *Store) Raw(key string) json.RawMessage {
 func (st *Store) SetRaw(key string, raw json.RawMessage) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
+	if st.loadErr != nil {
+		return st.loadErr
+	}
 	candidate := maps.Clone(st.sections)
 	candidate[key] = bytes.Clone(raw)
 	if err := st.save(candidate); err != nil {

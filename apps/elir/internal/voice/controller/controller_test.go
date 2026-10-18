@@ -503,6 +503,61 @@ func TestRecordingHook(t *testing.T) {
 	}
 }
 
+func TestCloseWaitsForRecordingRestoration(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	rec := &fakeRecorder{pcm: speech}
+	stream := &fakeStream{}
+	started, restoring, release := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	var once sync.Once
+	unblock := func() { once.Do(func() { close(release) }) }
+	t.Cleanup(unblock)
+	c := New(ctx, Deps{
+		Recorder: rec,
+		Streamer: fakeStreamer{stream},
+		Settings: config.Defaults,
+		OnChange: func(s Status) {
+			if s.State == Recording {
+				close(started)
+			}
+		},
+		Recording: func(on bool) {
+			if !on {
+				close(restoring)
+				<-release
+			}
+		},
+	})
+	c.Handle(hotkey.Dictate)
+	select {
+	case <-started:
+	case <-time.After(2 * time.Second):
+		t.Fatal("recording did not start")
+	}
+	closed := make(chan struct{})
+	go func() { c.Close(); close(closed) }()
+	select {
+	case <-restoring:
+	case <-time.After(2 * time.Second):
+		t.Fatal("close did not restore output")
+	}
+	select {
+	case <-closed:
+		t.Fatal("close returned before output restoration finished")
+	default:
+	}
+	unblock()
+	select {
+	case <-closed:
+	case <-time.After(2 * time.Second):
+		t.Fatal("close did not finish")
+	}
+	if !rec.cancelled || !stream.closed {
+		t.Fatal("close left the recorder or stream open")
+	}
+	c.Close() // Repeated shutdown must also return.
+}
+
 func TestOnResult(t *testing.T) {
 	h := newHarness(t)
 	results := make(chan Result, 4)

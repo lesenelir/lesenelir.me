@@ -1,7 +1,9 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -86,6 +88,62 @@ func TestCorruptFile(t *testing.T) {
 	app, _ := NewSection(st, "app", appSettings{Theme: "system"}, nil)
 	if app.Get().Theme != "system" {
 		t.Fatal("no defaults after a corrupt file")
+	}
+}
+
+func TestLoadErrorBlocksWrites(t *testing.T) {
+	for _, unreadable := range []bool{false, true} {
+		t.Run(map[bool]string{false: "corrupt", true: "unreadable"}[unreadable], func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "settings.json")
+			original := []byte(`{"voice":{"dictionary":["keep"]},"app":`)
+			if unreadable {
+				if err := os.Mkdir(path, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			} else if err := os.WriteFile(path, original, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			st, loadErr := Open(path)
+			if loadErr == nil || !st.Existed() {
+				t.Fatalf("open: existed %v, err %v", st.Existed(), loadErr)
+			}
+			if unreadable {
+				if err := os.Remove(path); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(path, original, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			app, err := NewSection(st, "app", appSettings{Theme: "system"}, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := app.Update(func(s *appSettings) { s.Theme = "dark" }); !errors.Is(err, loadErr) {
+				t.Fatalf("update: %v, want load error %v", err, loadErr)
+			}
+			if err := st.SetRaw("tool", json.RawMessage(`{"model":"new"}`)); !errors.Is(err, loadErr) {
+				t.Fatalf("SetRaw: %v, want load error %v", err, loadErr)
+			}
+			if app.Get().Theme != "system" || st.Raw("tool") != nil {
+				t.Fatal("failed writes changed memory")
+			}
+			after, err := os.ReadFile(path)
+			if err != nil || !bytes.Equal(after, original) {
+				t.Fatalf("original file changed: %q, err %v", after, err)
+			}
+			// Repairing and reopening is the explicit way to resume writes.
+			if err := os.WriteFile(path, []byte(`{"app":{"theme":"light"}}`), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			reopened, err := Open(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := reopened.SetRaw("tool", json.RawMessage(`{}`)); err != nil {
+				t.Fatalf("save after reopening repaired file: %v", err)
+			}
+		})
 	}
 }
 
