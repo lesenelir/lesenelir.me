@@ -42,8 +42,10 @@ that may include invisible borders. Moving a window after the freeze can make it
 live Space-selection bounds differ from the frozen image.
 
 Screenshots require verifiable per-monitor DPI awareness and return a feature
-error when it is unavailable. Automated native checks ran on Windows build 26300
-amd64; early Windows 10 versions and mixed-DPI interaction are not yet verified.
+error when it is unavailable. Windows build 26300 amd64 at 200% single-monitor
+scale passed drag/Space selection, image paste and 100 confirmations plus 100
+cancellations in an instrumented integration build. Early Windows 10 versions,
+100%/150% scale and mixed-DPI multi-monitor interaction are not yet verified.
 Snapshots have an internal 512 MiB allocation limit; display changes cancel the
 selection. See [native screenshot validation](design/windows-native-screenshot.md)
 for actual desktop checks and outstanding manual acceptance.

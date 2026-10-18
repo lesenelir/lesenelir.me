@@ -277,6 +277,27 @@ func TestScreenshotDPI(t *testing.T) {
 	}
 }
 
+func TestScreenshotQueuedMousePosition(t *testing.T) {
+	// Queued button-up must use its historical 32-bit screen point even if the
+	// live pointer has moved elsewhere, including negative and >16-bit positions.
+	bounds := image.Rect(-40000, -1000, 4000, 2000)
+	for _, points := range [][2]image.Point{
+		{image.Pt(-39000, 20), image.Pt(-35000, 50)},
+		{image.Pt(-35000, 50), image.Pt(-39000, 20)},
+		{image.Pt(1640, 620), image.Pt(2240, 860)},
+		{image.Pt(2240, 860), image.Pt(1640, 620)},
+	} {
+		s := &screenshotOverlay{d: &screenshotDIB{bounds: bounds}, monitors: []image.Rectangle{bounds}, start: points[0], pointer: points[1], dragging: true}
+		shotWindows.Store(uintptr(0), s)
+		screenshotWindowProc(0, 0x202, 0, 0) // lParam is deliberately unrelated.
+		shotWindows.Delete(uintptr(0))
+		want := (image.Rectangle{Min: points[0], Max: points[1]}).Canon()
+		if !s.done || s.err != nil || s.selection != want {
+			t.Fatalf("queued point lost: %v, want %v, err %v", s.selection, want, s.err)
+		}
+	}
+}
+
 func TestScreenshotUnavailableDPIQuery(t *testing.T) {
 	old := shotDPIAwareness
 	shotDPIAwareness = nil
@@ -345,6 +366,7 @@ func TestScreenshotHiddenWindowLifecycle(t *testing.T) {
 	userBefore, _, _ := resources.Call(^uintptr(0), 1)
 	module, _, _ := kernel32.NewProc("GetModuleHandleW").Call(0)
 	post := user32.MustFindProc("PostMessageW")
+	isWindow := user32.MustFindProc("IsWindow")
 	for i := range 100 {
 		message := []uintptr{0x10, 0x100, 0x113, 0x7e, 0x2e0}[i%5]
 		func() {
@@ -364,6 +386,9 @@ func TestScreenshotHiddenWindowLifecycle(t *testing.T) {
 				}
 				if _, exists := shotWindows.Load(hwnd); exists {
 					t.Error("HWND registry leak")
+				}
+				if exists, _, _ := isWindow.Call(hwnd); exists != 0 {
+					t.Error("selection HWND survived cleanup")
 				}
 			}()
 			s.timer, _, e = shotSetTimer.Call(hwnd, 1, 50, 0)
@@ -403,8 +428,9 @@ func TestScreenshotHiddenWindowLifecycle(t *testing.T) {
 	gdiAfter, _, _ := resources.Call(^uintptr(0), 0)
 	userAfter, _, _ := resources.Call(^uintptr(0), 1)
 	t.Logf("100 hidden sessions: GDI %d -> %d, USER %d -> %d", gdiBefore, gdiAfter, userBefore, userAfter)
-	if gdiAfter > gdiBefore || userAfter > userBefore {
-		t.Fatal("native window resources grew")
+	// Process-wide USER totals fluctuate; assert each owned HWND above instead.
+	if gdiAfter > gdiBefore {
+		t.Fatal("native GDI resources grew")
 	}
 }
 

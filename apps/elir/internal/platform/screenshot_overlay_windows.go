@@ -54,6 +54,7 @@ type screenshotOverlay struct {
 	monitors                             []image.Rectangle
 	hwnd, timer                          uintptr
 	start                                image.Point
+	pointer                              image.Point // MSG.pt at posting time, not the live cursor.
 	selection                            image.Rectangle
 	dragging, activated, finishing, done bool
 	err                                  error
@@ -153,6 +154,7 @@ func selectScreenshot(ctx context.Context, d *screenshotDIB, monitors []image.Re
 			s.finish(image.Rectangle{}, nil)
 			break
 		}
+		s.pointer = msg.Point.image()
 		shotTranslateMessage.Call(uintptr(unsafe.Pointer(&msg)))
 		shotDispatchMessage.Call(uintptr(unsafe.Pointer(&msg)))
 	}
@@ -281,27 +283,21 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 	if !s.done && !s.finishing {
 		switch message {
 		case 0x201: // WM_LBUTTONDOWN
-			if p, ok := s.cursor(); ok {
-				s.start, s.dragging = p, true
-				shotSetCapture.Call(hwnd)
-				if h, _, _ := shotGetCapture.Call(); h != hwnd {
-					s.finish(image.Rectangle{}, errors.New("capture selection mouse failed"))
-				}
+			s.start, s.dragging = s.pointer, true
+			shotSetCapture.Call(hwnd)
+			if h, _, _ := shotGetCapture.Call(); h != hwnd {
+				s.finish(image.Rectangle{}, errors.New("capture selection mouse failed"))
 			}
 		case 0x200: // WM_MOUSEMOVE
 			if s.dragging {
-				if p, ok := s.cursor(); ok {
-					s.selection = image.Rectangle{Min: s.start, Max: p}.Canon()
-					if r, _, e := shotInvalidate.Call(hwnd, 0, 0); r == 0 {
-						s.finish(image.Rectangle{}, fmt.Errorf("invalidate selection: %v", e))
-					}
+				s.selection = image.Rectangle{Min: s.start, Max: s.pointer}.Canon()
+				if r, _, e := shotInvalidate.Call(hwnd, 0, 0); r == 0 {
+					s.finish(image.Rectangle{}, fmt.Errorf("invalidate selection: %v", e))
 				}
 			}
 		case 0x202: // WM_LBUTTONUP
 			if s.dragging {
-				if p, ok := s.cursor(); ok {
-					s.finish(screenshotSelection(image.Rectangle{Min: s.start, Max: p}.Canon(), s.d.bounds, s.monitors), nil)
-				}
+				s.finish(screenshotSelection(image.Rectangle{Min: s.start, Max: s.pointer}.Canon(), s.d.bounds, s.monitors), nil)
 			}
 		case 0x100: // WM_KEYDOWN
 			if wparam == 0x1b {
