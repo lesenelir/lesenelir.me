@@ -76,3 +76,23 @@ applications, screenshot interaction on mixed-DPI/multiple monitors, and macOS
 release execution were not tested. No external speech/LLM requests were made.
 Windows PowerShell or WinForms disabled by policy prevents screenshot capture.
 This first verified build targets Windows amd64; arm64 has not been run on hardware.
+
+## Tray interaction follow-up (2026-10-18)
+
+Windows left-click restores the existing settings window through `showSettings`,
+retaining the last page and reloading feature settings as other open actions do.
+Right-click keeps the tray menu; macOS keeps its existing menu click behavior.
+Register the listener only after successful tray creation, using the pinned
+MyGo v0.5.5 `Tray.OnClick` API. No new window or additional event infrastructure.
+
+Verification: `go tool mygo vet .` and a Windows build passed. A native
+click-message smoke check launched an isolated `ElirTraySmoke.exe` with workspace
+APPDATA, closed Settings, sent MyGo's left-click tray callback message and verified
+that the same settings window became visible. The right-click message entered
+native menu mode. The helper targeted only its own process and closed it afterward;
+it did not use the clipboard, microphone or speech services. This checks the real
+message dispatch and window behavior, not a physical taskbar click or focus policy.
+Independent ponytail-review: Ship. Windows `CGO_ENABLED=0 go test ./... -count=1`
+passed, and macOS arm64/amd64 `go build ./...` passed. The Windows executable and
+NSIS installer were rebuilt with `go tool mygo build -platform windows/amd64`.
+A physical taskbar click and macOS runtime interaction were not exercised.

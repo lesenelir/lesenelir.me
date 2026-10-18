@@ -6,6 +6,7 @@ A personal toolbox for macOS and Windows: a tray app whose tools share one setti
 ## Windows
 
 Windows 10/11 on amd64 is supported. The native UI does not need a web frontend.
+Left-click the tray icon to restore Settings; right-click it for the menu.
 From the repository root:
 
 ```powershell
