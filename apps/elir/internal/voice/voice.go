@@ -118,20 +118,7 @@ func (v *Voice) Start(h *app.Host) error {
 		},
 	})
 
-	v.overlay = mygo.NewWindow(mygo.WindowOptions{
-		Title:       "Voice",
-		Panel:       true,
-		Hidden:      true,
-		Frameless:   true,
-		Transparent: true,
-		// The capsule draws its own shadow; the window's would outline the
-		// whole transparent rectangle.
-		DisableShadow: true,
-		Width:         overlayWidth,
-		Height:        overlayHeight,
-		Content:       ui.View(v.overlayView),
-	})
-	v.overlay.SetIgnoreMouseEvents(false)
+	v.overlay = widget.NewOverlay(h.Tray, "Voice", overlayWidth, overlayHeight, v.overlayView)
 
 	v.form = formFrom(v.settings.Get(), v.apiKeys())
 	h.Shortcuts.Register(shortcut.Dictate, nil, func() { v.ctrl.Handle(hotkey.Dictate) })

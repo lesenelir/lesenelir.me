@@ -72,6 +72,8 @@ type Host struct {
 	// Settings is the settings window, for Update and Invalidate from the
 	// feature's goroutines.
 	Settings *mygo.Window
+	// Tray owns the tools' nonactivating overlays on Windows.
+	Tray *mygo.Tray
 	// ShowSettings opens the settings window at a page, "" for the one
 	// shown last.
 	ShowSettings func(page string)

@@ -141,11 +141,13 @@ func (a *App) ready() {
 		}
 	})
 
+	a.setupTray()
 	host := &Host{
 		Store:        a.store,
 		Secrets:      secrets,
 		DataDir:      dir,
 		Settings:     a.window,
+		Tray:         a.tray,
 		ShowSettings: a.showSettings,
 		Shortcuts:    a.keys,
 	}
@@ -163,7 +165,6 @@ func (a *App) ready() {
 	applyAppearance(s.Appearance)
 	applyDock(s.ShowInDock)
 
-	a.setupTray()
 	mygo.App.OnLocaleChanged(func(string) {
 		a.window.SetTitle(locales.SettingsTitle())
 		a.localizeTray()

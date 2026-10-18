@@ -28,6 +28,7 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 )
 
 const (
@@ -76,7 +77,7 @@ func (r *Rewrite) Start(h *app.Host) error {
 	r.store = h.Store
 	r.key.Load(h.Secrets)
 	r.client = &openrouter.Client{Key: r.key.Get, HTTP: &http.Client{Timeout: 2 * minTimeout}}
-	r.bar = newBar(r.barView)
+	r.bar = widget.NewOverlay(h.Tray, "Elir", barWidth, barHeight, r.barView)
 	h.Shortcuts.Register(shortcut.TranslateText, nil, func() { r.start(Translate) })
 	h.Shortcuts.Register(shortcut.PolishText, nil, func() { r.start(Polish) })
 	h.Shortcuts.Register(shortcut.RewriteCancel, r.busy.Load, r.stop)

@@ -9,6 +9,7 @@ import (
 	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
 
@@ -40,21 +41,7 @@ type popup struct {
 }
 
 func (s *Screenshot) newPopup() *mygo.Window {
-	w := mygo.NewWindow(mygo.WindowOptions{
-		Title:       "Screenshot",
-		Panel:       true,
-		Hidden:      true,
-		Frameless:   true,
-		Transparent: true,
-		// The thumbnail draws its own shadow; the window's would outline
-		// the whole transparent rectangle.
-		DisableShadow: true,
-		Width:         popupThumbWidth + 2*popupMargin,
-		Height:        popupThumbHeight + 2*popupMargin,
-		Content:       ui.View(s.popupView),
-	})
-	w.SetIgnoreMouseEvents(false)
-	return w
+	return widget.NewOverlay(s.host.Tray, "Screenshot", popupThumbWidth+2*popupMargin, popupThumbHeight+2*popupMargin, s.popupView)
 }
 
 // fit returns the size a w×h pixel thumbnail shows at, within the popup's

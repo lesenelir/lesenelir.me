@@ -64,22 +64,6 @@ type hud struct {
 	seq     int // counts what the bar showed, so a stale timer hides none
 }
 
-func newBar(view func(*ui.Context)) *mygo.Window {
-	w := mygo.NewWindow(mygo.WindowOptions{
-		Title:         "Elir",
-		Panel:         true,
-		Hidden:        true,
-		Frameless:     true,
-		Transparent:   true,
-		DisableShadow: true,
-		Width:         barWidth,
-		Height:        barHeight,
-		Content:       ui.View(view),
-	})
-	w.SetIgnoreMouseEvents(false)
-	return w
-}
-
 // show shows h on the bar, from any goroutine.
 func (r *Rewrite) show(h hud) {
 	r.bar.Update(func() {
