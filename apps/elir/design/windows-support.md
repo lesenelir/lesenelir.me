@@ -77,6 +77,9 @@ release execution were not tested. No external speech/LLM requests were made.
 Windows PowerShell or WinForms disabled by policy prevents screenshot capture.
 This first verified build targets Windows amd64; arm64 has not been run on hardware.
 
+The PowerShell limitation above describes the 2026-10-17 implementation. The
+2026-10-18 native screenshot migration replaces that path; see the follow-up below.
+
 ## Tray interaction follow-up (2026-10-18)
 
 Windows left-click restores the existing settings window through `showSettings`,
@@ -96,3 +99,16 @@ Independent ponytail-review: Ship. Windows `CGO_ENABLED=0 go test ./... -count=1
 passed, and macOS arm64/amd64 `go build ./...` passed. The Windows executable and
 NSIS installer were rebuilt with `go tool mygo build -platform windows/amd64`.
 A physical taskbar click and macOS runtime interaction were not exercised.
+
+## Native screenshot migration (2026-10-18)
+
+Branch `codex/windows-native-screenshot` preserves the existing screenshot library,
+clipboard and thumbnail flow, replacing the PowerShell/WinForms helper with
+in-process GDI capture and a Win32 selection window. Thread-local per-monitor DPI,
+physical coordinates, DWM visible window bounds, context cancellation, native
+cleanup and a non-overwriting PNG commit belong to `internal/platform`.
+No screenshot dependency, CGO, helper process or fallback backend was added.
+
+Current evidence and outstanding desktop acceptance are tracked in
+[windows-native-screenshot.md](windows-native-screenshot.md#10-交接状态).
+Historical verification above remains scoped to the earlier implementation.

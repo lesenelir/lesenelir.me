@@ -5,7 +5,7 @@ A personal toolbox for macOS and Windows: a tray app whose tools share one setti
 
 ## Windows
 
-Windows 10/11 on amd64 is supported. The native UI does not need a web frontend.
+Windows builds target Windows 10/11 on amd64. The native UI does not need a web frontend.
 Left-click the tray icon to restore Settings; right-click it for the menu.
 From the repository root:
 
@@ -33,11 +33,22 @@ with higher privileges; paste manually from the clipboard in that case.
 Settings, history and screenshots use MyGo's Windows user-data directory under
 `%APPDATA%`. API keys in `secrets.json` are encrypted with Windows DPAPI and can
 only be decrypted with that Windows user's credentials. They are not portable to
-another account. Screenshot selection uses built-in Windows PowerShell and
-WinForms; environments that disable these cannot use screenshot capture.
+another account. Screenshot selection runs in-process with Win32/GDI: drag and
+release to capture an area, press Space to immediately capture the window under
+the pointer, or Esc to cancel. Losing focus also cancels. PowerShell and .NET are
+not required. GDI captures frozen visible desktop pixels, including occlusion;
+protected content may be blank. Window bounds use DWM with a GetWindowRect fallback
+that may include invisible borders. Moving a window after the freeze can make its
+live Space-selection bounds differ from the frozen image.
 
-The screenshot helper uses the system PowerShell executable and modules, and does
-not inherit Elir's API key environment variables. Temporary auto-paste text opts
+Screenshots require verifiable per-monitor DPI awareness and return a feature
+error when it is unavailable. Automated native checks ran on Windows build 26300
+amd64; early Windows 10 versions and mixed-DPI interaction are not yet verified.
+Snapshots have an internal 512 MiB allocation limit; display changes cancel the
+selection. See [native screenshot validation](design/windows-native-screenshot.md)
+for actual desktop checks and outstanding manual acceptance.
+
+Windows DLLs load from the real System32 directory. Temporary auto-paste text opts
 out of Windows clipboard history and device synchronization. Other local apps can
 still read the clipboard. If the secret file cannot be read or decrypted, Elir
 refuses to replace it; restore the file and restart Elir before saving keys again.

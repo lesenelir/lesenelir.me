@@ -15,7 +15,10 @@ func TestSystemPathsIgnoreEnvironment(t *testing.T) {
 	if !filepath.IsAbs(actual) || !strings.EqualFold(filepath.Base(actual), "System32") {
 		t.Fatalf("unexpected system directory %q", actual)
 	}
-	for _, name := range []string{"user32.dll", "winmm.dll", "ole32.dll"} {
+	if dll, err := loadSystemDLL("elir-missing-optional-system-library.dll"); dll != nil || err == nil {
+		t.Fatal("missing optional DLL must return an error")
+	}
+	for _, name := range []string{"user32.dll", "winmm.dll", "ole32.dll", "gdi32.dll", "dwmapi.dll"} {
 		dll := systemDLL(name)
 		defer dll.Release()
 		if dll.Name != filepath.Join(actual, name) {
