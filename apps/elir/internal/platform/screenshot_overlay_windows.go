@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"image"
 	"slices"
 	"sync"
@@ -299,12 +300,35 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 			if s.dragging {
 				s.finish(screenshotSelection(image.Rectangle{Min: s.start, Max: s.pointer}.Canon(), s.d.bounds, s.monitors), nil)
 			}
-		case 0x100: // WM_KEYDOWN
-			if wparam == 0x1b {
-				s.finish(image.Rectangle{}, nil)
-			}
-			if wparam == 0x20 && lparam&(1<<30) == 0 {
-				s.windowSelection()
+		case 0x100, 0x104: // WM_KEYDOWN / WM_SYSKEYDOWN
+			if lparam&(1<<30) == 0 {
+				vk := shortcut.WindowsVK(uint32(wparam), uint32(lparam>>16)&0xff, lparam&(1<<24) != 0)
+				var flags uint64
+				for _, k := range []uint32{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0x5b, 0x5c} {
+					v, _, _ := asyncKey.Call(uintptr(k))
+					if v&0x8000 == 0 {
+						continue
+					}
+					switch k {
+					case 0xa0:
+						flags |= 2
+					case 0xa1:
+						flags |= 4
+					case 0xa2:
+						flags |= 1
+					case 0xa3:
+						flags |= 0x2000
+					case 0xa4:
+						flags |= 0x20
+					case 0xa5:
+						flags |= 0x40
+					case 0x5b:
+						flags |= 8
+					case 0x5c:
+						flags |= 16
+					}
+				}
+				s.shortcut(shortcut.Key(normalizedKey(vk)), shortcut.Flags(flags))
 			}
 		case 0x10, 0x1f: // WM_CLOSE / WM_CANCELMODE
 			s.finish(image.Rectangle{}, nil)
@@ -332,7 +356,7 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 	}
 	// Never let DefWindowProc close a window or beep on handled input.
 	switch message {
-	case 0x10, 0x100, 0x201, 0x202, 0x200:
+	case 0x10, 0x100, 0x104, 0x101, 0x105, 0x201, 0x202, 0x200:
 		return 0
 	}
 	r, _, _ := shotDefWindow.Call(hwnd, message, wparam, lparam)
@@ -373,5 +397,18 @@ func (s *screenshotOverlay) paint() {
 		if ok, _, e := shotFrameRect.Call(dc, uintptr(unsafe.Pointer(&rect)), brush); ok == 0 {
 			s.finish(image.Rectangle{}, fmt.Errorf("paint selection FrameRect: %v", e))
 		}
+	}
+}
+
+func (s *screenshotOverlay) shortcut(key string, mods shortcut.Mods) {
+	b := screenshotBindings(s.ctx)
+	if b[shortcut.ScreenshotCancel].Match(key, mods) {
+		claimScreenshotKey(s.ctx, key)
+		s.finish(image.Rectangle{}, nil)
+		return
+	}
+	if b[shortcut.Window].Match(key, mods) {
+		claimScreenshotKey(s.ctx, key)
+		s.windowSelection()
 	}
 }

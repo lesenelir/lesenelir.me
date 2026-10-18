@@ -29,7 +29,7 @@ type App struct {
 	settings *store.Section[Settings]
 	window   *mygo.Window
 	tray     *mygo.Tray
-	keys     keys
+	keys     *Shortcuts
 	tap      *platform.EventTap
 	updater  updater
 	quitting bool
@@ -124,7 +124,9 @@ func (a *App) ready() {
 		Vibrancy:      mygo.VibrancySidebar,
 		Content:       ui.View(a.view),
 	})
+	a.keys = newShortcuts(a.store, a.window)
 	a.window.OnBlur(func() {
+		a.keys.CancelEdit()
 		for _, f := range a.features {
 			if b, ok := f.(SettingsBlurred); ok {
 				b.SettingsBlurred()
@@ -132,6 +134,7 @@ func (a *App) ready() {
 		}
 	})
 	a.window.OnClose(func(e *mygo.CloseEvent) {
+		a.keys.CancelEdit()
 		if !a.quitting {
 			e.PreventDefault()
 			a.window.Hide()
@@ -144,7 +147,7 @@ func (a *App) ready() {
 		DataDir:      dir,
 		Settings:     a.window,
 		ShowSettings: a.showSettings,
-		HandleKeys:   func(h platform.KeyHandler) { a.keys = append(a.keys, h) },
+		Shortcuts:    a.keys,
 	}
 	for _, f := range a.features {
 		if err := f.Start(host); err != nil {
@@ -153,6 +156,7 @@ func (a *App) ready() {
 	}
 	a.pages = a.collectPages()
 	a.tap = &platform.EventTap{Handler: a.keys}
+	a.keys.Running = a.tap.Running
 
 	// MyGo refreshes the light or dark look of the windows that exist when
 	// the appearance is set, so set it once the features' are made too.
@@ -209,6 +213,7 @@ func (a *App) showSettings(page string) {
 			}
 		}
 		if page != "" {
+			a.keys.CancelEdit()
 			a.page = page
 		}
 		// The user may have changed it in System Settings meanwhile.

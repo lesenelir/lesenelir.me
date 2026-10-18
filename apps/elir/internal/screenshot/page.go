@@ -10,6 +10,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
@@ -43,14 +44,20 @@ func keepLabel(m locales.Messages, days int) string {
 func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 	t := c.Theme()
 	widget.Group(c, pal, m.SectionCapture(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutCapture(), m.CaptureNote(), func() { widget.Keycaps(c, pal, "⌘", "⇧", "2") })
-		g.Row(c, m.ShortcutWindow(), "", func() { widget.Keycaps(c, pal, "space") })
-		g.Row(c, m.ShortcutCancel(), "", func() { widget.Keycaps(c, pal, "esc") })
+		g.Row(c, m.ShortcutCapture(), m.CaptureNote(), func() { s.host.Shortcut(c, shortcuts.Capture) })
+		g.Row(c, m.ShortcutWindow(), "", func() { s.host.Shortcut(c, shortcuts.Window) })
+		g.Row(c, m.ShortcutCancel(), "", func() { s.host.Shortcut(c, shortcuts.ScreenshotCancel) })
 	})
 	// A terminal's ⌘V pastes text alone; Claude Code reads an image
 	// itself on ⌃V.
 	widget.Group(c, pal, m.SectionPaste(), func(g *widget.Rows) {
-		g.Row(c, m.PasteApps(), "", func() { widget.Keycaps(c, pal, "⌘", "V") })
+		g.Row(c, m.PasteApps(), "", func() {
+			if runtime.GOOS == "windows" {
+				widget.Keycaps(c, pal, "Ctrl", "V")
+			} else {
+				widget.Keycaps(c, pal, "⌘", "V")
+			}
+		})
 		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(), func() {
 			if runtime.GOOS == "windows" {
 				widget.Keycaps(c, pal, "Ctrl", "Shift", "V")

@@ -6,8 +6,8 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -75,7 +75,8 @@ type Host struct {
 	// ShowSettings opens the settings window at a page, "" for the one
 	// shown last.
 	ShowSettings func(page string)
-	// HandleKeys adds a handler of the global keyboard events, in Start.
-	// Its methods run on the main thread and must return quickly.
-	HandleKeys func(h platform.KeyHandler)
+	// Shortcuts owns the shared bindings, editor and event router.
+	Shortcuts *Shortcuts
 }
+
+func (h *Host) Shortcut(c *ui.Context, a shortcut.Action) { h.Shortcuts.Control(c, a) }

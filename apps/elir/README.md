@@ -26,7 +26,15 @@ development executable with `go build -o build/Elir.exe .` from `apps/elir`.
 | `Ctrl+Shift+2` | Select a screenshot area; `Space` captures the window under the pointer |
 | `Esc` / `Tab` | Cancel / switch the translation language |
 
-F8 is reserved while Elir runs; Fn is usually handled by keyboard firmware on
+These tables list defaults. Click a shortcut in Settings → Dictation & Translation,
+Translate & Polish, or Screenshot to record a replacement, choose whether left/right
+modifiers matter, then Save. Each action has its own restore-default control. All ten
+actions, including screenshot selection keys and the three cancel actions, are saved
+in the `shortcuts` section of `settings.json`. Conflicting assignments are rejected;
+matching cancel actions may share a key. A bare typing key reserves that key in other
+apps. Capture and shortcut editing temporarily own input, so other tools do not fire.
+
+F8 is reserved with the default voice bindings; rebinding releases it. Fn is usually handled by keyboard firmware on
 Windows. Pasting uses Ctrl+V. Windows can block automatic paste into an app running
 with higher privileges; paste manually from the clipboard in that case.
 
@@ -87,10 +95,18 @@ chat model and OpenRouter API key of Models. While Elir runs, `⌥T` and `⌥R` 
 
 ## Screenshots
 
-`⌘⇧2` runs macOS's own capture, as `⌘⇧4` does: drag over an area, or press `Space` and click a window; `Esc`
+`⌘⇧2` opens Elir's selection panels over frozen display snapshots: drag over an area, or press `Space` and click a window; `Esc`
 cancels. The screenshot is copied to the clipboard, ready to paste into a chat with `⌘V`, and its thumbnail shows in the
 bottom right corner for a few seconds: drag it into an app, or click it to open the screenshot. In Claude Code and
 other terminals paste it with `Control+V`: a terminal's `⌘V` pastes text only, and a file dropped on it becomes its path.
+
+macOS selection keys are configurable too. Display snapshots are taken before the
+selection panels appear; window capture crops visible desktop pixels, so overlapping
+windows remain visible and window shadows are not added. Moving a selection while
+dragging is not currently supported. The snapshots and output each have a 256 MiB
+pixel budget; display changes cancel selection. The macOS implementation is compiled
+for arm64/amd64 but still needs physical-device acceptance, including multiple
+displays and Retina scaling. See [shortcut implementation and verification](design/customizable-shortcuts.md).
 
 Nothing goes to the Desktop: screenshots are kept in `~/Library/Application Support/Elir/screenshot/` for 1, 7 (the
 default) or 30 days, or forever, as Settings → Screenshot says, and deleted after. That page lists them to copy, drag,
@@ -104,7 +120,7 @@ the menu bar. Strings live in `locales/en.json` and `locales/zh-Hans.json`;
 `go tool mygo generate` (also run by `mygo dev` and `mygo build`) writes the typed `locales` package from them.
 
 Settings are kept in `~/Library/Application Support/Elir/settings.json`, a section per part: `app` for the app itself,
-`voice` for voice input, `screenshot` for screenshots. On its first launch Elir brings over the settings, history and API keys of Voice, the
+`voice` for voice input, `screenshot` for screenshots, `shortcuts` for keyboard bindings. On its first launch Elir brings over the settings, history and API keys of Voice, the
 standalone app it grew from.
 
 ## Development
@@ -176,7 +192,8 @@ internal/platform/darwin      CGEventTap, AudioQueue, CoreAudio, Cmd+V, permissi
 internal/voice                voice input: the feature, voice bar, its settings pages, pipeline adapters
 internal/voice/config         its settings section
 internal/voice/controller     record → transcribe → rewrite → paste state machine
-internal/voice/hotkey         Fn / Fn+Left Shift / Esc / Tab decisions
+internal/shortcut            shared bindings, validation, recording and event routing
+internal/voice/hotkey         controller action contract
 internal/voice/soniox         Soniox real-time streaming client
 internal/voice/prompt         prompts and spoken-language detection
 internal/voice/history        local history of pasted text

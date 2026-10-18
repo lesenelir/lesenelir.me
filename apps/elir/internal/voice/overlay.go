@@ -12,6 +12,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
@@ -22,7 +23,7 @@ import (
 // own HUDs: dark in either appearance, so that it reads over any window.
 // The window is larger than the capsule to leave room for its shadow.
 const (
-	overlayWidth  = 340
+	overlayWidth  = 640
 	overlayHeight = 76
 	// overlayMargin keeps the voice bar above the Dock.
 	overlayMargin = 56
@@ -134,7 +135,7 @@ func (v *Voice) overlayView(c *ui.Context) {
 					v.targetChip(c, m, s)
 				}
 				v.waveform(c)
-				overlayKeycap(c, "esc")
+				overlayKeycap(c, v.host.Shortcuts.Bindings[shortcuts.VoiceCancel].String())
 			case controller.Transcribing, controller.Rewriting, controller.Pasting:
 				thinkingDots(c)
 				ui.Text(c, stageText(m, s)).FontSize(12.5).TextColor(barText).NoWrap()
@@ -209,7 +210,7 @@ func (v *Voice) waveform(c *ui.Context) {
 // targetChip shows the translation target; a click moves to the next one.
 func (v *Voice) targetChip(c *ui.Context, m locales.Messages, s controller.Status) {
 	chip := ui.Row(c.Key("target")).Padding(2, 8).Radius(6).Background(ui.RGBA(255, 255, 255, 0.12)).
-		Cursor(ui.CursorPointer).Tooltip(m.SwitchLanguageTooltip())
+		Cursor(ui.CursorPointer).Tooltip(m.SwitchLanguageTooltip() + " (" + v.host.Shortcuts.Bindings[shortcuts.CycleTarget].String() + ")")
 	chip.Children(func() {
 		ui.Text(c, "→ "+prompt.LanguageFor(s.Target).Label).FontSize(12).Bold().TextColor(barText).NoWrap()
 	})

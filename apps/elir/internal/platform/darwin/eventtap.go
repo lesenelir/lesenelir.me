@@ -74,6 +74,9 @@ func (t *EventTap) Start() error {
 		if t.tap != 0 {
 			return
 		}
+		if h, ok := t.Handler.(interface{ Reset() }); ok {
+			h.Reset()
+		}
 		mask := uint64(1)<<cgEventKeyDown | uint64(1)<<cgEventKeyUp | uint64(1)<<cgEventFlagsChanged
 		tap := cgEventTapCreate(cgSessionEventTap, cgHeadInsertEventTap, cgEventTapOptionDefault, mask, tapCallback, 0)
 		if tap == 0 {
@@ -102,6 +105,9 @@ func (t *EventTap) Stop() {
 		if t.tap == 0 {
 			return
 		}
+		if h, ok := t.Handler.(interface{ Reset() }); ok {
+			h.Reset()
+		}
 		cgEventTapEnable(t.tap, false)
 		cfRunLoopRemoveSource(cfRunLoopGetMain(), t.source, kCFRunLoopCommonModes)
 		cfMachPortInvalidate(t.tap)
@@ -122,6 +128,9 @@ func onTapEvent(proxy, eventType, event, info uintptr) uintptr {
 	}
 	switch typ := uint32(eventType); typ {
 	case cgEventTapDisabledByTimeout, cgEventTapDisabledByUserInput:
+		if h, ok := t.Handler.(interface{ Reset() }); ok {
+			h.Reset()
+		}
 		cgEventTapEnable(t.tap, true)
 		return event
 	case cgEventKeyDown, cgEventKeyUp, cgEventFlagsChanged:

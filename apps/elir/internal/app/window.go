@@ -44,6 +44,9 @@ func (a *App) view(c *ui.Context) {
 			ui.Scroll(c.Key("page-"+page.ID)).Fill().ScrollbarInsets(headerHeight, 0, 0).Children(func() {
 				ui.Column(c).Padding(headerHeight+8, 28, 28, 28).Gap(22).Children(func() {
 					page.View(c, m, pal)
+					if a.keys != nil && a.keys.editing == "" && a.keys.err != nil {
+						ui.Text(c, m.SaveFailed(a.keys.err.Error())).FontSize(12).TextColor(t.Danger)
+					}
 					if a.saveErr != nil {
 						ui.Text(c, m.SaveFailed(a.saveErr.Error())).FontSize(12).TextColor(t.Danger)
 					}
@@ -116,6 +119,9 @@ func (a *App) navItem(c *ui.Context, page string, icon *ui.SVG, label string) {
 		ui.Text(c, label).Grow(1).SingleLine().TextColor(textColor)
 	})
 	if item.Clicked() {
+		if a.keys != nil {
+			a.keys.CancelEdit()
+		}
 		a.page = page
 	}
 }

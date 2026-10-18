@@ -6,9 +6,11 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"sync"
@@ -39,6 +41,9 @@ func Open(path string) (*Store, error) {
 		st.sections = map[string]json.RawMessage{}
 		return st, err
 	}
+	if st.sections == nil {
+		st.sections = map[string]json.RawMessage{}
+	}
 	return st, nil
 }
 
@@ -50,21 +55,26 @@ func (st *Store) Existed() bool { return st.existed }
 func (st *Store) Raw(key string) json.RawMessage {
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	return st.sections[key]
+	return bytes.Clone(st.sections[key])
 }
 
 // SetRaw replaces a section and saves the file.
 func (st *Store) SetRaw(key string, raw json.RawMessage) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	st.sections[key] = raw
-	return st.save()
+	candidate := maps.Clone(st.sections)
+	candidate[key] = bytes.Clone(raw)
+	if err := st.save(candidate); err != nil {
+		return err
+	}
+	st.sections = candidate
+	return nil
 }
 
 // save writes the file, through a temporary one so that a crash cannot
 // leave it half written. The caller holds mu.
-func (st *Store) save() error {
-	data, err := json.MarshalIndent(st.sections, "", "  ")
+func (st *Store) save(candidate map[string]json.RawMessage) error {
+	data, err := json.MarshalIndent(candidate, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -72,6 +82,7 @@ func (st *Store) save() error {
 		return err
 	}
 	tmp := st.path + ".tmp"
+	defer os.Remove(tmp)
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {
 		return err
 	}
@@ -98,7 +109,7 @@ func NewSection[T any](st *Store, key string, defaults T, clone func(T) T) (*Sec
 	if clone == nil {
 		clone = func(v T) T { return v }
 	}
-	s := &Section[T]{st: st, key: key, clone: clone, value: defaults}
+	s := &Section[T]{st: st, key: key, clone: clone, value: clone(defaults)}
 	var err error
 	if raw := st.Raw(key); raw != nil {
 		v := clone(defaults)
@@ -120,10 +131,15 @@ func (s *Section[T]) Get() T {
 func (s *Section[T]) Update(fn func(*T)) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	fn(&s.value)
-	raw, err := json.Marshal(s.value)
+	candidate := s.clone(s.value)
+	fn(&candidate)
+	raw, err := json.Marshal(candidate)
 	if err != nil {
 		return err
 	}
-	return s.st.SetRaw(s.key, raw)
+	if err := s.st.SetRaw(s.key, raw); err != nil {
+		return err
+	}
+	s.value = candidate
+	return nil
 }

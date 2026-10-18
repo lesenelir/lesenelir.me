@@ -6,6 +6,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/soniox"
@@ -134,11 +135,11 @@ func (v *Voice) voicePage(c *ui.Context, m locales.Messages, pal widget.Palette)
 		labels[i] = l.Label
 	}
 	widget.Group(c, pal, m.SectionDictation(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutDictate(), "", func() { widget.Keycaps(c, pal, "fn") })
-		g.Row(c, m.ShortcutCancel(), m.CancelNote(), func() { widget.Keycaps(c, pal, "esc") })
+		g.Row(c, m.ShortcutDictate(), "", func() { v.host.Shortcut(c, shortcuts.Dictate) })
+		g.Row(c, m.ShortcutCancel(), m.CancelNote(), func() { v.host.Shortcut(c, shortcuts.VoiceCancel) })
 	})
 	widget.Group(c, pal, m.SectionTranslate(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutTranslate(), m.TranslateNote(), func() { widget.Keycaps(c, pal, "fn", m.KeyLeftShift()) })
+		g.Row(c, m.ShortcutTranslate(), m.TranslateNote(), func() { v.host.Shortcut(c, shortcuts.Translate) })
 		g.Row(c, m.FieldChineseTo(), "", func() {
 			widget.Dropdown(c.Key("zh"), m.FieldChineseTo(), &v.form.zhTo, labels, widget.Same, nil, 160, v.commit)
 		})
@@ -148,7 +149,7 @@ func (v *Voice) voicePage(c *ui.Context, m locales.Messages, pal widget.Palette)
 		g.Row(c, m.FieldOtherTo(), "", func() {
 			widget.Dropdown(c.Key("default"), m.FieldOtherTo(), &v.form.defaultTo, labels, widget.Same, nil, 160, v.commit)
 		})
-		g.Row(c, m.ShortcutSwitch(), m.TargetsTabNote(), func() { widget.Keycaps(c, pal, "tab") })
+		g.Row(c, m.ShortcutSwitch(), m.TargetsTabNote(), func() { v.host.Shortcut(c, shortcuts.CycleTarget) })
 		g.Block(c, func() {
 			ui.Grid(c).Columns(3).GapX(16).GapY(12).Label(m.SectionTargets()).Children(func() {
 				for i, l := range prompt.Languages {

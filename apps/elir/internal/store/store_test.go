@@ -111,3 +111,37 @@ func TestSetRaw(t *testing.T) {
 		t.Fatalf("theme %q", app.Get().Theme)
 	}
 }
+
+func TestFailedSaveDoesNotPublishOrLeakIntoLaterSave(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	st, _ := Open(path)
+	tool, _ := NewSection(st, "tool", toolSettings{Tags: []string{"old"}}, cloneTool)
+	if err := tool.Update(func(*toolSettings) {}); err != nil {
+		t.Fatal(err)
+	}
+	// A directory at the temporary filename deterministically rejects writes.
+	if err := os.Mkdir(path+".tmp", 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := tool.Update(func(s *toolSettings) { s.Tags[0] = "failed" }); err == nil {
+		t.Fatal("expected failure")
+	}
+	if tool.Get().Tags[0] != "old" {
+		t.Fatal("failed update published")
+	}
+	os.Remove(path + ".tmp")
+	app, _ := NewSection(st, "app", appSettings{}, nil)
+	if err := app.Update(func(s *appSettings) { s.Theme = "dark" }); err != nil {
+		t.Fatal(err)
+	}
+	reopened, _ := Open(path)
+	again, _ := NewSection(reopened, "tool", toolSettings{}, cloneTool)
+	if again.Get().Tags[0] != "old" {
+		t.Fatal("failed update leaked through another section")
+	}
+	raw := st.Raw("tool")
+	raw[0] = '!'
+	if st.Raw("tool")[0] != '{' {
+		t.Fatal("Raw aliases store")
+	}
+}

@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -23,6 +24,7 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
@@ -35,12 +37,13 @@ import (
 
 // Voice is voice input, a feature of the app.
 type Voice struct {
-	host     *app.Host
-	settings *store.Section[config.Settings]
-	ctrl     *controller.Controller
-	rec      *platform.Recorder
-	keys     *hotkeys
-	overlay  *mygo.Window
+	host       *app.Host
+	settings   *store.Section[config.Settings]
+	ctrl       *controller.Controller
+	rec        *platform.Recorder
+	cancelable atomic.Bool
+	cycling    atomic.Bool
+	overlay    *mygo.Window
 
 	openrouterKey *secret.Secret
 	sonioxKey     *secret.Secret
@@ -70,7 +73,6 @@ var _ interface {
 func New() *Voice {
 	return &Voice{
 		rec:           &platform.Recorder{},
-		keys:          &hotkeys{},
 		openrouterKey: secret.New("openrouter-api-key", "OPENROUTER_API_KEY"),
 		sonioxKey:     secret.New("soniox-api-key", "SONIOX_API_KEY"),
 	}
@@ -105,7 +107,7 @@ func (v *Voice) Start(h *app.Host) error {
 		Rewriter:    rewriter{client: client, settings: v.settings.Get},
 		Paster:      platform.Paster{},
 		Settings:    v.settings.Get,
-		Capture:     v.keys.detector.Capture,
+		Capture:     func(cancel, cycle bool) { v.cancelable.Store(cancel); v.cycling.Store(cycle) },
 		OnChange:    v.onStatus,
 		Recording:   quiet.Recording,
 		OnResult:    v.onResult,
@@ -115,7 +117,6 @@ func (v *Voice) Start(h *app.Host) error {
 			}
 		},
 	})
-	v.keys.handle = v.ctrl.Handle
 
 	v.overlay = mygo.NewWindow(mygo.WindowOptions{
 		Title:       "Voice",
@@ -133,7 +134,10 @@ func (v *Voice) Start(h *app.Host) error {
 	v.overlay.SetIgnoreMouseEvents(false)
 
 	v.form = formFrom(v.settings.Get(), v.apiKeys())
-	h.HandleKeys(v.keys)
+	h.Shortcuts.Register(shortcut.Dictate, nil, func() { v.ctrl.Handle(hotkey.Dictate) })
+	h.Shortcuts.Register(shortcut.Translate, nil, func() { v.ctrl.Handle(hotkey.Translate) })
+	h.Shortcuts.Register(shortcut.VoiceCancel, v.cancelable.Load, func() { v.ctrl.Handle(hotkey.Cancel) })
+	h.Shortcuts.Register(shortcut.CycleTarget, v.cycling.Load, func() { v.ctrl.Handle(hotkey.CycleTarget) })
 	return nil
 }
 
@@ -197,29 +201,4 @@ func (v *Voice) PermissionTips(c *ui.Context, m locales.Messages, pal widget.Pal
 // apiKeys are the keys, as the settings show them.
 func (v *Voice) apiKeys() apiKeys {
 	return apiKeys{openrouter: v.openrouterKey.Get(), soniox: v.sonioxKey.Get()}
-}
-
-// hotkeys turns the event tap's key events into the controller's actions.
-type hotkeys struct {
-	detector hotkey.Detector
-	handle   func(hotkey.Action)
-}
-
-func (k *hotkeys) FlagsChanged(keycode int64, flags uint64) bool {
-	k.do(k.detector.FlagsChanged(keycode, flags))
-	return false
-}
-
-func (k *hotkeys) KeyDown(keycode int64, _ uint64, repeat bool) bool {
-	action, swallow := k.detector.KeyDown(keycode, repeat)
-	k.do(action)
-	return swallow
-}
-
-func (k *hotkeys) KeyUp(keycode int64) bool { return k.detector.KeyUp(keycode) }
-
-func (k *hotkeys) do(a hotkey.Action) {
-	if a != hotkey.None && k.handle != nil {
-		k.handle(a)
-	}
 }

@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/egoist/mygo"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 )
 
 var user32 = systemDLL("user32.dll")
@@ -33,7 +34,6 @@ type EventTap struct {
 	hook     uintptr
 	callback uintptr
 	down     map[uint32]bool
-	fn       bool
 }
 
 func (t *EventTap) Start() error {
@@ -41,6 +41,9 @@ func (t *EventTap) Start() error {
 	mygo.RunOnMain(func() {
 		if t.hook != 0 {
 			return
+		}
+		if h, ok := t.Handler.(interface{ Reset() }); ok {
+			h.Reset()
 		}
 		t.down = make(map[uint32]bool)
 		for _, k := range []uint32{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0x5b, 0x5c} {
@@ -71,6 +74,9 @@ func (t *EventTap) Stop() {
 		if t.hook != 0 {
 			unhook.Call(t.hook)
 			t.hook = 0
+			if h, ok := t.Handler.(interface{ Reset() }); ok {
+				h.Reset()
+			}
 		}
 	})
 }
@@ -84,7 +90,8 @@ func (t *EventTap) handle(code, message, data uintptr) uintptr {
 		// Ignore injected events, including our own Ctrl+C / Ctrl+V.
 		if e.Flags&0x10 == 0 {
 			down := message == 0x100 || message == 0x104
-			if t.key(e.Key, down) {
+			vk := shortcut.WindowsVK(e.Key, e.Scan, e.Flags&1 != 0)
+			if t.key(vk, down) {
 				return 1
 			}
 		}
@@ -97,24 +104,6 @@ func (t *EventTap) key(vk uint32, down bool) bool {
 	repeat := t.down[vk]
 	t.down[vk] = down
 	flags := t.flags()
-	if vk == 0x77 { // F8 replaces the Mac's Fn key.
-		if down && !repeat && flags&(0x40000|0x80000|0x100000|4) == 0 {
-			t.fn = true
-		}
-		if t.fn {
-			if down {
-				flags |= 0x800000
-			}
-			t.Handler.FlagsChanged(63, flags)
-			if !down {
-				t.fn = false
-			}
-			return true
-		}
-	}
-	if t.fn {
-		flags |= 0x800000
-	}
 	if k, ok := modifierKey(vk); ok {
 		return t.Handler.FlagsChanged(k, flags)
 	}
@@ -133,14 +122,23 @@ func (t *EventTap) flags() uint64 {
 	if t.down[0xa1] {
 		f |= 0x20000 | 4
 	}
-	if t.down[0xa2] || t.down[0xa3] {
-		f |= 0x40000
+	if t.down[0xa2] {
+		f |= 0x40000 | 1
 	}
-	if t.down[0xa4] || t.down[0xa5] {
-		f |= 0x80000
+	if t.down[0xa3] {
+		f |= 0x40000 | 0x2000
 	}
-	if t.down[0x5b] || t.down[0x5c] {
-		f |= 0x100000
+	if t.down[0xa4] {
+		f |= 0x80000 | 0x20
+	}
+	if t.down[0xa5] {
+		f |= 0x80000 | 0x40
+	}
+	if t.down[0x5b] {
+		f |= 0x100000 | 8
+	}
+	if t.down[0x5c] {
+		f |= 0x100000 | 16
 	}
 	return f
 }
@@ -151,31 +149,23 @@ func modifierKey(vk uint32) (int64, bool) {
 		return 56, true
 	case 0xa1:
 		return 60, true
-	case 0xa2, 0xa3:
+	case 0xa2:
 		return 59, true
-	case 0xa4, 0xa5:
+	case 0xa3:
+		return 62, true
+	case 0xa4:
 		return 58, true
-	case 0x5b, 0x5c:
+	case 0xa5:
+		return 61, true
+	case 0x5b:
 		return 55, true
+	case 0x5c:
+		return 54, true
 	}
 	return 0, false
 }
 
-func normalizedKey(vk uint32) int64 {
-	switch vk {
-	case 0x1b:
-		return 53
-	case 9:
-		return 48
-	case 'T':
-		return 17
-	case 'R':
-		return 15
-	case '2':
-		return 19
-	}
-	return int64(vk) + 256
-}
+func normalizedKey(vk uint32) int64 { return shortcut.WindowsKey(vk) }
 
 // INPUT's union has pointer alignment on both supported 64-bit architectures.
 type keyboardInput struct {

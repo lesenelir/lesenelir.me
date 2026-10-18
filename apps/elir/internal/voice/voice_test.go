@@ -20,11 +20,11 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/history"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/hotkey"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/soniox"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
@@ -44,7 +44,7 @@ func testVoice(t *testing.T) *Voice {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 	v := New()
-	v.host = &app.Host{Store: st}
+	v.host = &app.Host{Store: st, Shortcuts: &app.Shortcuts{Router: shortcut.New(shortcut.Defaults("darwin"))}}
 	v.settings, err = store.NewSection(st, config.Section, config.Defaults(), config.Clone)
 	if err != nil {
 		t.Fatal(err)
@@ -99,23 +99,6 @@ func TestPages(t *testing.T) {
 	}
 }
 
-// The hotkeys turn Fn into an action for the controller, and keep the
-// event from no app.
-func TestHotkeys(t *testing.T) {
-	var got []string
-	k := &hotkeys{handle: func(a hotkey.Action) { got = append(got, a.String()) }}
-	if k.FlagsChanged(hotkey.KeyFn, hotkey.FlagFn) || k.FlagsChanged(hotkey.KeyFn, 0) {
-		t.Fatal("swallowed Fn")
-	}
-	k.detector.Capture(true, false)
-	if !k.KeyDown(hotkey.KeyEscape, 0, false) || !k.KeyUp(hotkey.KeyEscape) {
-		t.Fatal("let a captured Esc through")
-	}
-	if want := []string{"dictate", "cancel"}; !slices.Equal(got, want) {
-		t.Fatalf("actions %q, want %q", got, want)
-	}
-}
-
 func TestOverlayShowsState(t *testing.T) {
 	v := testVoice(t)
 	tt := ui.NewTester(v.overlayView, overlayWidth, overlayHeight)
@@ -123,7 +106,7 @@ func TestOverlayShowsState(t *testing.T) {
 
 	v.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
 	tt.Frame()
-	if !tt.HasText("esc") || tt.HasText("→ English") {
+	if !tt.HasText("Escape") || tt.HasText("→ English") {
 		t.Errorf("dictation bar %q", tt.Texts())
 	}
 

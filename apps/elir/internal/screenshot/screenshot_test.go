@@ -14,6 +14,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -31,7 +32,7 @@ func testScreenshot(t *testing.T) *Screenshot {
 		t.Fatal(err)
 	}
 	s := New()
-	s.host = &app.Host{Store: st, DataDir: dir}
+	s.host = &app.Host{Store: st, DataDir: dir, Shortcuts: &app.Shortcuts{Router: shortcut.New(shortcut.Defaults("darwin"))}}
 	if s.settings, err = store.NewSection(st, section, defaults(), nil); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +79,7 @@ func TestPageEmpty(t *testing.T) {
 	}
 	tt := ui.NewTester(pageView(s), pageWidth, 900)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"截取区域或窗口", "⌘", "2", "截取指针下方的窗口", "粘贴到 Claude Code 等终端", "⌃", "截图保留", "7 天", "共 0 张 · 0 B", "还没有截图。使用上方截图快捷键截一张。"} {
+	for _, want := range []string{"截取区域或窗口", "Command + Shift + 2", "截取指针下方的窗口", "粘贴到 Claude Code 等终端", "⌃", "截图保留", "7 天", "共 0 张 · 0 B", "还没有截图。使用上方截图快捷键截一张。"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}
