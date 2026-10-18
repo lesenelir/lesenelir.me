@@ -2,7 +2,7 @@
 
 日期：2026-10-18。状态：实现和自动化验证完成；macOS 真机及物理快捷键交互尚未验收。
 
-实现先在独立 worktree 完成，从 `e102493` 起步并合入截图坐标修复 `fcb23a7`。按评审边界现已整理到独立分支 `codex/customizable-shortcuts`，基线为截图分支的 `fcb23a7`；PR 只展示快捷键差异，截图分支及其上游 PR 不包含快捷键提交。临时 worktree、编译／预览产物已清理。
+实现先在独立 worktree 完成，从 `e102493` 起步并合入截图坐标修复 `fcb23a7`。现已整理到独立分支 `codex/customizable-shortcuts`，快捷键功能提交以截图分支的 `fcb23a7` 为基线；向原仓库 `lesenelir/lesenelir.me` 的 `master` 单独提 PR，并依赖截图 PR #9。原仓库没有独立截图目标分支，因此 #9 合并前 PR diff 仍会显示前置改动；截图分支及其 PR 不包含快捷键提交。临时 worktree、编译／预览产物已清理。
 
 当前实现记录（2026-10-18）：
 
