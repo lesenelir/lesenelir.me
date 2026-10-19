@@ -4,6 +4,7 @@ package voice
 
 import (
 	"log"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -137,7 +138,7 @@ func (v *Voice) historyPage(c *ui.Context, m locales.Messages, pal widget.Palett
 			}
 		})
 	})
-	switch ui.AlertDialog(c, &h.confirm, m.ClearHistoryTitle(), m.ClearHistoryMessage(), m.ButtonCancel(), m.ButtonClearHistory()) {
+	switch ui.AlertDialog(c, &h.confirm, m.ClearHistoryTitle(), m.ClearHistoryMessage(runtime.GOOS), m.ButtonCancel(), m.ButtonClearHistory()) {
 	case 1:
 		v.clearHistory()
 	}

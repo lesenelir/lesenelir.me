@@ -74,7 +74,11 @@ func (q *quieter) restore() {
 	}
 	if err := restoreOutput(q.state); err != nil {
 		log.Printf("restore output: %v", err)
-		return
+		// Kept to try again, so that quieting anew cannot take the lowered
+		// volume for the user's; a device gone has nothing left to undo.
+		if !errors.Is(err, platform.ErrOutputGone) {
+			return
+		}
 	}
 	q.state = platform.OutputState{}
 	_ = os.Remove(q.path)

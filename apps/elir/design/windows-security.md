@@ -14,9 +14,11 @@ malware already running as the same Windows user is outside the DPAPI boundary.
   Restrict the helper's module search to system modules and omit API key variables.
 - Exclude temporary auto-paste text from Windows clipboard history and cloud
   synchronization. Explicit user copy actions keep their current behavior.
-- Reject writes after a secret file read/decryption/JSON error. Publish changed
-  keys in memory only after the file replacement succeeds. Keep existing DPAPI
-  ciphertext and macOS JSON formats; do not reset or migrate damaged files.
+- Reject writes after a secret file read error. A file read but not decrypted
+  or decoded (DPAPI fails after a password reset or on another machine) is
+  renamed to `secrets.json.unreadable-<time>`, unchanged, and the store starts
+  empty, so keys can be entered again. Publish changed keys in memory only after
+  the file replacement succeeds. Keep existing DPAPI ciphertext and macOS JSON formats.
 
 No new dependencies or elevation. Review DLL/procedure callers, screenshot
 launch, Paster and its tests, and Store/Secret callers before editing.

@@ -36,7 +36,7 @@ func (a *App) generalPage() Page {
 				g.Row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
 			})
 			widget.Group(c, pal, "", func(g *widget.Rows) {
-				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(), func() {
+				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(runtime.GOOS), func() {
 					ui.Switch(c.Key("open-at-login"), &a.openAtLogin).Label(m.FieldOpenAtLogin()).OnChange(a.setOpenAtLogin)
 				})
 				if runtime.GOOS == "darwin" {

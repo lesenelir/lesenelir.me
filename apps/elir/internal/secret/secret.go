@@ -14,6 +14,7 @@ package secret
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"log"
 	"maps"
@@ -38,24 +39,46 @@ type Store struct {
 	loadErr error
 }
 
-// OpenStore reads the keys at path. A missing file is an empty store.
+// OpenStore reads the keys at path. A missing file is an empty store. A
+// file that cannot be read keeps the store from writing, so that it is
+// not replaced; one read but not understood, as one Windows can no longer
+// decrypt after the user's password was reset, is moved aside to
+// path.unreadable-<time>, and the store starts empty.
 func OpenStore(path string) (*Store, error) {
 	st := &Store{path: path, values: map[string]string{}}
-	data, err := readSecretFile(path)
+	data, err := os.ReadFile(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return st, nil
 	}
-	if err == nil {
-		err = json.Unmarshal(data, &st.values)
-		if err == nil && st.values == nil {
-			err = errors.New("secret: expected a JSON object")
-		}
-	}
 	if err != nil {
-		st.values = map[string]string{}
+		st.loadErr = err
+		return st, err
 	}
-	st.loadErr = err
-	return st, err
+	if err = decode(data, &st.values); err == nil {
+		return st, nil
+	}
+	st.values = map[string]string{}
+	aside := path + ".unreadable-" + time.Now().Format("20060102-150405")
+	if moveErr := os.Rename(path, aside); moveErr != nil {
+		st.loadErr = err
+		return st, errors.Join(err, moveErr)
+	}
+	return st, fmt.Errorf("%w; moved it to %s", err, filepath.Base(aside))
+}
+
+// decode reads the keys of a file's contents.
+func decode(data []byte, values *map[string]string) error {
+	data, err := decodeSecretFile(data)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, values); err != nil {
+		return err
+	}
+	if *values == nil {
+		return errors.New("secret: expected a JSON object")
+	}
+	return nil
 }
 
 // lookup returns a key, and whether the file has it, even as removed.

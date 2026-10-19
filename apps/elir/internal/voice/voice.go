@@ -174,9 +174,9 @@ func micText(m locales.Messages, s platform.MicStatus) string {
 	case platform.MicAuthorized:
 		return m.MicAllowed()
 	case platform.MicDenied, platform.MicRestricted:
-		return m.MicDenied()
+		return m.MicDenied(runtime.GOOS)
 	}
-	return m.MicAsk()
+	return m.MicAsk(runtime.GOOS)
 }
 
 // PermissionTips tells how to keep the Globe key from macOS, which would

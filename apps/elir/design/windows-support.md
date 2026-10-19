@@ -35,7 +35,13 @@ Implemented: shared platform entry point, a thin Darwin facade and Windows-nativ
 keyboard hooks, WinMM PCM recording, input injection and endpoint-volume control.
 The audio worker waits for native events and uses three reusable 100 ms buffers;
 it drains them in queue order, including the partial tail after reset. Keyboard
-callbacks stay on the main thread and dispatch long-running work to existing workers.
+hook lives on a thread of its own with its own message loop; it hands each key to
+the main thread, where the handlers run as on macOS, and waits at most 200 ms
+for the answer, so that a busy UI thread neither stalls typing in every app nor
+gets the hook removed (`LowLevelHooksTimeout`). A swallowed key with Alt or Win
+held, and the modifiers released and restored around injected Ctrl+C / Ctrl+V,
+are followed by an unassigned key (VK 0xE8), so that the app in front does not
+take a lone Alt for its menu bar or a lone Win for the Start menu.
 No dependencies were added. Screenshot selection starts a short-lived built-in
 PowerShell/WinForms helper; it takes a snapshot before opening the overlay.
 

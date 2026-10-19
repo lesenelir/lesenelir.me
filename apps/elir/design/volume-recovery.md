@@ -13,8 +13,10 @@ CoInitializeEx, including S_FALSE, must have one matching CoUninitialize.
 When native restoration fails, retain the saved recovery file and in-memory
 state. Retry before applying another recording-time volume change; do not
 overwrite a pending recovery with another device/state. Remove a valid record
-only after restoration succeeds. Keep the existing file schema and Darwin
-backend; malformed JSON continues to be discarded as before.
+only after restoration succeeds, or when the device is gone (`ErrOutputGone`:
+a CoreAudio device no longer alive, a Windows endpoint not found or not
+active), which would otherwise keep every later recording from quieting output.
+Keep the existing file schema; malformed JSON continues to be discarded as before.
 
 ## Verification plan
 

@@ -3,6 +3,8 @@
 package voice
 
 import (
+	"runtime"
+
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
@@ -73,7 +75,7 @@ func (v *Voice) modelsPage(c *ui.Context, m locales.Messages, pal widget.Palette
 	})
 	if streaming {
 		widget.Group(c, pal, "Soniox", func(g *widget.Rows) {
-			g.Row(c, m.FieldSonioxKey(), m.SonioxKeyNote(), func() {
+			g.Row(c, m.FieldSonioxKey(), m.SonioxKeyNote(runtime.GOOS), func() {
 				ui.TextInput(c.Key("soniox-key"), &v.form.sonioxKey).Password().Placeholder("Soniox API key").
 					Label("Soniox " + m.FieldSonioxKey()).Width(fieldWidth).
 					OnChange(func() { v.commitKey(v.sonioxKey, v.form.sonioxKey) })
@@ -89,7 +91,7 @@ func (v *Voice) modelsPage(c *ui.Context, m locales.Messages, pal widget.Palette
 		})
 	}
 	widget.Group(c, pal, m.SectionOpenRouter(), func(g *widget.Rows) {
-		g.Row(c, m.FieldApiKey(), m.OpenRouterKeyNote(), func() {
+		g.Row(c, m.FieldApiKey(), m.OpenRouterKeyNote(runtime.GOOS), func() {
 			ui.TextInput(c.Key("api-key"), &v.form.apiKey).Password().Placeholder("sk-or-…").
 				Label("OpenRouter " + m.FieldApiKey()).Width(fieldWidth).
 				OnChange(func() { v.commitKey(v.openrouterKey, v.form.apiKey) })
@@ -138,7 +140,7 @@ func (v *Voice) voicePage(c *ui.Context, m locales.Messages, pal widget.Palette)
 		g.Row(c, m.ShortcutCancel(), m.CancelNote(), func() { widget.Keycaps(c, pal, "esc") })
 	})
 	widget.Group(c, pal, m.SectionTranslate(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutTranslate(), m.TranslateNote(), func() { widget.Keycaps(c, pal, "fn", m.KeyLeftShift()) })
+		g.Row(c, m.ShortcutTranslate(), m.TranslateNote(runtime.GOOS), func() { widget.Keycaps(c, pal, "fn", m.KeyLeftShift()) })
 		g.Row(c, m.FieldChineseTo(), "", func() {
 			widget.Dropdown(c.Key("zh"), m.FieldChineseTo(), &v.form.zhTo, labels, widget.Same, nil, 160, v.commit)
 		})

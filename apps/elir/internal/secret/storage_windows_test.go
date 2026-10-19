@@ -41,7 +41,7 @@ func TestWindowsSecretsEncryptedAndPersisted(t *testing.T) {
 	}
 }
 
-func TestWindowsSecretsRejectCorruption(t *testing.T) {
+func TestWindowsCorruptSecretsAreMovedAside(t *testing.T) {
 	data, err := protectData([]byte("secret"), true)
 	if err != nil {
 		t.Fatal(err)
@@ -58,11 +58,14 @@ func TestWindowsSecretsRejectCorruption(t *testing.T) {
 	if err == nil {
 		t.Fatal("opened corrupt encrypted store")
 	}
-	if err := st.put("new", "must-not-overwrite"); err == nil {
-		t.Fatal("overwrote corrupt encrypted store")
+	aside, _ := filepath.Glob(path + ".unreadable-*")
+	if len(aside) != 1 {
+		t.Fatalf("corrupt store not kept aside: %v", aside)
 	}
-	after, err := os.ReadFile(path)
-	if err != nil || !bytes.Equal(data, after) {
+	if kept, err := os.ReadFile(aside[0]); err != nil || !bytes.Equal(data, kept) {
 		t.Fatalf("corrupt original changed: %v", err)
+	}
+	if err := st.put("new", "saved"); err != nil {
+		t.Fatalf("a new key cannot be saved: %v", err)
 	}
 }

@@ -5,9 +5,10 @@
 package widget
 
 import (
-	"github.com/egoist/mygo/ui"
 	"runtime"
 	"strings"
+
+	"github.com/egoist/mygo/ui"
 )
 
 // Icon parses a 16×16 line icon drawn in the text's color.
