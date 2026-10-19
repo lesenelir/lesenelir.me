@@ -4,6 +4,7 @@ package shortcut
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"slices"
 	"strings"
 )
@@ -255,17 +256,46 @@ func Validate(b Bindings, os string) error {
 func Printable(b Binding) bool {
 	return len(b.Modifiers) == 0 && (strings.HasPrefix(b.Key, "Key") || strings.HasPrefix(b.Key, "Digit") || strings.HasPrefix(b.Key, "Numpad") || slices.Contains([]string{"Space", "Minus", "Equal", "BracketLeft", "BracketRight", "Backslash", "Semicolon", "Quote", "Comma", "Period", "Slash", "Backquote"}, b.Key))
 }
-func (b Binding) String() string {
-	key := b.Key
-	key = strings.TrimPrefix(strings.TrimPrefix(key, "Key"), "Digit")
-	if key == "Meta" {
-		key = "Command"
+func (b Binding) String() string { return b.Format(runtime.GOOS) }
+
+// Format words b as os does: "Ctrl + Shift + 2" on Windows, "⇧⌘2" on macOS,
+// with the modifiers in the order of macOS's menus (⌃⌥⇧⌘).
+func (b Binding) Format(os string) string {
+	key := strings.TrimPrefix(strings.TrimPrefix(b.Key, "Key"), "Digit")
+	if os == "windows" {
+		parts := slices.Clone(b.Modifiers)
+		for i, p := range parts {
+			parts[i] = strings.ReplaceAll(p, "Meta", "Win")
+		}
+		if key == "Meta" {
+			key = "Win"
+		}
+		return strings.Join(append(parts, key), " + ")
 	}
-	parts := slices.Clone(b.Modifiers)
-	for i, p := range parts {
-		parts[i] = strings.ReplaceAll(p, "Meta", "Command")
+	symbols := map[string]string{"Ctrl": "⌃", "Alt": "⌥", "Shift": "⇧", "Meta": "⌘"}
+	if s, ok := symbols[key]; ok {
+		key = s
+	} else if key == "Escape" {
+		key = "Esc"
 	}
-	return strings.Join(append(parts, key), " + ")
+	var out string
+	for _, name := range []string{"Ctrl", "Alt", "Shift", "Meta"} {
+		for _, side := range []string{"", "Left", "Right"} {
+			if !slices.Contains(b.Modifiers, side+name) {
+				continue
+			}
+			if side != "" {
+				out += side + " " + symbols[name] + " "
+			} else {
+				out += symbols[name]
+			}
+		}
+	}
+	// A word key ("Fn", "Space") stands apart from the symbols; a letter does not.
+	if out != "" && !strings.HasSuffix(out, " ") && len([]rune(key)) > 1 {
+		out += " "
+	}
+	return out + key
 }
 
 func (b Binding) AnySide() Binding {

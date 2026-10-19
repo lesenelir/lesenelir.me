@@ -378,3 +378,24 @@ func TestFnSystemChordsAndHeldTyping(t *testing.T) {
 		t.Fatal("held typing started a recording", *got)
 	}
 }
+func TestFormat(t *testing.T) {
+	for _, tt := range []struct {
+		os   string
+		b    Binding
+		want string
+	}{
+		{"darwin", Defaults("darwin")[TranslateText], "⌥T"},
+		{"darwin", Defaults("darwin")[Capture], "⇧⌘2"},
+		{"darwin", Defaults("darwin")[Translate], "Left ⇧ Fn"},
+		{"darwin", Defaults("darwin")[RewriteCancel], "Esc"},
+		{"darwin", Binding{Key: "Space", Modifiers: []string{"Meta", "Ctrl"}}, "⌃⌘ Space"},
+		{"darwin", Binding{Key: "KeyK", Modifiers: []string{"RightAlt"}}, "Right ⌥ K"},
+		{"windows", Defaults("windows")[TranslateText], "Alt + T"},
+		{"windows", Defaults("windows")[Capture], "Ctrl + Shift + 2"},
+		{"windows", Binding{Key: "KeyE", Modifiers: []string{"Meta"}}, "Win + E"},
+	} {
+		if got := tt.b.Format(tt.os); got != tt.want {
+			t.Errorf("%s %v = %q, want %q", tt.os, tt.b, got, tt.want)
+		}
+	}
+}

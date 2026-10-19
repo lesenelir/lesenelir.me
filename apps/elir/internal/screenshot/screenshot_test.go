@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -79,7 +80,7 @@ func TestPageEmpty(t *testing.T) {
 	}
 	tt := ui.NewTester(pageView(s), pageWidth, 900)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"截取区域或窗口", "Command + Shift + 2", "改为截取窗口", "space", "esc", "粘贴到 Claude Code 等终端", "⌃", "截图保留", "7 天", "共 0 张 · 0 B", "还没有截图。使用上方截图快捷键截一张。"} {
+	for _, want := range []string{"截取区域或窗口", shortcut.Defaults(runtime.GOOS)[shortcut.Capture].String(), "改为截取窗口", "space", "esc", "粘贴到 Claude Code 等终端", "⌃", "截图保留", "7 天", "共 0 张 · 0 B", "还没有截图。使用上方截图快捷键截一张。"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}

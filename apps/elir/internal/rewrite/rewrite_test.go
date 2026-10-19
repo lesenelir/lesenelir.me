@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -88,7 +89,7 @@ func TestPage(t *testing.T) {
 		ui.Column(c).Padding(28).Gap(22).Children(func() { page.View(c, locales.In(c.Locale()), pal) })
 	}, 560, 640)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"翻译", "润色", "Alt + T", "Alt + R", "Escape", "中文译成English，英文译成日本語，其他译成English，跟随「听写与翻译」的设置。"} {
+	for _, want := range []string{"翻译", "润色", shortcut.Defaults(runtime.GOOS)[shortcut.TranslateText].String(), shortcut.Defaults(runtime.GOOS)[shortcut.PolishText].String(), shortcut.Defaults(runtime.GOOS)[shortcut.RewriteCancel].String(), "中文译成English，英文译成日本語，其他译成English，跟随「听写与翻译」的设置。"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}

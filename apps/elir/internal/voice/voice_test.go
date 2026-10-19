@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -106,7 +107,7 @@ func TestOverlayShowsState(t *testing.T) {
 
 	v.status = controller.Status{State: controller.Recording, Mode: prompt.Dictate}
 	tt.Frame()
-	if !tt.HasText("Escape") || tt.HasText("→ English") {
+	if !tt.HasText(shortcut.Defaults(runtime.GOOS)[shortcut.VoiceCancel].String()) || tt.HasText("→ English") {
 		t.Errorf("dictation bar %q", tt.Texts())
 	}
 
