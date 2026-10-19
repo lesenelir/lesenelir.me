@@ -21,6 +21,7 @@ const (
 
 var (
 	ErrNotTrusted               = darwin.ErrNotTrusted
+	ErrOutputGone               = darwin.ErrOutputGone
 	AccessibilityTrusted        = darwin.AccessibilityTrusted
 	Microphone                  = darwin.Microphone
 	ScreenCaptureAllowed        = darwin.ScreenCaptureAllowed

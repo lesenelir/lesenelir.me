@@ -13,7 +13,7 @@
 | 范围 | Windows 实现及契约 |
 | --- | --- |
 | 入口与界面 | Windows/macOS 共享入口与设置；隐藏 Windows 不适用的 Dock、macOS 权限项 |
-| 键盘 | WH_KEYBOARD_LL 提供事件，耗时操作交给原工作 goroutine；模拟输入不回流业务快捷键 |
+| 键盘 | WH_KEYBOARD_LL 运行在独立线程（自有消息循环），按顺序把按键交给主线程的 Router，最多等 200 ms，超时放行，避免主线程繁忙时拖慢全局输入或被系统摘除（`LowLevelHooksTimeout`）。Alt/Win 按住时被吞掉的按键、注入 Ctrl+C/V 前后释放和恢复修饰键时，都补发未分配键 VK 0xE8，前台应用不会把单独的 Alt 当作菜单键；模拟输入不回流业务快捷键 |
 | 麦克风 | WinMM PCM；三个复用的 100 ms 缓冲区按队列顺序处理，reset 后收取不足整块的尾部 |
 | 粘贴／选中复制 | 剪贴板与原生按键注入；剪贴板读写失败时停止，不继续注入 |
 | 输出音量 | Core Audio endpoint API；保存设备 ID，在原设备恢复，不误改切换后的默认设备 |
@@ -27,7 +27,7 @@ Windows 默认 F8／左 Shift+F8 启动听写／翻译，Alt+T／Alt+R 处理选
 
 新增 DLL 从 OS 查询得到的真实 System32 目录加载，用 `LOAD_LIBRARY_SEARCH_SYSTEM32` 限制依赖搜索，不信任 PATH、当前目录或 SystemRoot 环境输入。可选 API/DLL 缺失返回相关功能错误，不回退不受限搜索。截图资源与文件提交由 [PR #9](windows-native-screenshot.md#取消文件与资源所有权) 维护。
 
-DPAPI 保护当前用户持久化的 API key，不抵御以同一用户身份运行的进程。密钥文件读取、解密或 JSON 解析失败后拒绝覆盖；写盘成功后才发布新 key，失败保留原密文和内存值，不自动重置损坏文件。
+DPAPI 保护当前用户持久化的 API key，不抵御以同一用户身份运行的进程。密钥文件读取失败时拒绝覆盖；能读出但解密或 JSON 解析失败（如密码被重置后 DPAPI 失效）时，原文件改名为 `secrets.json.unreadable-<时间>` 原样保留，以空存储继续，用户可重新填写 key。写盘成功后才发布新 key，失败保留原密文和内存值。
 
 共享 settings.json 同样保留首次读取或整文件解析错误：加载失败时使用默认值，但 SetRaw 和 Section.Update 均拒绝写入，内存值也不发布，避免切换主题等操作覆盖词典、快捷键和其他原配置。用户修复文件后需重启以重新加载；不自动重置或尝试拼接损坏内容。
 
@@ -44,7 +44,7 @@ PR #8 曾对截图 helper 使用系统路径、系统模块范围并移除 API k
 1. withOutput 锁定 OS 线程，先尝试 MTA，仅在 RPC_E_CHANGED_MODE 时按已有 STA 初始化。
 2. 每次成功初始化（包括 S_FALSE）配对一次 CoUninitialize，不改变或释放调用者持有的 COM apartment。
 3. 恢复失败保留有效恢复记录与内存状态；再次录音调整音量前先重试，未恢复则不覆盖待恢复设备／状态。
-4. 恢复成功才清空状态并删除记录。schema 和 Darwin 后端不变，无效 JSON 沿既有逻辑丢弃。
+4. 恢复成功才清空状态并删除记录；设备已不存在（`ErrOutputGone`：CoreAudio 设备不再 alive，Windows endpoint 找不到或不再 active）时同样丢弃，否则之后每次录音都无法静音。schema 不变，无效 JSON 沿既有逻辑丢弃。
 
 录音开始时，静音或降低音量后必须检查恢复记录的序列化与写入结果。保存失败记录错误并立即调用 restore；恢复也失败则保留内存状态，在录音结束或下一次调整音量前重试。若保存与恢复持续失败且进程随后退出，仍没有可用的持久化恢复保证。
 

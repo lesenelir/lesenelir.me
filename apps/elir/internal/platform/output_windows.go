@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"runtime"
@@ -26,6 +27,10 @@ var (
 	iidEnumerator = guid{0xa95664d2, 0x9614, 0x4f35, [8]byte{0xa7, 0x46, 0xde, 0x8d, 0xb6, 0x36, 0x17, 0xe6}}
 	iidVolume     = guid{0x5cdf2c82, 0x841e, 0x4546, [8]byte{0x97, 0x22, 0x0c, 0xf7, 0x40, 0x78, 0x22, 0x9a}}
 )
+
+// ErrOutputGone is RestoreOutput's error for an endpoint that is no longer
+// there or no longer plugged in: there is nothing left to undo.
+var ErrOutputGone = errors.New("the output device is gone")
 
 func native(p uintptr) unsafe.Pointer { return *(*unsafe.Pointer)(unsafe.Pointer(&p)) }
 func method(obj uintptr, index int) uintptr {
@@ -82,11 +87,23 @@ func withOutput(id string, fn func(uintptr, string) error) error {
 			return err
 		}
 		hr = comCall(enumerator, 5, uintptr(unsafe.Pointer(p)), uintptr(unsafe.Pointer(&device)))
+		if uint32(hr) == 0x80070490 { // E_NOTFOUND
+			return ErrOutputGone
+		}
 	}
 	if err := comError("audio endpoint", hr); err != nil {
 		return err
 	}
 	defer comCall(device, 2)
+	if id != "" {
+		var state uint32
+		if err := comError("endpoint state", comCall(device, 6, uintptr(unsafe.Pointer(&state)))); err != nil {
+			return err
+		}
+		if state != 1 { // DEVICE_STATE_ACTIVE
+			return ErrOutputGone
+		}
+	}
 	var p *uint16
 	if err := comError("endpoint ID", comCall(device, 5, uintptr(unsafe.Pointer(&p)))); err != nil {
 		return err

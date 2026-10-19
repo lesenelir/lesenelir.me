@@ -67,7 +67,7 @@ func (a *App) permissionsPage() Page {
 						}
 					})
 				}
-				g.Row(c, m.PermHotkeys(), m.PermHotkeysNote(), func() {
+				g.Row(c, m.PermHotkeys(), m.PermHotkeysNote(runtime.GOOS), func() {
 					if a.perms.tapRunning {
 						widget.Badge(c, m.StatusRunning(), t.Success)
 					} else {

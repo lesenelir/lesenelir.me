@@ -2,14 +2,18 @@ package secret
 
 import (
 	"errors"
-	"github.com/egoist/mygo"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/egoist/mygo"
 )
 
-func readSecretFile(path string) ([]byte, error)     { return os.ReadFile(path) }
-func writeSecretFile(path string, data []byte) error { return os.WriteFile(path, data, 0600) }
+// decodeSecretFile returns the file's JSON: on macOS the file is the JSON,
+// kept readable by the user alone.
+func decodeSecretFile(data []byte) ([]byte, error) { return data, nil }
+
+func writeSecretFile(path string, data []byte) error { return os.WriteFile(path, data, 0o600) }
 
 // fromKeychain reads a key the app kept in the Keychain before, "" when
 // there is none.

@@ -44,9 +44,15 @@ func keepLabel(m locales.Messages, days int) string {
 func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 	t := c.Theme()
 	widget.Group(c, pal, m.SectionCapture(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutCapture(), m.CaptureNote(), func() { s.host.Shortcut(c, shortcuts.Capture) })
-		g.Row(c, m.ShortcutWindow(), "", func() { s.host.Shortcut(c, shortcuts.Window) })
-		g.Row(c, m.ShortcutCancel(), "", func() { s.host.Shortcut(c, shortcuts.ScreenshotCancel) })
+		g.Row(c, m.ShortcutCapture(), m.CaptureNote(runtime.GOOS), func() { s.host.Shortcut(c, shortcuts.Capture) })
+		if runtime.GOOS == "windows" {
+			g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { s.host.Shortcut(c, shortcuts.Window) })
+			g.Row(c, m.ShortcutCancel(), "", func() { s.host.Shortcut(c, shortcuts.ScreenshotCancel) })
+		} else {
+			// macOS's own capture, which Elir runs, takes these keys.
+			g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { widget.Keycaps(c, pal, "space") })
+			g.Row(c, m.ShortcutCancel(), "", func() { widget.Keycaps(c, pal, "esc") })
+		}
 	})
 	// A terminal's ⌘V pastes text alone; Claude Code reads an image
 	// itself on ⌃V.
@@ -58,7 +64,7 @@ func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette)
 				widget.Keycaps(c, pal, "⌘", "V")
 			}
 		})
-		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(), func() {
+		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(runtime.GOOS), func() {
 			if runtime.GOOS == "windows" {
 				widget.Keycaps(c, pal, "Ctrl", "Shift", "V")
 			} else {
@@ -77,7 +83,7 @@ func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette)
 			}
 		})
 	})
-	if ui.AlertDialog(c, &s.confirm, m.ClearScreenshotsTitle(), m.ClearScreenshotsMessage(), m.ButtonCancel(), m.ButtonClearHistory()) == 1 {
+	if ui.AlertDialog(c, &s.confirm, m.ClearScreenshotsTitle(), m.ClearScreenshotsMessage(runtime.GOOS), m.ButtonCancel(), m.ButtonClearHistory()) == 1 {
 		s.clear()
 	}
 	if s.err != nil {
@@ -121,7 +127,7 @@ func (s *Screenshot) card(c *ui.Context, m locales.Messages, pal widget.Palette,
 		if menu.Item(m.ButtonCopy()).Chosen() {
 			copyIt()
 		}
-		if menu.Item(m.ShowInFinder()).Chosen() {
+		if menu.Item(m.ShowInFinder(runtime.GOOS)).Chosen() {
 			mygo.Shell.ShowItemInFolder(shot.Path)
 		}
 		menu.Separator()

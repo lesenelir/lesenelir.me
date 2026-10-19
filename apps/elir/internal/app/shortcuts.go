@@ -149,7 +149,7 @@ func shortcutName(m locales.Messages, a shortcut.Action) string {
 	case shortcut.Capture:
 		return m.ShortcutCapture()
 	case shortcut.Window:
-		return m.ShortcutWindow()
+		return m.ShortcutWindow(runtime.GOOS)
 	case shortcut.ScreenshotCancel:
 		return m.NavScreenshot() + " · " + m.ShortcutCancel()
 	}

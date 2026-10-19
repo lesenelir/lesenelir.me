@@ -3,6 +3,7 @@
 package darwin
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sync"
@@ -17,6 +18,7 @@ type audioAddress struct{ Selector, Scope, Element uint32 }
 const (
 	audioSystemObject               = 1
 	propDefaultOutputDevice         = 0x644F7574 // 'dOut'
+	propDeviceIsAlive               = 0x6C69766E // 'livn'
 	propMute                        = 0x6D757465 // 'mute'
 	propVirtualMainVolume           = 0x766D7663 // 'vmvc', AudioHardwareService
 	scopeGlobal                     = 0x676C6F62 // 'glob'
@@ -62,6 +64,10 @@ func loadCoreAudio() error {
 	})
 	return coreAudioErr
 }
+
+// ErrOutputGone is RestoreOutput's error for a device that is no longer
+// there, as headphones unplugged: there is nothing left to undo.
+var ErrOutputGone = errors.New("darwin: the output device is gone")
 
 // OutputState is how to undo QuietOutput: unmute the device, or put its
 // volume back. A zero Kind means there is nothing to undo. It is plain
@@ -120,6 +126,9 @@ func RestoreOutput(s OutputState) error {
 	if err := loadCoreAudio(); err != nil {
 		return err
 	}
+	if !deviceAlive(s.Device) {
+		return ErrOutputGone
+	}
 	switch s.Kind {
 	case "mute":
 		if muted, err := getMute(s.Device); err != nil || !muted {
@@ -147,6 +156,14 @@ func defaultOutputDevice() (uint32, error) {
 		return 0, fmt.Errorf("darwin: no default output device")
 	}
 	return device, nil
+}
+
+// deviceAlive reports whether device is still there.
+func deviceAlive(device uint32) bool {
+	var alive uint32
+	size := uint32(unsafe.Sizeof(alive))
+	addr := audioAddress{propDeviceIsAlive, scopeGlobal, elementMain}
+	return audioObjectGetPropertyData(device, &addr, 0, nil, &size, unsafe.Pointer(&alive)) == 0 && alive != 0
 }
 
 func muteAddress() *audioAddress { return &audioAddress{propMute, scopeOutput, elementMain} }

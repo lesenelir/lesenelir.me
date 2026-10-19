@@ -137,3 +137,30 @@ func TestRecoverySaveFailureRestoresOutput(t *testing.T) {
 		})
 	}
 }
+
+func TestRecoveryOfAGoneDeviceIsDropped(t *testing.T) {
+	restore, quiet := restoreOutput, quietOutput
+	t.Cleanup(func() { restoreOutput, quietOutput = restore, quiet })
+	restoreOutput = func(platform.OutputState) error { return platform.ErrOutputGone }
+	quiets := 0
+	quietOutput = func(float32) (platform.OutputState, error) {
+		quiets++
+		return platform.OutputState{}, nil
+	}
+	q := &quieter{settings: config.Defaults, path: filepath.Join(t.TempDir(), "restore.json")}
+	data, err := json.Marshal(platform.OutputState{Kind: "mute"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(q.path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	q.recover()
+	if _, err := os.Stat(q.path); !os.IsNotExist(err) {
+		t.Fatalf("record of a gone device kept: %v", err)
+	}
+	q.Recording(true)
+	if quiets != 1 {
+		t.Fatal("a gone device keeps new recordings from quieting output")
+	}
+}

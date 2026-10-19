@@ -39,13 +39,8 @@ func protectData(data []byte, encrypt bool) ([]byte, error) {
 	return append([]byte(nil), unsafe.Slice(out.Data, out.Size)...), nil
 }
 
-func readSecretFile(path string) ([]byte, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return protectData(data, false)
-}
+// decodeSecretFile decrypts the file's JSON.
+func decodeSecretFile(data []byte) ([]byte, error) { return protectData(data, false) }
 
 func writeSecretFile(path string, data []byte) error {
 	encrypted, err := protectData(data, true)

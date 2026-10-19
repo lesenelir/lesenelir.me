@@ -3,6 +3,8 @@
 package rewrite
 
 import (
+	"runtime"
+
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
@@ -30,5 +32,5 @@ func (r *Rewrite) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 		g.Row(c, m.ShortcutPolishText(), m.PolishTextNote(), func() { r.host.Shortcut(c, shortcuts.PolishText) })
 		g.Row(c, m.ShortcutCancel(), m.RewriteCancelNote(), func() { r.host.Shortcut(c, shortcuts.RewriteCancel) })
 	})
-	widget.Note(c, pal, m.RewriteHowNote())
+	widget.Note(c, pal, m.RewriteHowNote(runtime.GOOS))
 }
