@@ -2,6 +2,11 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.4.1
+
+- A tap of Fn starts dictation again; since 0.4.0 the recording stopped as it began, as "Too short, ignored".
+- Shortcuts are written as macOS writes them: `⌥T` and `⇧⌘2` rather than "Alt + T" and "Command + Shift + 2".
+
 ## 0.4.0
 
 - Every shortcut can be changed: click one in Dictation & Translation, Translate & Polish or Screenshot, press the new
