@@ -43,7 +43,7 @@ Settings, history and screenshots use MyGo's Windows user-data directory under
 only be decrypted with that Windows user's credentials. They are not portable to
 another account. Screenshot selection runs in-process with Win32/GDI: drag and
 release to capture an area, press Space to immediately capture the window under
-the pointer, or Esc to cancel. Losing focus also cancels. PowerShell and .NET are
+the pointer, or Esc or a right click to cancel. Losing focus also cancels. PowerShell and .NET are
 not required. GDI captures frozen visible desktop pixels, including occlusion;
 protected content may be blank. Window bounds use DWM with a GetWindowRect fallback
 that may include invisible borders. Moving a window after the freeze can make its

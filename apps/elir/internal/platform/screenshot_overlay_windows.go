@@ -127,14 +127,9 @@ func selectScreenshot(ctx context.Context, d *screenshotDIB, monitors []image.Re
 		return selection, fmt.Errorf("create selection timer: %v", e)
 	}
 	shotShowWindow.Call(hwnd, 5)
-	shotSetForeground.Call(hwnd)
-	shotSetFocus.Call(hwnd)
-	foreground, _, _ := shotGetForeground.Call()
-	focus, _, _ := shotGetFocus.Call()
-	if foreground != hwnd || focus != hwnd {
-		return selection, errors.New("activate selection window: keyboard focus unavailable")
-	}
-	s.activated = true
+	// Without the foreground the window still takes the mouse, and it is
+	// activated by the first click; until then Esc is polled on the timer.
+	s.activated = activateScreenshotWindow(hwnd)
 	shotUpdateWindow.Call(hwnd)
 	s.checkDisplays()
 	var msg struct {
@@ -160,6 +155,26 @@ func selectScreenshot(ctx context.Context, d *screenshotDIB, monitors []image.Re
 		shotDispatchMessage.Call(uintptr(unsafe.Pointer(&msg)))
 	}
 	return s.selection, s.err
+}
+
+// activateScreenshotWindow brings the selection window to the front with
+// the keyboard focus. Elir is in the background when its shortcut is pressed,
+// and Windows lets a background process take the foreground only when it
+// received the last input; a zero mouse input, which moves nothing, is that.
+func activateScreenshotWindow(hwnd uintptr) bool {
+	var input struct { // INPUT_MOUSE
+		Type              uint32
+		_                 uint32
+		DX, DY            int32
+		Data, Flags, Time uint32
+		Extra             uintptr
+	}
+	sendInput.Call(1, uintptr(unsafe.Pointer(&input)), unsafe.Sizeof(input))
+	shotSetForeground.Call(hwnd)
+	shotSetFocus.Call(hwnd)
+	foreground, _, _ := shotGetForeground.Call()
+	focus, _, _ := shotGetFocus.Call()
+	return foreground == hwnd && focus == hwnd
 }
 
 func (s *screenshotOverlay) finish(r image.Rectangle, err error) {
@@ -303,41 +318,18 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 		case 0x100, 0x104: // WM_KEYDOWN / WM_SYSKEYDOWN
 			if lparam&(1<<30) == 0 {
 				vk := shortcut.WindowsVK(uint32(wparam), uint32(lparam>>16)&0xff, lparam&(1<<24) != 0)
-				var flags uint64
-				for _, k := range []uint32{0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0x5b, 0x5c} {
-					v, _, _ := asyncKey.Call(uintptr(k))
-					if v&0x8000 == 0 {
-						continue
-					}
-					switch k {
-					case 0xa0:
-						flags |= 2
-					case 0xa1:
-						flags |= 4
-					case 0xa2:
-						flags |= 1
-					case 0xa3:
-						flags |= 0x2000
-					case 0xa4:
-						flags |= 0x20
-					case 0xa5:
-						flags |= 0x40
-					case 0x5b:
-						flags |= 8
-					case 0x5c:
-						flags |= 16
-					}
-				}
-				s.shortcut(shortcut.Key(normalizedKey(vk)), shortcut.Flags(flags))
+				s.shortcut(shortcut.Key(normalizedKey(vk)), heldModifiers())
 			}
-		case 0x10, 0x1f: // WM_CLOSE / WM_CANCELMODE
+		case 0x10, 0x1f, 0x205: // WM_CLOSE / WM_CANCELMODE / WM_RBUTTONUP
 			s.finish(image.Rectangle{}, nil)
 		case 0x8: // WM_KILLFOCUS
 			if s.activated {
 				s.finish(image.Rectangle{}, nil)
 			}
 		case 0x6: // WM_ACTIVATE
-			if s.activated && wparam&0xffff == 0 {
+			if wparam&0xffff != 0 {
+				s.activated = true
+			} else if s.activated {
 				s.finish(image.Rectangle{}, nil)
 			}
 		case 0x215: // WM_CAPTURECHANGED
@@ -349,6 +341,9 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 		case 0x113: // WM_TIMER
 			if err := s.ctx.Err(); err != nil {
 				s.finish(image.Rectangle{}, err)
+			} else if !s.activated && s.cancelHeld() {
+				// Keys go to the app in front until the window is activated.
+				s.finish(image.Rectangle{}, nil)
 			} else {
 				s.checkDisplays()
 			}
@@ -356,7 +351,7 @@ func screenshotWindowProc(hwnd, message, wparam, lparam uintptr) uintptr {
 	}
 	// Never let DefWindowProc close a window or beep on handled input.
 	switch message {
-	case 0x10, 0x100, 0x104, 0x101, 0x105, 0x201, 0x202, 0x200:
+	case 0x10, 0x100, 0x104, 0x101, 0x105, 0x201, 0x202, 0x200, 0x204, 0x205:
 		return 0
 	}
 	r, _, _ := shotDefWindow.Call(hwnd, message, wparam, lparam)
@@ -411,4 +406,30 @@ func (s *screenshotOverlay) shortcut(key string, mods shortcut.Mods) {
 		claimScreenshotKey(s.ctx, key)
 		s.windowSelection()
 	}
+}
+
+// cancelHeld reports whether the cancel shortcut is held, for a window that
+// has not received the keyboard yet.
+func (s *screenshotOverlay) cancelHeld() bool {
+	b := screenshotBindings(s.ctx)[shortcut.ScreenshotCancel]
+	vk := shortcut.VK(b.Key) & 0xff
+	if vk == 0 {
+		return false
+	}
+	v, _, _ := asyncKey.Call(uintptr(vk))
+	return v&0x8000 != 0 && b.Match(b.Key, heldModifiers())
+}
+
+// heldModifiers reads the modifiers held now, by side.
+func heldModifiers() shortcut.Mods {
+	var flags uint64
+	for _, k := range []struct {
+		vk   uintptr
+		flag uint64
+	}{{0xa0, 2}, {0xa1, 4}, {0xa2, 1}, {0xa3, 0x2000}, {0xa4, 0x20}, {0xa5, 0x40}, {0x5b, 8}, {0x5c, 16}} {
+		if v, _, _ := asyncKey.Call(k.vk); v&0x8000 != 0 {
+			flags |= k.flag
+		}
+	}
+	return shortcut.Flags(flags)
 }

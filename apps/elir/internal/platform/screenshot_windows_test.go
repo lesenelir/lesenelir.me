@@ -242,6 +242,37 @@ func TestScreenshotTerminalState(t *testing.T) {
 	}
 }
 
+func TestScreenshotWithoutForeground(t *testing.T) {
+	send := func(s *screenshotOverlay, message, wparam uintptr) {
+		shotWindows.Store(uintptr(0), s)
+		screenshotWindowProc(0, message, wparam, 0)
+		shotWindows.Delete(uintptr(0))
+	}
+	// A window that never got the foreground ignores focus notifications.
+	s := &screenshotOverlay{}
+	for _, message := range []uintptr{0x8, 0x6} {
+		send(s, message, 0)
+	}
+	if s.done {
+		t.Fatal("an inactive selection window cancelled on focus loss")
+	}
+	// A click activates it; losing the foreground then cancels as usual.
+	send(s, 0x6, 2) // WA_CLICKACTIVE
+	if !s.activated || s.done {
+		t.Fatalf("activation: %+v", s)
+	}
+	send(s, 0x6, 0)
+	if !s.done {
+		t.Fatal("an activated window kept running after losing the foreground")
+	}
+	// The right button cancels, focused or not.
+	s = &screenshotOverlay{}
+	send(s, 0x205, 0)
+	if !s.done || !s.selection.Empty() || s.err != nil {
+		t.Fatalf("right click: %+v", s)
+	}
+}
+
 func TestScreenshotDPI(t *testing.T) {
 	runtime.LockOSThread()
 	unlock := true

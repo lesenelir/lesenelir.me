@@ -24,6 +24,15 @@ func Key(code int64) string {
 	}
 	return ""
 }
+// VK is the Windows virtual key of a key ID, 0 for one Windows lacks.
+func VK(id string) uint32 {
+	for _, k := range keys {
+		if k.ID == id {
+			return k.VK
+		}
+	}
+	return 0
+}
 func WindowsKey(vk uint32) int64 {
 	for _, k := range keys {
 		if k.VK != 0 && k.VK == vk {

@@ -52,12 +52,12 @@ Windows 脚本、嵌入和 helper 测试已删除。macOS 选择器由 [PR #10](
 | --- | --- |
 | 左键按下／拖动／松开 | 捕获鼠标，最终坐标重算；有效矩形确认，否则取消 |
 | 窗口键，默认 Space | 非重复时隐藏自身，WindowFromPoint → GA_ROOT，立即选窗 |
-| 取消键，默认 Esc；关闭；激活后失焦／Alt+Tab | 取消，不残留覆盖层或 busy |
+| 取消键，默认 Esc；右键；关闭；激活后失焦／Alt+Tab | 取消，不残留覆盖层或 busy |
 | 非自身收尾的鼠标捕获丢失 | 取消 |
 | 显示布局／分辨率／DPI 变化 | 返回配置变化错误，要求重试 |
 | context 取消／超时 | 会话 timer 检查后退出，不保证中断阻塞原生 API |
 
-结果只完成一次，自身隐藏、正常 ReleaseCapture 和迟到通知不能改写已确认结果。覆盖层必须取得可接收取消键的焦点，否则退出。WM_PAINT 配对 BeginPaint/EndPaint，框线不烧进 PNG。
+结果只完成一次，自身隐藏、正常 ReleaseCapture 和迟到通知不能改写已确认结果。激活前先发送一个零位移的鼠标输入（`SendInput`，不移动指针），使 Elir 成为最后输入的接收者，再 `SetForegroundWindow`：快捷键按下时 Elir 在后台，否则前台锁会拒绝激活。仍未拿到前台时不退出：置顶覆盖层照常接收鼠标，第一次点击即激活；在此之前 `WM_TIMER` 轮询所配置的取消键（`GetAsyncKeyState`），右键也取消，覆盖层不会无法关闭。WM_PAINT 配对 BeginPaint/EndPaint，框线不烧进 PNG。
 
 边界优先 DWM 扩展可见边界，失败回退 GetWindowRect，后者可能含不可见边框。圆角外保留桌面背景。冻结后外部窗口移动／关闭／换层叠时，实时命中可能与快照不符；当前没有冻结窗口树。
 
