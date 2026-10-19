@@ -56,3 +56,19 @@ contents. Real device and multi-monitor interaction remain manual checks.
 
 References: [Microsoft DLL security guidance](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-security)
 and [Windows clipboard history/cloud exclusion formats](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats#cloud-clipboard-and-clipboard-history-formats).
+
+## Native screenshot migration (2026-10-18)
+
+The screenshot helper, script embedding, C# declarations and helper-specific tests
+have been removed on `codex/windows-native-screenshot`. Capture now runs entirely
+inside Elir, so screenshot capture no longer starts a child process or constructs
+a child environment. The earlier helper checks above are historical evidence.
+
+New user32/gdi32/dwmapi calls retain the real-System32 loader and dependency-search
+restriction. The optional old-OS shcore probe uses the same loader through an
+error-returning variant, releases its reference, and fails only the screenshot
+feature when unavailable. PNG output is encoded into an owned temporary file and
+committed with MoveFileExW without REPLACE_EXISTING; cancellation or failure before
+commit removes only the temporary file. Existing targets and the explicit-copy
+clipboard policy are preserved. Resource and file-contract tests are recorded in
+[the native screenshot design](windows-native-screenshot.md#10-交接状态).

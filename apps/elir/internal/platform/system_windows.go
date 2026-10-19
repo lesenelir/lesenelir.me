@@ -23,16 +23,24 @@ var systemDirectory = func() string {
 func SystemDirectory() string { return systemDirectory }
 
 func systemDLL(name string) *syscall.DLL {
-	path := filepath.Join(systemDirectory, name)
-	p, err := syscall.UTF16PtrFromString(path)
+	dll, err := loadSystemDLL(name)
 	if err != nil {
 		panic(err)
 	}
+	return dll
+}
+
+func loadSystemDLL(name string) (*syscall.DLL, error) {
+	path := filepath.Join(systemDirectory, name)
+	p, err := syscall.UTF16PtrFromString(path)
+	if err != nil {
+		return nil, err
+	}
 	// Restrict both this DLL and its dependencies; an absolute path alone
-	// only constrains the requested DLL. Keep the handle for the process lifetime.
+	// only constrains the requested DLL. Callers own this loader reference.
 	handle, _, err := kernel32.NewProc("LoadLibraryExW").Call(uintptr(unsafe.Pointer(p)), 0, 0x800) // LOAD_LIBRARY_SEARCH_SYSTEM32
 	if handle == 0 {
-		panic(fmt.Sprintf("load system DLL %s: %v", name, err))
+		return nil, fmt.Errorf("load system DLL %s: %v", name, err)
 	}
-	return &syscall.DLL{Name: path, Handle: syscall.Handle(handle)}
+	return &syscall.DLL{Name: path, Handle: syscall.Handle(handle)}, nil
 }

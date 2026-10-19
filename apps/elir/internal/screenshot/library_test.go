@@ -37,6 +37,7 @@ func TestLibrary(t *testing.T) {
 	}
 	old := add(8 * 24 * time.Hour)
 	_ = os.WriteFile(filepath.Join(l.dir, "notes.txt"), nil, 0o644)
+	_ = os.WriteFile(filepath.Join(l.dir, ".elir-capture-123.tmp"), []byte("partial"), 0o600)
 
 	shots, err := l.List()
 	if err != nil || len(shots) != 3 || shots[2].Path != old || Size(shots) != 9 {
