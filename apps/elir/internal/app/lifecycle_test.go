@@ -54,3 +54,19 @@ func TestQuitWaitsForFeatureStop(t *testing.T) {
 		t.Fatal("quit still blocked after cleanup")
 	}
 }
+
+func TestQuitDoesNotWaitForeverForAStuckFeature(t *testing.T) {
+	timeout := stopTimeout
+	stopTimeout = 50 * time.Millisecond
+	t.Cleanup(func() { stopTimeout = timeout })
+	f := &stoppingFeature{started: make(chan struct{}), release: make(chan struct{})}
+	t.Cleanup(func() { close(f.release) })
+	a := New()
+	a.Add(f)
+	a.beforeQuit(&mygo.QuitEvent{})
+	select {
+	case <-a.stopDone:
+	case <-time.After(2 * time.Second):
+		t.Fatal("a stuck feature kept the app from quitting")
+	}
+}

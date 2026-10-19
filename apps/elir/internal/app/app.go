@@ -10,6 +10,7 @@ import (
 	"log"
 	"path/filepath"
 	"slices"
+	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -77,6 +78,9 @@ func (a *App) Run() error {
 	return mygo.App.Run()
 }
 
+// stopTimeout is how long quitting waits for the tools to stop.
+var stopTimeout = 3 * time.Second
+
 func (a *App) beforeQuit(e *mygo.QuitEvent) {
 	if a.stopDone != nil {
 		select {
@@ -92,10 +96,21 @@ func (a *App) beforeQuit(e *mygo.QuitEvent) {
 	a.stopDone = make(chan struct{})
 	// macOS recorder cancellation needs the UI loop to keep serving RunOnMain.
 	go func() {
-		for _, f := range a.features {
-			if s, ok := f.(Stopper); ok {
-				s.Stop()
+		stopped := make(chan struct{})
+		go func() {
+			for _, f := range a.features {
+				if s, ok := f.(Stopper); ok {
+					s.Stop()
+				}
 			}
+			close(stopped)
+		}()
+		// A tool stuck stopping must not keep the app from quitting; the
+		// next launch undoes what a recording left quieted.
+		select {
+		case <-stopped:
+		case <-time.After(stopTimeout):
+			log.Printf("quit: the tools did not stop within %v", stopTimeout)
 		}
 		close(a.stopDone)
 		mygo.App.Quit()

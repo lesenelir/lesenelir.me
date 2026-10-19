@@ -7,7 +7,6 @@ type Router struct {
 	Available map[Action]func() bool
 	Fire      map[Action]func()
 	Exclusive func() bool
-	Selection func(string, Mods) bool
 	Changed   func()
 	Editing   bool
 	Candidate Binding
@@ -104,11 +103,8 @@ func (r *Router) down(code int64, repeat bool) bool {
 	if r.blocked {
 		return false
 	}
+	// A screenshot's selection takes its own keys; Claim pairs their releases.
 	if r.Exclusive != nil && r.Exclusive() {
-		if r.Selection != nil && r.Selection(key, r.mods) {
-			r.taken[code] = true
-			return true
-		}
 		return false
 	}
 	if r.Editing {

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"image"
 	"slices"
 	"sync"
 	"syscall"
 	"unsafe"
+
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 )
 
 var (

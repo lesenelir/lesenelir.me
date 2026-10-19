@@ -4,7 +4,7 @@
 
 ## 范围与调用边界
 
-同一套配置、匹配和录入覆盖 Windows/macOS 十项业务快捷键，包括截图内部键。保留功能页、语音控制器、文字处理与图库；不引入热键库、宏、多段键、额外手势或配置方案系统。
+同一套配置、匹配和录入覆盖 Windows/macOS 十项业务快捷键；截图内部的窗口键和取消键只在 Windows 可改，macOS 截图由系统 `screencapture -i` 处理这两个键（`shortcut.Fixed`）。保留功能页、语音控制器、文字处理与图库；不引入热键库、宏、多段键、额外手势或配置方案系统。
 
 ```text
 Windows hook / macOS EventTap → 物理键归一化
@@ -28,8 +28,8 @@ UI 状态只在主线程读写，经 Window.Update 发布工作结果；使用�
 | rewrite.polish | Alt+R | Option+R | 选中文本润色 |
 | rewrite.cancel | Esc | Esc | 改写进行中 |
 | screenshot.capture | Ctrl+Shift+2 | Command+Shift+2 | 启动截图 |
-| screenshot.window | Space | Space | Windows 立即选窗；macOS 切换模式后点击 |
-| screenshot.cancel | Esc | Esc | 截图选择中 |
+| screenshot.window | Space | Space（固定） | Windows 立即选窗；macOS 由系统截图切换窗口模式 |
+| screenshot.cancel | Esc | Esc（固定） | 截图选择中 |
 
 存稳定物理键 ID（KeyT、Digit2、F8、Fn），不存显示字符串／混合平台数字。修饰键支持通用 Ctrl／Alt／Shift／Meta 和左右限定，主键盘与数字键盘分开。Windows F8 为真实 F8，macOS Fn／Globe 合并；硬件未上报的 Fn 无法录入。
 
@@ -65,9 +65,9 @@ Store.SetRaw 用候选副本，持久化成功才发布 sections；Section.Updat
 
 Windows 保留 [PR #9 原生 GDI](windows-native-screenshot.md)。WithScreenshotShortcuts 经 context 传不可变快照；窗口按同一规则处理窗口／取消动作，由 Router.Claim 认领释放。全局路由在截图时透传本地输入，不启动语音／改写；DPI、文件、安全加载和清理契约不变，没有 helper 配置／环境通道。
 
-macOS 用固定 /usr/sbin/screencapture 在遮罩出现前非交互抓各显示器，CGWindowListCopyWindowInfo 快照窗口几何，MyGo 自有选择层负责拖动、窗口模式、取消。不向系统选择器注入 Space/Esc。随机临时目录在成功／取消／失败均清理，结果仍进原图库／剪贴板。
+macOS 继续运行系统的 `/usr/sbin/screencapture -i`：拖选、Space 切换窗口模式（带阴影、可截被遮挡的窗口）、拖动中移动选区和 Esc 取消都由系统提供，按下快捷键即出现，无需先抓屏解码。因此 macOS 上只有触发截图的快捷键可改；`Config.Bindings` 忽略 darwin 下保存的窗口键和取消键，设置页对它们显示固定键帽。截图进行中 Router 透传按键，交给系统截图。
 
-显示器逻辑坐标按各自快照尺寸映射物理像素；快照总量与输出分别有 256 MiB 像素预算，显示变化取消。相较旧系统选择器，当前裁剪冻结可见桌面，不恢复遮挡内容、不加窗口阴影、不支持拖动中移动选区；窗口键仍切换模式再点击。差异来自源码对照，未作 macOS 真机交互对照。
+曾尝试过用自绘选择层替换系统截图，以支持在 macOS 改这两个键；代价是遮罩出现前要抓取并解码整张 Retina 快照（数百毫秒以上），且失去窗口阴影、遮挡内容和移动选区，已撤回。
 
 ## Windows 透明浮窗后续修复
 
@@ -98,6 +98,6 @@ macOS 用固定 /usr/sbin/screencapture 在遮罩出现前非交互抓各显示�
 
 ## 未验收与下一步
 
-无 macOS 真机：Fn／Globe、非美式键盘、权限恢复、新选择器多屏／Retina 待验。Windows 真实终端／高权限目标物理快捷键、完整录音上传、缩略图拖放、Windows 10 真机透明合成未全面验收。用户试用反馈不替代逐项验收。
+无 macOS 真机：Fn／Globe、非美式键盘、权限恢复待验。Windows 真实终端／高权限目标物理快捷键、完整录音上传、缩略图拖放、Windows 10 真机透明合成未全面验收。用户试用反馈不替代逐项验收。
 
-后续按三篇维护：平台与安全归 PR #8，Windows 捕获／文件归 PR #9，按键、macOS 选择器及本次浮窗归本文；更新对应正文和验证记录，不再为小修复增文档。
+后续按三篇维护：平台与安全归 PR #8，Windows 捕获／文件归 PR #9，按键及本次浮窗归本文；更新对应正文和验证记录，不再为小修复增文档。

@@ -185,24 +185,30 @@ func TestScreenshotOwnsInput(t *testing.T) {
 	r, got := fixture("windows")
 	exclusive := true
 	r.Exclusive = func() bool { return exclusive }
-	locals := 0
-	r.Selection = func(k string, m Mods) bool {
-		if k == "Escape" {
-			locals++
-			return true
-		}
-		return false
-	}
 	if r.KeyDown(100, 0, false) {
 		t.Fatal("screenshot triggered voice")
 	}
 	r.KeyUp(100)
-	if !r.KeyDown(53, 0, false) {
-		t.Fatal("local cancel missed")
+	// The selection window takes Esc itself, then claims its release.
+	if r.KeyDown(53, 0, false) {
+		t.Fatal("the router took the selection window's key")
 	}
+	r.Claim("Escape")
 	exclusive = false
-	if !r.KeyUp(53) || locals != 1 || len(*got) != 0 {
+	if !r.KeyUp(53) || len(*got) != 0 {
 		t.Fatal("ownership leaked")
+	}
+}
+func TestMacScreenshotKeysAreFixed(t *testing.T) {
+	c := Config{Version: 1}
+	w := Binding{Key: "KeyW"}
+	c.Set("darwin", Bindings{Window: w})
+	c.Set("windows", Bindings{Window: w})
+	if c.Bindings("darwin")[Window].Key != Defaults("darwin")[Window].Key {
+		t.Fatal("macOS took a screenshot key its own capture handles")
+	}
+	if c.Bindings("windows")[Window].Key != "KeyW" {
+		t.Fatal("Windows lost its screenshot key")
 	}
 }
 func TestValidationAndLoading(t *testing.T) {

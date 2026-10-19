@@ -9,11 +9,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 // Store is the settings file. It is safe for concurrent use.
@@ -26,8 +28,10 @@ type Store struct {
 	loadErr  error
 }
 
-// Open reads the settings at path. A missing file is an empty store; a
-// corrupt or unreadable one uses defaults and rejects writes until reopened.
+// Open reads the settings at path. A missing file is an empty store. One
+// that cannot be read gives defaults and keeps the store from writing, so
+// that it is not replaced; one read but not JSON is moved aside to
+// path.unreadable-<time>, and the store starts empty and saves anew.
 func Open(path string) (*Store, error) {
 	st := &Store{path: path, sections: map[string]json.RawMessage{}}
 	data, err := os.ReadFile(path)
@@ -41,8 +45,12 @@ func Open(path string) (*Store, error) {
 	}
 	if err := json.Unmarshal(data, &st.sections); err != nil {
 		st.sections = map[string]json.RawMessage{}
-		st.loadErr = err
-		return st, err
+		aside := path + ".unreadable-" + time.Now().Format("20060102-150405")
+		if moveErr := os.Rename(path, aside); moveErr != nil {
+			st.loadErr = err
+			return st, errors.Join(err, moveErr)
+		}
+		return st, fmt.Errorf("%w; moved it to %s", err, filepath.Base(aside))
 	}
 	if st.sections == nil {
 		st.sections = map[string]json.RawMessage{}

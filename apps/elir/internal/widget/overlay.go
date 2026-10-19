@@ -20,9 +20,13 @@ func NewOverlay(tray *mygo.Tray, title string, width, height int, view func(*ui.
 		w.SetTitle(title)
 		return w
 	}
-	return mygo.NewWindow(mygo.WindowOptions{
+	w := mygo.NewWindow(mygo.WindowOptions{
 		Title: title, Panel: true, Hidden: true, Frameless: true,
 		Transparent: true, DisableShadow: true,
 		Width: width, Height: height, Content: ui.View(view),
 	})
+	// A transparent window lets clicks through by default; the bars and the
+	// thumbnail take clicks and drags.
+	w.SetIgnoreMouseEvents(false)
+	return w
 }

@@ -91,59 +91,76 @@ func TestCorruptFile(t *testing.T) {
 	}
 }
 
-func TestLoadErrorBlocksWrites(t *testing.T) {
-	for _, unreadable := range []bool{false, true} {
-		t.Run(map[bool]string{false: "corrupt", true: "unreadable"}[unreadable], func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "settings.json")
-			original := []byte(`{"voice":{"dictionary":["keep"]},"app":`)
-			if unreadable {
-				if err := os.Mkdir(path, 0o700); err != nil {
-					t.Fatal(err)
-				}
-			} else if err := os.WriteFile(path, original, 0o600); err != nil {
-				t.Fatal(err)
-			}
-			st, loadErr := Open(path)
-			if loadErr == nil || !st.Existed() {
-				t.Fatalf("open: existed %v, err %v", st.Existed(), loadErr)
-			}
-			if unreadable {
-				if err := os.Remove(path); err != nil {
-					t.Fatal(err)
-				}
-				if err := os.WriteFile(path, original, 0o600); err != nil {
-					t.Fatal(err)
-				}
-			}
-			app, err := NewSection(st, "app", appSettings{Theme: "system"}, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err := app.Update(func(s *appSettings) { s.Theme = "dark" }); !errors.Is(err, loadErr) {
-				t.Fatalf("update: %v, want load error %v", err, loadErr)
-			}
-			if err := st.SetRaw("tool", json.RawMessage(`{"model":"new"}`)); !errors.Is(err, loadErr) {
-				t.Fatalf("SetRaw: %v, want load error %v", err, loadErr)
-			}
-			if app.Get().Theme != "system" || st.Raw("tool") != nil {
-				t.Fatal("failed writes changed memory")
-			}
-			after, err := os.ReadFile(path)
-			if err != nil || !bytes.Equal(after, original) {
-				t.Fatalf("original file changed: %q, err %v", after, err)
-			}
-			// Repairing and reopening is the explicit way to resume writes.
-			if err := os.WriteFile(path, []byte(`{"app":{"theme":"light"}}`), 0o600); err != nil {
-				t.Fatal(err)
-			}
-			reopened, err := Open(path)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err := reopened.SetRaw("tool", json.RawMessage(`{}`)); err != nil {
-				t.Fatalf("save after reopening repaired file: %v", err)
-			}
-		})
+func TestUnreadableFileBlocksWrites(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	original := []byte(`{"voice":{"dictionary":["keep"]},"app":{}}`)
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	st, loadErr := Open(path)
+	if loadErr == nil || !st.Existed() {
+		t.Fatalf("open: existed %v, err %v", st.Existed(), loadErr)
+	}
+	// The file comes back readable; the store still does not replace it.
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	app, err := NewSection(st, "app", appSettings{Theme: "system"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := app.Update(func(s *appSettings) { s.Theme = "dark" }); !errors.Is(err, loadErr) {
+		t.Fatalf("update: %v, want load error %v", err, loadErr)
+	}
+	if err := st.SetRaw("tool", json.RawMessage(`{"model":"new"}`)); !errors.Is(err, loadErr) {
+		t.Fatalf("SetRaw: %v, want load error %v", err, loadErr)
+	}
+	if app.Get().Theme != "system" || st.Raw("tool") != nil {
+		t.Fatal("failed writes changed memory")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(after, original) {
+		t.Fatalf("original file changed: %q, err %v", after, err)
+	}
+	reopened, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := reopened.SetRaw("tool", json.RawMessage(`{}`)); err != nil {
+		t.Fatalf("save after reopening a readable file: %v", err)
+	}
+}
+
+func TestCorruptFileIsMovedAside(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	original := []byte(`{"voice":{"dictionary":["keep"]},"app":`)
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	st, err := Open(path)
+	if err == nil || !st.Existed() {
+		t.Fatalf("open: existed %v, err %v", st.Existed(), err)
+	}
+	aside, _ := filepath.Glob(path + ".unreadable-*")
+	if len(aside) != 1 {
+		t.Fatalf("corrupt file not kept aside: %v", aside)
+	}
+	if kept, err := os.ReadFile(aside[0]); err != nil || !bytes.Equal(kept, original) {
+		t.Fatalf("corrupt file changed: %v", err)
+	}
+	app, _ := NewSection(st, "app", appSettings{Theme: "system"}, nil)
+	if err := app.Update(func(s *appSettings) { s.Theme = "dark" }); err != nil {
+		t.Fatalf("settings cannot be saved after a corrupt file: %v", err)
+	}
+	reopened, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again, _ := NewSection(reopened, "app", appSettings{}, nil); again.Get().Theme != "dark" {
+		t.Fatal("new settings not saved")
 	}
 }
 

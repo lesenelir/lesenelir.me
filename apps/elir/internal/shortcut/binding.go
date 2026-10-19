@@ -69,10 +69,16 @@ func (c Config) Bindings(os string) Bindings {
 		src = c.Windows
 	}
 	for a, v := range src {
-		b[a] = v
+		if !Fixed(a, os) {
+			b[a] = v
+		}
 	}
 	return Clone(b)
 }
+
+// Fixed reports whether an action keeps its default on os: on macOS, the
+// screenshot's Space and Esc belong to macOS's own capture, which Elir runs.
+func Fixed(a Action, os string) bool { return os != "windows" && local(a) }
 func (c *Config) Set(os string, b Bindings) {
 	c.Version = 1
 	if os == "windows" {

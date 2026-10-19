@@ -30,7 +30,6 @@ var (
 	OpenAccessibilitySettings   = darwin.OpenAccessibilitySettings
 	OpenMicrophoneSettings      = darwin.OpenMicrophoneSettings
 	OpenKeyboardSettings        = darwin.OpenKeyboardSettings
-	ScreenshotWindows           = darwin.ScreenshotWindows
 	CopySelection               = darwin.CopySelection
 	QuietOutput                 = darwin.QuietOutput
 	RestoreOutput               = darwin.RestoreOutput

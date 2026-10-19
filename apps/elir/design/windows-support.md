@@ -29,7 +29,7 @@ Windows 默认 F8／左 Shift+F8 启动听写／翻译，Alt+T／Alt+R 处理选
 
 DPAPI 保护当前用户持久化的 API key，不抵御以同一用户身份运行的进程。密钥文件读取失败时拒绝覆盖；能读出但解密或 JSON 解析失败（如密码被重置后 DPAPI 失效）时，原文件改名为 `secrets.json.unreadable-<时间>` 原样保留，以空存储继续，用户可重新填写 key。写盘成功后才发布新 key，失败保留原密文和内存值。
 
-共享 settings.json 同样保留首次读取或整文件解析错误：加载失败时使用默认值，但 SetRaw 和 Section.Update 均拒绝写入，内存值也不发布，避免切换主题等操作覆盖词典、快捷键和其他原配置。用户修复文件后需重启以重新加载；不自动重置或尝试拼接损坏内容。
+共享 settings.json 采用相同策略：读取失败时使用默认值，SetRaw 和 Section.Update 均拒绝写入、内存值也不发布，避免覆盖词典、快捷键等原配置，文件恢复可读后重启即可；能读出但整文件 JSON 解析失败时，原文件改名为 `settings.json.unreadable-<时间>` 原样保留，以默认值继续并可正常保存，用户不会被困在“无法保存”。
 
 自动粘贴临时文本请求排除 Windows 剪贴板历史／云同步；显式复制保持现有行为。这不阻止本机其他程序读取当前剪贴板。普通权限程序向更高权限目标粘贴可能被系统阻止，沿用手动粘贴提示。
 
@@ -48,7 +48,7 @@ PR #8 曾对截图 helper 使用系统路径、系统模块范围并移除 API k
 
 录音开始时，静音或降低音量后必须检查恢复记录的序列化与写入结果。保存失败记录错误并立即调用 restore；恢复也失败则保留内存状态，在录音结束或下一次调整音量前重试。若保存与恢复持续失败且进程随后退出，仍没有可用的持久化恢复保证。
 
-正常退出链为 `App.beforeQuit → Voice.Stop → Controller.Close → endSession → Recorder.Cancel → Recording(false)`。首次退出先 PreventDefault，在后台取消控制器并等待录音、音量恢复回调和流关闭完成，之后再次请求 MyGo Quit；等待中的重复退出也被拦住。清理期间保持 UI 循环运行，因为 Darwin Recorder.Cancel 通过 RunOnMain 释放录音资源。未启动的 Voice 和重复 Close 均可安全处理；强制终止仍由下次启动恢复记录兜底。
+正常退出链为 `App.beforeQuit → Voice.Stop → Controller.Close → endSession → Recorder.Cancel → Recording(false)`。首次退出先 PreventDefault，在后台取消控制器并等待录音、音量恢复回调和流关闭完成，之后再次请求 MyGo Quit；等待中的重复退出也被拦住。等待最多 3 秒（`stopTimeout`），超时记录日志后照常退出，未完成的音量恢复由下次启动的恢复记录兜底，卡住的录音器不会让应用无法退出。清理期间保持 UI 循环运行，因为 Darwin Recorder.Cancel 通过 RunOnMain 释放录音资源。未启动的 Voice 和重复 Close 均可安全处理；强制终止仍由下次启动恢复记录兜底。
 
 原生回归使用无效设备 ID，覆盖未初始化、已有 MTA／STA 线程，不改真实音量；通过后续 apartment 切换检查 S_FALSE 引用平衡。修复前 STA 复现 HRESULT 0x80010106，修复后通过。共享 quieter 测试用假 API 验证失败保留、重试和成功清理。
 

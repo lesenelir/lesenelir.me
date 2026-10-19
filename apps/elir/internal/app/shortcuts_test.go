@@ -72,7 +72,8 @@ func TestRestoreDefaultChecksWholeTable(t *testing.T) {
 	b := shortcut.Defaults(runtime.GOOS)
 	original := b[shortcut.Dictate]
 	b[shortcut.Dictate] = shortcut.Binding{Key: "F9"}
-	b[shortcut.VoiceCancel] = original
+	// Translate may take the voice key on both systems, Fn included.
+	b[shortcut.Translate] = original
 	s.Set(b)
 	tt := ui.NewTester(func(c *ui.Context) { s.Control(c, shortcut.Dictate) }, 560, 460)
 	tt.SetLocale("en")
