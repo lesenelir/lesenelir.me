@@ -23,11 +23,11 @@ func TestDetectLanguage(t *testing.T) {
 
 func TestSystemPrompts(t *testing.T) {
 	d := System(Request{Mode: Dictate, Dictionary: []string{"MyGo", "OpenRouter"}})
-	if !strings.Contains(d, "MyGo、OpenRouter") || strings.Contains(d, "%") {
+	if !strings.Contains(d, "MyGo, OpenRouter") || strings.Contains(d, "%") {
 		t.Errorf("dictation prompt: %s", d)
 	}
 	tr := System(Request{Mode: Translate, Target: "en"})
-	if strings.Count(tr, "English") != 3 || strings.Contains(tr, "%") {
+	if strings.Count(tr, "into English") != 2 || strings.Contains(tr, "%") {
 		t.Errorf("translation prompt: %s", tr)
 	}
 }
@@ -46,6 +46,9 @@ func TestClean(t *testing.T) {
 	if got := Clean("  <transcript>\n你好。\n</transcript> "); got != "你好。" {
 		t.Fatalf("Clean = %q", got)
 	}
+	if got := Clean("三件事：\n\n1. 修 bug  \n2. 写文档"); got != "三件事：\n\n1. 修 bug\n2. 写文档" {
+		t.Fatalf("Clean = %q", got)
+	}
 }
 
 func TestPlausible(t *testing.T) {
@@ -61,5 +64,11 @@ func TestPlausible(t *testing.T) {
 	}
 	if !Plausible(Request{Mode: Translate, Transcript: "你好"}, "Hello, nice to meet you all today.") {
 		t.Error("translations may be longer than the transcript")
+	}
+	if Plausible(Request{Mode: Dictate, Transcript: "好的"}, examples[0]) {
+		t.Error("an example copied from the prompt was accepted")
+	}
+	if !Plausible(Request{Mode: Dictate, Transcript: examples[0]}, examples[0]) {
+		t.Error("dictating an example's words was rejected")
 	}
 }
