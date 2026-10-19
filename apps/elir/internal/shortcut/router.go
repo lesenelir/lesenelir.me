@@ -63,7 +63,7 @@ func (r *Router) flags(code int64, f uint64) {
 	}
 }
 func (r *Router) FlagsChanged(code int64, f uint64) bool {
-	if code == 179 {
+	if code == globe {
 		code = 63
 	}
 	r.flags(code, f)
@@ -86,7 +86,15 @@ func (r *Router) FlagsChanged(code int64, f uint64) bool {
 	}
 	return false
 }
+
+// globe is the key down/up macOS posts after Fn's release for the 🌐 key's
+// own action; Fn itself arrives through FlagsChanged, so it is not a press.
+const globe = 179
+
 func (r *Router) KeyDown(code int64, f uint64, repeat bool) bool {
+	if code == globe {
+		return false
+	}
 	r.flags(code, f)
 	return r.down(code, repeat)
 }
@@ -151,6 +159,9 @@ func (r *Router) down(code int64, repeat bool) bool {
 	return swallowed
 }
 func (r *Router) KeyUp(code int64) bool {
+	if code == globe {
+		return false
+	}
 	owned := r.taken[code]
 	delete(r.taken, code)
 	delete(r.held, code)

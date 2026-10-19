@@ -356,6 +356,25 @@ func TestGlobeAliasAndMissedReleaseRecovery(t *testing.T) {
 	}
 }
 
+// A tap of Fn, as macOS posts it: the Globe key down/up follow the release.
+func TestFnTapFiresOnce(t *testing.T) {
+	for _, editing := range []bool{false, true} {
+		r, got := fixture("darwin")
+		r.Editing = editing
+		r.FlagsChanged(63, 0x800100)
+		r.FlagsChanged(63, 0x100)
+		if r.KeyDown(179, 0x100, false) || r.KeyUp(179) {
+			t.Fatal("Globe key events were taken")
+		}
+		if !editing && (len(*got) != 1 || (*got)[0] != Dictate) {
+			t.Fatal("one tap fired", *got)
+		}
+		if editing && r.Candidate.Key != "Fn" {
+			t.Fatal("recorded", r.Candidate)
+		}
+	}
+}
+
 func TestFnSystemChordsAndHeldTyping(t *testing.T) {
 	r, got := fixture("darwin")
 	r.FlagsChanged(63, 0x800000)
