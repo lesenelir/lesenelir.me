@@ -2,6 +2,13 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.4.2
+
+- Dictation cleans up Chinese better: it keeps only the final version when you correct yourself, fixes words speech
+  recognition misheard from what you are talking about, splits long dictation into paragraphs, and keeps your
+  questions, your own words and every detail instead of rewording them in a formal style. Translation keeps names and
+  times it used to drop.
+
 ## 0.4.1
 
 - A tap of Fn starts dictation again; since 0.4.0 the recording stopped as it began, as "Too short, ignored".
