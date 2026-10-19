@@ -14,6 +14,7 @@ import (
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -23,7 +24,7 @@ import (
 // it says what runs, then that the selection was replaced, with a button
 // to copy the result where it could not be, as in a web page.
 const (
-	barWidth  = 380
+	barWidth  = 640
 	barHeight = 76
 	// barMargin keeps the bar above the Dock.
 	barMargin     = 56
@@ -61,22 +62,6 @@ type hud struct {
 	copied  bool
 	hovered bool
 	seq     int // counts what the bar showed, so a stale timer hides none
-}
-
-func newBar(view func(*ui.Context)) *mygo.Window {
-	w := mygo.NewWindow(mygo.WindowOptions{
-		Title:         "Elir",
-		Panel:         true,
-		Hidden:        true,
-		Frameless:     true,
-		Transparent:   true,
-		DisableShadow: true,
-		Width:         barWidth,
-		Height:        barHeight,
-		Content:       ui.View(view),
-	})
-	w.SetIgnoreMouseEvents(false)
-	return w
 }
 
 // show shows h on the bar, from any goroutine.
@@ -134,7 +119,7 @@ func (r *Rewrite) barView(c *ui.Context) {
 				ui.Text(c, formatDuration(time.Since(h.since))).FontSize(12.5).TextColor(barMuted).
 					FontFeatures("tnum").NoWrap()
 				c.After(100 * time.Millisecond)
-				keycap(c, "esc")
+				keycap(c, r.host.Shortcuts.Bindings[shortcuts.RewriteCancel].String())
 			case hudDone:
 				ui.Icon(c, widget.IconCheck).Size(14, 14).TextColor(doneGreen)
 				ui.Text(c, m.RewriteReplaced()).FontSize(12.5).TextColor(barText).NoWrap()

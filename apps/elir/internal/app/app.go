@@ -10,6 +10,7 @@ import (
 	"log"
 	"path/filepath"
 	"slices"
+	"time"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -29,10 +30,11 @@ type App struct {
 	settings *store.Section[Settings]
 	window   *mygo.Window
 	tray     *mygo.Tray
-	keys     keys
+	keys     *Shortcuts
 	tap      *platform.EventTap
 	updater  updater
 	quitting bool
+	stopDone chan struct{}
 
 	// Read and written on the main thread: by the views and in
 	// Window.Update.
@@ -71,9 +73,48 @@ func (a *App) Run() error {
 			a.showSettings("")
 		}
 	})
-	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) { a.quitting = true })
+	mygo.App.OnBeforeQuit(a.beforeQuit)
 	mygo.App.WhenReady(a.ready)
 	return mygo.App.Run()
+}
+
+// stopTimeout is how long quitting waits for the tools to stop.
+var stopTimeout = 3 * time.Second
+
+func (a *App) beforeQuit(e *mygo.QuitEvent) {
+	if a.stopDone != nil {
+		select {
+		case <-a.stopDone:
+			a.quitting = true
+			return
+		default:
+			e.PreventDefault()
+			return
+		}
+	}
+	e.PreventDefault()
+	a.stopDone = make(chan struct{})
+	// macOS recorder cancellation needs the UI loop to keep serving RunOnMain.
+	go func() {
+		stopped := make(chan struct{})
+		go func() {
+			for _, f := range a.features {
+				if s, ok := f.(Stopper); ok {
+					s.Stop()
+				}
+			}
+			close(stopped)
+		}()
+		// A tool stuck stopping must not keep the app from quitting; the
+		// next launch undoes what a recording left quieted.
+		select {
+		case <-stopped:
+		case <-time.After(stopTimeout):
+			log.Printf("quit: the tools did not stop within %v", stopTimeout)
+		}
+		close(a.stopDone)
+		mygo.App.Quit()
+	}()
 }
 
 func (a *App) ready() {
@@ -124,7 +165,9 @@ func (a *App) ready() {
 		Vibrancy:      mygo.VibrancySidebar,
 		Content:       ui.View(a.view),
 	})
+	a.keys = newShortcuts(a.store, a.window)
 	a.window.OnBlur(func() {
+		a.keys.CancelEdit()
 		for _, f := range a.features {
 			if b, ok := f.(SettingsBlurred); ok {
 				b.SettingsBlurred()
@@ -132,19 +175,22 @@ func (a *App) ready() {
 		}
 	})
 	a.window.OnClose(func(e *mygo.CloseEvent) {
+		a.keys.CancelEdit()
 		if !a.quitting {
 			e.PreventDefault()
 			a.window.Hide()
 		}
 	})
 
+	a.setupTray()
 	host := &Host{
 		Store:        a.store,
 		Secrets:      secrets,
 		DataDir:      dir,
 		Settings:     a.window,
+		Tray:         a.tray,
 		ShowSettings: a.showSettings,
-		HandleKeys:   func(h platform.KeyHandler) { a.keys = append(a.keys, h) },
+		Shortcuts:    a.keys,
 	}
 	for _, f := range a.features {
 		if err := f.Start(host); err != nil {
@@ -153,13 +199,13 @@ func (a *App) ready() {
 	}
 	a.pages = a.collectPages()
 	a.tap = &platform.EventTap{Handler: a.keys}
+	a.keys.Running = a.tap.Running
 
 	// MyGo refreshes the light or dark look of the windows that exist when
 	// the appearance is set, so set it once the features' are made too.
 	applyAppearance(s.Appearance)
 	applyDock(s.ShowInDock)
 
-	a.setupTray()
 	mygo.App.OnLocaleChanged(func(string) {
 		a.window.SetTitle(locales.SettingsTitle())
 		a.localizeTray()
@@ -209,6 +255,7 @@ func (a *App) showSettings(page string) {
 			}
 		}
 		if page != "" {
+			a.keys.CancelEdit()
 			a.page = page
 		}
 		// The user may have changed it in System Settings meanwhile.

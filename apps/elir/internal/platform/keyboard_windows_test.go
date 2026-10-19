@@ -4,83 +4,66 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/hotkey"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 )
 
-type testKeys struct {
-	d       hotkey.Detector
-	actions []hotkey.Action
-	key     int64
-	flags   uint64
-}
-
-func (h *testKeys) FlagsChanged(k int64, f uint64) bool {
-	if a := h.d.FlagsChanged(k, f); a != hotkey.None {
-		h.actions = append(h.actions, a)
-	}
-	return false
-}
-func (h *testKeys) KeyDown(k int64, f uint64, repeat bool) bool {
-	h.key, h.flags = k, f
-	a, swallow := h.d.KeyDown(k, repeat)
-	if a != hotkey.None {
-		h.actions = append(h.actions, a)
-	}
-	return swallow
-}
-func (h *testKeys) KeyUp(k int64) bool { return h.d.KeyUp(k) }
-
 func TestWindowsVoiceShortcuts(t *testing.T) {
-	for _, tt := range []struct {
-		name     string
-		modifier uint32
-		want     hotkey.Action
-	}{
-		{"dictate", 0, hotkey.Dictate},
-		{"translate", 0xa0, hotkey.Translate},
-		{"right shift ignored", 0xa1, hotkey.None},
-		{"control ignored", 0xa2, hotkey.None},
-		{"alt ignored", 0xa4, hotkey.None},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &testKeys{}
-			tap := &EventTap{Handler: h, down: map[uint32]bool{}}
-			if tt.modifier != 0 {
-				tap.key(tt.modifier, true)
+	for _, tc := range []struct {
+		mod  uint32
+		want shortcut.Action
+	}{{0, shortcut.Dictate}, {0xa0, shortcut.Translate}, {0xa1, ""}, {0xa2, ""}, {0xa4, ""}} {
+		r := shortcut.New(shortcut.Defaults("windows"))
+		var got []shortcut.Action
+		for _, a := range []shortcut.Action{shortcut.Dictate, shortcut.Translate} {
+			r.Register(a, nil, func() { got = append(got, a) })
+		}
+		tap := &EventTap{Handler: r, down: map[uint32]bool{}}
+		if tc.mod != 0 {
+			tap.key(tc.mod, true)
+		}
+		tap.key(0x77, true)
+		tap.key(0x77, true)
+		tap.key(0x77, false)
+		if tc.want == "" {
+			if len(got) != 0 {
+				t.Fatal(got)
 			}
-			tap.key(0x77, true)
-			tap.key(0x77, true) // Holding F8 must not fire repeatedly.
-			tap.key(0x77, false)
-			if tt.want == hotkey.None {
-				if len(h.actions) != 0 {
-					t.Fatalf("unexpected actions %v", h.actions)
-				}
-			} else if len(h.actions) != 1 || h.actions[0] != tt.want {
-				t.Fatalf("actions %v, want %v", h.actions, tt.want)
-			}
-		})
+		} else if len(got) != 1 || got[0] != tc.want {
+			t.Fatalf("mod %x: %v", tc.mod, got)
+		}
 	}
 }
-
 func TestWindowsKeyNormalizationAndCancel(t *testing.T) {
-	h := &testKeys{}
-	tap := &EventTap{Handler: h, down: map[uint32]bool{}}
+	r := shortcut.New(shortcut.Defaults("windows"))
+	n := 0
+	r.Register(shortcut.VoiceCancel, nil, func() { n++ })
+	tap := &EventTap{Handler: r, down: map[uint32]bool{}}
 	tap.key(0xa4, true)
-	tap.key('T', true)
-	if h.key != 17 || h.flags != 0x80000 {
-		t.Fatalf("Alt+T: %d %#x", h.key, h.flags)
+	if tap.flags() != 0x80020 {
+		t.Fatalf("left Alt flags: %x", tap.flags())
 	}
-	tap.key('T', false)
 	tap.key(0xa4, false)
-	h.d.Capture(true, true)
-	if !tap.key(0x1b, true) || !tap.key(0x1b, false) {
-		t.Fatal("Esc must be swallowed while capturing")
+	tap.key(0xa5, true)
+	if tap.flags() != 0x80040 {
+		t.Fatalf("right Alt flags: %x", tap.flags())
 	}
-	if len(h.actions) != 1 || h.actions[0] != hotkey.Cancel {
-		t.Fatalf("actions %v", h.actions)
+	tap.key(0xa5, false)
+	if normalizedKey('T') != 17 || normalizedKey(0x77) != 100 || shortcut.Key(normalizedKey(0x77)) != "F8" {
+		t.Fatal("normalization")
+	}
+	if !tap.key(0x1b, true) || !tap.key(0x1b, false) || n != 1 {
+		t.Fatal("cancel")
 	}
 	if unsafe.Sizeof(keyboardInput{}) != 40 || unsafe.Sizeof(waveHeader{}) != 48 || unsafe.Sizeof(guid{}) != 16 {
 		t.Fatal("Windows ABI layout changed")
+	}
+	// Remapping releases physical F8 back to the foreground application.
+	b := shortcut.Defaults("windows")
+	b[shortcut.Dictate] = shortcut.Binding{Key: "F9"}
+	b[shortcut.Translate] = shortcut.Binding{Key: "F10"}
+	r.Set(b)
+	if tap.key(0x77, true) || tap.key(0x77, false) {
+		t.Fatal("F8 remained reserved")
 	}
 }
 

@@ -164,8 +164,10 @@ const (
 
 // Controller is safe for concurrent use.
 type Controller struct {
-	d     Deps
-	inbox chan any
+	d        Deps
+	inbox    chan any
+	shutdown context.CancelFunc
+	done     chan struct{}
 
 	mu     sync.Mutex
 	status Status
@@ -218,9 +220,17 @@ func New(ctx context.Context, d Deps) *Controller {
 	if d.OnResult == nil {
 		d.OnResult = func(Result) {}
 	}
-	c := &Controller{d: d, inbox: make(chan any, 16)}
+	ctx, shutdown := context.WithCancel(ctx)
+	c := &Controller{d: d, inbox: make(chan any, 16), shutdown: shutdown, done: make(chan struct{})}
 	go c.run(ctx)
 	return c
+}
+
+// Close cancels the session and waits for the recorder and Recording hook.
+// Call it outside controller callbacks.
+func (c *Controller) Close() {
+	c.shutdown()
+	<-c.done
 }
 
 // Handle queues a hotkey action. It never blocks, so the event tap may
@@ -249,10 +259,11 @@ func (c *Controller) Status() Status {
 }
 
 func (c *Controller) run(ctx context.Context) {
-	for {
+	defer close(c.done)
+	defer c.endSession()
+	for ctx.Err() == nil {
 		select {
 		case <-ctx.Done():
-			c.endSession()
 			return
 		case m := <-c.inbox:
 			switch m := m.(type) {

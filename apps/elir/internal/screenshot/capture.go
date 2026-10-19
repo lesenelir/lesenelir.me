@@ -10,12 +10,16 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 )
 
 // capture runs macOS's own interactive screenshot into path, as ⌘⇧4 does:
-// drag over an area, or press Space and click a window; Esc cancels. It
-// reports whether there is a screenshot, none when the user cancelled.
-func capture(ctx context.Context, path string) (bool, error) {
+// drag over an area, or press Space and click a window; Esc cancels. Those
+// keys are macOS's own there, so they are not among the shortcuts to set on
+// macOS. It reports whether there is a screenshot, none when the user
+// cancelled.
+func capture(ctx context.Context, path string, _ shortcut.Bindings, _ *shortcut.Router) (bool, error) {
 	out, err := exec.CommandContext(ctx, "/usr/sbin/screencapture", "-i", path).CombinedOutput()
 	if _, statErr := os.Stat(path); statErr == nil {
 		return true, nil

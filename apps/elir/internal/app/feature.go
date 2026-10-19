@@ -6,8 +6,8 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -26,6 +26,8 @@ type Feature interface {
 
 // Optional parts of a Feature, which the app calls when it has them.
 type (
+	// Stopper releases background resources before quit, off the main thread.
+	Stopper interface{ Stop() }
 	// NeedsSetup reports whether the feature lacks something to work, as
 	// an API key: the settings window then opens at launch.
 	NeedsSetup interface{ NeedsSetup() bool }
@@ -72,10 +74,13 @@ type Host struct {
 	// Settings is the settings window, for Update and Invalidate from the
 	// feature's goroutines.
 	Settings *mygo.Window
+	// Tray owns the tools' nonactivating overlays on Windows.
+	Tray *mygo.Tray
 	// ShowSettings opens the settings window at a page, "" for the one
 	// shown last.
 	ShowSettings func(page string)
-	// HandleKeys adds a handler of the global keyboard events, in Start.
-	// Its methods run on the main thread and must return quickly.
-	HandleKeys func(h platform.KeyHandler)
+	// Shortcuts owns the shared bindings, editor and event router.
+	Shortcuts *Shortcuts
 }
+
+func (h *Host) Shortcut(c *ui.Context, a shortcut.Action) { h.Shortcuts.Control(c, a) }

@@ -3,6 +3,7 @@ package platform
 import (
 	"context"
 	"errors"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"image"
 	"image/color"
 	"image/png"
@@ -515,5 +516,25 @@ func TestScreenshotDesktopCancellation(t *testing.T) {
 	}
 	for _, registry := range []*sync.Map{&shotCreating, &shotWindows, &shotMonitorSessions} {
 		registry.Range(func(key, _ any) bool { t.Errorf("session registry leaked token %v", key); return true })
+	}
+}
+
+func TestScreenshotCustomCancel(t *testing.T) {
+	b := shortcut.Defaults("windows")
+	b[shortcut.ScreenshotCancel] = shortcut.Binding{Key: "F9", Modifiers: []string{"RightCtrl"}}
+	claimed := ""
+	ctx := WithScreenshotShortcuts(context.Background(), b, func(key string) { claimed = key })
+	s := &screenshotOverlay{ctx: ctx}
+	s.shortcut("Escape", 0)
+	if s.done {
+		t.Fatal("old cancel active")
+	}
+	s.shortcut("F9", shortcut.LeftCtrl)
+	if s.done {
+		t.Fatal("wrong Ctrl side accepted")
+	}
+	s.shortcut("F9", shortcut.RightCtrl)
+	if !s.done || !s.selection.Empty() || claimed != "F9" {
+		t.Fatal("custom cancel failed")
 	}
 }

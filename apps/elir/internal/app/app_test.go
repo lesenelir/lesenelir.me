@@ -188,40 +188,6 @@ func TestMigrateFiles(t *testing.T) {
 	}
 }
 
-// recorder is a key handler that swallows one key.
-type recorder struct {
-	swallow int64
-	seen    []int64
-}
-
-func (r *recorder) FlagsChanged(keycode int64, _ uint64) bool {
-	r.seen = append(r.seen, keycode)
-	return keycode == r.swallow
-}
-
-func (r *recorder) KeyDown(keycode int64, _ uint64, _ bool) bool {
-	r.seen = append(r.seen, keycode)
-	return keycode == r.swallow
-}
-
-func (r *recorder) KeyUp(keycode int64) bool {
-	r.seen = append(r.seen, keycode)
-	return keycode == r.swallow
-}
-
-// Every feature sees every key; one that swallows it keeps it from the app
-// in front.
-func TestKeys(t *testing.T) {
-	a, b := &recorder{swallow: 19}, &recorder{swallow: 53}
-	k := keys{a, b}
-	if k.KeyDown(1, 0, false) || !k.KeyDown(19, 0, false) || !k.KeyUp(53) || !k.FlagsChanged(19, 0) {
-		t.Fatal("swallowed the wrong keys")
-	}
-	if want := []int64{1, 19, 53, 19}; !slices.Equal(a.seen, want) || !slices.Equal(b.seen, want) {
-		t.Fatalf("seen %v and %v, want %v", a.seen, b.seen, want)
-	}
-}
-
 // Kit's data moves to Elir's directory, unless Elir has its own already.
 func TestMigrateFromKit(t *testing.T) {
 	root := t.TempDir()

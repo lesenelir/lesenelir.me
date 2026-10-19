@@ -406,11 +406,11 @@ func (msgs Messages) SaveFailed(error string) string {
 	return Catalog.Format(msgs.locale, "saveFailed", map[string]any{"error": error})
 }
 
-// SwitchLanguageTooltip says "Click to switch the target language"
+// SwitchLanguageTooltip says "Switch target language"
 // in the language the app shows.
 func SwitchLanguageTooltip() string { return In(i18n.Locale()).SwitchLanguageTooltip() }
 
-// SwitchLanguageTooltip says "Click to switch the target language"
+// SwitchLanguageTooltip says "Switch target language"
 // in the language of msgs.
 func (msgs Messages) SwitchLanguageTooltip() string {
 	return Catalog.Format(msgs.locale, "switchLanguageTooltip", nil)
@@ -1386,21 +1386,21 @@ func (msgs Messages) CancelNote() string {
 	return Catalog.Format(msgs.locale, "cancelNote", nil)
 }
 
-// TranslateNote says "Speak any language; the text comes out translated. {system, select, windows {F8} other {Fn}} finishes."
+// TranslateNote says "Speak any language; the text comes out translated. The dictation shortcut finishes."
 // in the language the app shows.
-func TranslateNote(system string) string { return In(i18n.Locale()).TranslateNote(system) }
+func TranslateNote() string { return In(i18n.Locale()).TranslateNote() }
 
-// TranslateNote says "Speak any language; the text comes out translated. {system, select, windows {F8} other {Fn}} finishes."
+// TranslateNote says "Speak any language; the text comes out translated. The dictation shortcut finishes."
 // in the language of msgs.
-func (msgs Messages) TranslateNote(system string) string {
-	return Catalog.Format(msgs.locale, "translateNote", map[string]any{"system": system})
+func (msgs Messages) TranslateNote() string {
+	return Catalog.Format(msgs.locale, "translateNote", nil)
 }
 
-// TargetsTabNote says "Tab cycles through the languages ticked below while translating."
+// TargetsTabNote says "Use the current switch shortcut to cycle through the languages ticked below while translating."
 // in the language the app shows.
 func TargetsTabNote() string { return In(i18n.Locale()).TargetsTabNote() }
 
-// TargetsTabNote says "Tab cycles through the languages ticked below while translating."
+// TargetsTabNote says "Use the current switch shortcut to cycle through the languages ticked below while translating."
 // in the language of msgs.
 func (msgs Messages) TargetsTabNote() string {
 	return Catalog.Format(msgs.locale, "targetsTabNote", nil)
@@ -1426,11 +1426,11 @@ func (msgs Messages) ShortcutCapture() string {
 	return Catalog.Format(msgs.locale, "shortcutCapture", nil)
 }
 
-// CaptureNote says "{system, select, windows {Drag to select an area; press Esc to cancel. Copied to the clipboard.} other {Copied to the…"
+// CaptureNote says "{system, select, windows {Drag to select an area; the cancel shortcut below cancels. Copied to the clipboard.} other …"
 // in the language the app shows.
 func CaptureNote(system string) string { return In(i18n.Locale()).CaptureNote(system) }
 
-// CaptureNote says "{system, select, windows {Drag to select an area; press Esc to cancel. Copied to the clipboard.} other {Copied to the…"
+// CaptureNote says "{system, select, windows {Drag to select an area; the cancel shortcut below cancels. Copied to the clipboard.} other …"
 // in the language of msgs.
 func (msgs Messages) CaptureNote(system string) string {
 	return Catalog.Format(msgs.locale, "captureNote", map[string]any{"system": system})
@@ -1538,14 +1538,14 @@ func (msgs Messages) ScreenshotFailed(error string) string {
 	return Catalog.Format(msgs.locale, "screenshotFailed", map[string]any{"error": error})
 }
 
-// ScreenshotsEmpty says "No screenshots yet. Press {system, select, windows {Ctrl+Shift+2} other {⌘⇧2}} to take one."
+// ScreenshotsEmpty says "No screenshots yet. Use the capture shortcut above to take one."
 // in the language the app shows.
-func ScreenshotsEmpty(system string) string { return In(i18n.Locale()).ScreenshotsEmpty(system) }
+func ScreenshotsEmpty() string { return In(i18n.Locale()).ScreenshotsEmpty() }
 
-// ScreenshotsEmpty says "No screenshots yet. Press {system, select, windows {Ctrl+Shift+2} other {⌘⇧2}} to take one."
+// ScreenshotsEmpty says "No screenshots yet. Use the capture shortcut above to take one."
 // in the language of msgs.
-func (msgs Messages) ScreenshotsEmpty(system string) string {
-	return Catalog.Format(msgs.locale, "screenshotsEmpty", map[string]any{"system": system})
+func (msgs Messages) ScreenshotsEmpty() string {
+	return Catalog.Format(msgs.locale, "screenshotsEmpty", nil)
 }
 
 // ShowInFinder says "{system, select, windows {Show in File Explorer} other {Show in Finder}}"
@@ -2008,4 +2008,96 @@ func UpdatesManual() string { return In(i18n.Locale()).UpdatesManual() }
 // in the language of msgs.
 func (msgs Messages) UpdatesManual() string {
 	return Catalog.Format(msgs.locale, "updatesManual", nil)
+}
+
+// ShortcutRecord says "Press a shortcut"
+// in the language the app shows.
+func ShortcutRecord() string { return In(i18n.Locale()).ShortcutRecord() }
+
+// ShortcutRecord says "Press a shortcut"
+// in the language of msgs.
+func (msgs Messages) ShortcutRecord() string {
+	return Catalog.Format(msgs.locale, "shortcutRecord", nil)
+}
+
+// ShortcutReset says "Restore default"
+// in the language the app shows.
+func ShortcutReset() string { return In(i18n.Locale()).ShortcutReset() }
+
+// ShortcutReset says "Restore default"
+// in the language of msgs.
+func (msgs Messages) ShortcutReset() string {
+	return Catalog.Format(msgs.locale, "shortcutReset", nil)
+}
+
+// ShortcutPhysical says "Shortcuts use physical key positions. Actions pause while recording a shortcut."
+// in the language the app shows.
+func ShortcutPhysical() string { return In(i18n.Locale()).ShortcutPhysical() }
+
+// ShortcutPhysical says "Shortcuts use physical key positions. Actions pause while recording a shortcut."
+// in the language of msgs.
+func (msgs Messages) ShortcutPhysical() string {
+	return Catalog.Format(msgs.locale, "shortcutPhysical", nil)
+}
+
+// ShortcutOccupies says "Saving reserves this typing key for Elir in other apps."
+// in the language the app shows.
+func ShortcutOccupies() string { return In(i18n.Locale()).ShortcutOccupies() }
+
+// ShortcutOccupies says "Saving reserves this typing key for Elir in other apps."
+// in the language of msgs.
+func (msgs Messages) ShortcutOccupies() string {
+	return Catalog.Format(msgs.locale, "shortcutOccupies", nil)
+}
+
+// ShortcutLoadError says "Invalid shortcut settings; using defaults: {error}"
+// in the language the app shows.
+func ShortcutLoadError(error string) string { return In(i18n.Locale()).ShortcutLoadError(error) }
+
+// ShortcutLoadError says "Invalid shortcut settings; using defaults: {error}"
+// in the language of msgs.
+func (msgs Messages) ShortcutLoadError(error string) string {
+	return Catalog.Format(msgs.locale, "shortcutLoadError", map[string]any{"error": error})
+}
+
+// ShortcutUnavailable says "Enable keyboard monitoring on the Permissions page first."
+// in the language the app shows.
+func ShortcutUnavailable() string { return In(i18n.Locale()).ShortcutUnavailable() }
+
+// ShortcutUnavailable says "Enable keyboard monitoring on the Permissions page first."
+// in the language of msgs.
+func (msgs Messages) ShortcutUnavailable() string {
+	return Catalog.Format(msgs.locale, "shortcutUnavailable", nil)
+}
+
+// ShortcutSave says "Save"
+// in the language the app shows.
+func ShortcutSave() string { return In(i18n.Locale()).ShortcutSave() }
+
+// ShortcutSave says "Save"
+// in the language of msgs.
+func (msgs Messages) ShortcutSave() string {
+	return Catalog.Format(msgs.locale, "shortcutSave", nil)
+}
+
+// ShortcutConflict says "{action} conflicts with {other}."
+// in the language the app shows.
+func ShortcutConflict(action string, other string) string {
+	return In(i18n.Locale()).ShortcutConflict(action, other)
+}
+
+// ShortcutConflict says "{action} conflicts with {other}."
+// in the language of msgs.
+func (msgs Messages) ShortcutConflict(action string, other string) string {
+	return Catalog.Format(msgs.locale, "shortcutConflict", map[string]any{"action": action, "other": other})
+}
+
+// ShortcutSides says "Distinguish left and right modifiers"
+// in the language the app shows.
+func ShortcutSides() string { return In(i18n.Locale()).ShortcutSides() }
+
+// ShortcutSides says "Distinguish left and right modifiers"
+// in the language of msgs.
+func (msgs Messages) ShortcutSides() string {
+	return Catalog.Format(msgs.locale, "shortcutSides", nil)
 }

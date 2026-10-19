@@ -10,6 +10,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
@@ -43,14 +44,26 @@ func keepLabel(m locales.Messages, days int) string {
 func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 	t := c.Theme()
 	widget.Group(c, pal, m.SectionCapture(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutCapture(), m.CaptureNote(runtime.GOOS), func() { widget.Keycaps(c, pal, "⌘", "⇧", "2") })
-		g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { widget.Keycaps(c, pal, "space") })
-		g.Row(c, m.ShortcutCancel(), "", func() { widget.Keycaps(c, pal, "esc") })
+		g.Row(c, m.ShortcutCapture(), m.CaptureNote(runtime.GOOS), func() { s.host.Shortcut(c, shortcuts.Capture) })
+		if runtime.GOOS == "windows" {
+			g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { s.host.Shortcut(c, shortcuts.Window) })
+			g.Row(c, m.ShortcutCancel(), "", func() { s.host.Shortcut(c, shortcuts.ScreenshotCancel) })
+		} else {
+			// macOS's own capture, which Elir runs, takes these keys.
+			g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { widget.Keycaps(c, pal, "space") })
+			g.Row(c, m.ShortcutCancel(), "", func() { widget.Keycaps(c, pal, "esc") })
+		}
 	})
 	// A terminal's ⌘V pastes text alone; Claude Code reads an image
 	// itself on ⌃V.
 	widget.Group(c, pal, m.SectionPaste(), func(g *widget.Rows) {
-		g.Row(c, m.PasteApps(), "", func() { widget.Keycaps(c, pal, "⌘", "V") })
+		g.Row(c, m.PasteApps(), "", func() {
+			if runtime.GOOS == "windows" {
+				widget.Keycaps(c, pal, "Ctrl", "V")
+			} else {
+				widget.Keycaps(c, pal, "⌘", "V")
+			}
+		})
 		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(runtime.GOOS), func() {
 			if runtime.GOOS == "windows" {
 				widget.Keycaps(c, pal, "Ctrl", "Shift", "V")
@@ -77,7 +90,7 @@ func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette)
 		ui.Text(c, m.ScreenshotFailed(s.err.Error())).FontSize(12).TextColor(t.Danger)
 	}
 	if len(s.shots) == 0 {
-		widget.EmptyState(c, pal, iconScreenshot, m.ScreenshotsEmpty(runtime.GOOS))
+		widget.EmptyState(c, pal, iconScreenshot, m.ScreenshotsEmpty())
 		return
 	}
 	shown := min(len(s.shots), max(s.shown, shotBatch))

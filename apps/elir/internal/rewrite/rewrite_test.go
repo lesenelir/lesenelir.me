@@ -12,43 +12,14 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
 )
-
-func TestShortcuts(t *testing.T) {
-	var fired []Mode
-	cancelled, busy := 0, false
-	s := &shortcuts{fire: func(m Mode) { fired = append(fired, m) }, cancel: func() { cancelled++ }, busy: func() bool { return busy }}
-
-	for _, flags := range []uint64{0, flagCommand, flagOption | flagShift, flagOption | flagCommand, flagOption | flagControl} {
-		if s.KeyDown(keyT, flags, false) {
-			t.Errorf("took T with flags %#x", flags)
-		}
-	}
-	// Caps Lock and the other bits of the flags do not matter.
-	if !s.KeyDown(keyT, flagOption|0x10000|0x100, false) || !s.KeyUp(keyT) {
-		t.Fatal("let ⌥T through")
-	}
-	if !s.KeyDown(keyR, flagOption, false) || !s.KeyDown(keyR, flagOption, true) || !s.KeyUp(keyR) || s.KeyUp(keyR) {
-		t.Fatal("⌥R")
-	}
-	if len(fired) != 2 || fired[0] != Translate || fired[1] != Polish {
-		t.Fatalf("fired %v, want translate then polish once each", fired)
-	}
-
-	// Esc is the app's own, but while a rewrite runs.
-	if s.KeyDown(keyEscape, 0, false) || cancelled != 0 {
-		t.Fatal("took Esc with nothing running")
-	}
-	busy = true
-	if !s.KeyDown(keyEscape, 0, false) || !s.KeyUp(keyEscape) || cancelled != 1 {
-		t.Fatal("did not cancel on Esc")
-	}
-}
 
 func TestPrompt(t *testing.T) {
 	sys := system(Translate, "English", []string{"MyGo", "Elir"})
@@ -95,6 +66,7 @@ func testRewrite(t *testing.T) *Rewrite {
 	}
 	r := New()
 	r.store = st
+	r.host = &app.Host{Shortcuts: &app.Shortcuts{Router: shortcut.New(shortcut.Defaults("darwin"))}}
 	return r
 }
 
@@ -116,7 +88,7 @@ func TestPage(t *testing.T) {
 		ui.Column(c).Padding(28).Gap(22).Children(func() { page.View(c, locales.In(c.Locale()), pal) })
 	}, 560, 640)
 	tt.SetLocale("zh-Hans")
-	for _, want := range []string{"翻译", "润色", "⌥", "T", "R", "esc", "中文译成English，英文译成日本語，其他译成English，跟随「听写与翻译」的设置。"} {
+	for _, want := range []string{"翻译", "润色", "Alt + T", "Alt + R", "Escape", "中文译成English，英文译成日本語，其他译成English，跟随「听写与翻译」的设置。"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in %q", want, tt.Texts())
 		}

@@ -90,6 +90,54 @@ func TestFailedRecoveryRemainsPendingUntilRetrySucceeds(t *testing.T) {
 	}
 }
 
+func TestRecoverySaveFailureRestoresOutput(t *testing.T) {
+	for _, failRestore := range []bool{false, true} {
+		t.Run(map[bool]string{false: "restored", true: "pending"}[failRestore], func(t *testing.T) {
+			restore, quiet := restoreOutput, quietOutput
+			t.Cleanup(func() { restoreOutput, quietOutput = restore, quiet })
+			state := platform.OutputState{Kind: "mute"}
+			restores, quiets := 0, 0
+			quietOutput = func(float32) (platform.OutputState, error) {
+				quiets++
+				return state, nil
+			}
+			restoreOutput = func(got platform.OutputState) error {
+				if got != state {
+					t.Errorf("restore state %+v, want %+v", got, state)
+				}
+				restores++
+				if failRestore {
+					return errors.New("audio device unavailable")
+				}
+				return nil
+			}
+			// The missing parent rejects the recovery record on either platform.
+			q := &quieter{settings: config.Defaults, path: filepath.Join(t.TempDir(), "missing", "restore.json")}
+			q.Recording(true)
+			if restores != 1 || quiets != 1 {
+				t.Fatalf("save failure: restores=%d, quiets=%d", restores, quiets)
+			}
+			if failRestore {
+				if q.state != state {
+					t.Fatal("failed restore lost pending state")
+				}
+				q.Recording(true)
+				if restores != 2 || quiets != 1 || q.state != state {
+					t.Fatal("new recording overwrote pending recovery")
+				}
+				failRestore = false
+				q.Recording(false)
+				if restores != 3 {
+					t.Fatal("recording end did not retry restoration")
+				}
+			}
+			if q.state.Kind != "" {
+				t.Fatal("successful restore remains pending")
+			}
+		})
+	}
+}
+
 func TestRecoveryOfAGoneDeviceIsDropped(t *testing.T) {
 	restore, quiet := restoreOutput, quietOutput
 	t.Cleanup(func() { restoreOutput, quietOutput = restore, quiet })

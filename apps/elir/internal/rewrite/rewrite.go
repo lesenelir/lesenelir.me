@@ -24,9 +24,11 @@ import (
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 )
 
 const (
@@ -49,7 +51,7 @@ type Rewrite struct {
 	store  *store.Store
 	key    *secret.Secret
 	client *openrouter.Client
-	keys   *shortcuts
+	host   *app.Host
 	bar    *mygo.Window
 
 	busy   atomic.Bool
@@ -66,17 +68,19 @@ var _ app.Feature = (*Rewrite)(nil)
 // New returns the tool for selected text, to Add to the app.
 func New() *Rewrite {
 	r := &Rewrite{key: secret.New("openrouter-api-key", "OPENROUTER_API_KEY")}
-	r.keys = &shortcuts{fire: r.start, cancel: r.stop, busy: r.busy.Load}
 	return r
 }
 
 // Start reads the API key, makes the bar and takes ⌥T, ⌥R and Esc.
 func (r *Rewrite) Start(h *app.Host) error {
+	r.host = h
 	r.store = h.Store
 	r.key.Load(h.Secrets)
 	r.client = &openrouter.Client{Key: r.key.Get, HTTP: &http.Client{Timeout: 2 * minTimeout}}
-	r.bar = newBar(r.barView)
-	h.HandleKeys(r.keys)
+	r.bar = widget.NewOverlay(h.Tray, "Elir", barWidth, barHeight, r.barView)
+	h.Shortcuts.Register(shortcut.TranslateText, nil, func() { r.start(Translate) })
+	h.Shortcuts.Register(shortcut.PolishText, nil, func() { r.start(Polish) })
+	h.Shortcuts.Register(shortcut.RewriteCancel, r.busy.Load, r.stop)
 	return nil
 }
 

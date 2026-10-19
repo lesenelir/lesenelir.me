@@ -8,6 +8,7 @@ import (
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/prompt"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -27,9 +28,9 @@ func (r *Rewrite) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 	widget.Group(c, pal, m.SectionSelectedText(), func(g *widget.Rows) {
 		g.Row(c, m.ShortcutTranslateText(),
 			m.TranslateTextNote(label(s.TargetFor("zh")), label(s.TargetFor("en")), label(s.DefaultTarget)),
-			func() { widget.Keycaps(c, pal, "⌥", "T") })
-		g.Row(c, m.ShortcutPolishText(), m.PolishTextNote(), func() { widget.Keycaps(c, pal, "⌥", "R") })
-		g.Row(c, m.ShortcutCancel(), m.RewriteCancelNote(), func() { widget.Keycaps(c, pal, "esc") })
+			func() { r.host.Shortcut(c, shortcuts.TranslateText) })
+		g.Row(c, m.ShortcutPolishText(), m.PolishTextNote(), func() { r.host.Shortcut(c, shortcuts.PolishText) })
+		g.Row(c, m.ShortcutCancel(), m.RewriteCancelNote(), func() { r.host.Shortcut(c, shortcuts.RewriteCancel) })
 	})
 	widget.Note(c, pal, m.RewriteHowNote(runtime.GOOS))
 }

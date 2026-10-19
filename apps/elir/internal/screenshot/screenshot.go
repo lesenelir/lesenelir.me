@@ -25,6 +25,7 @@ import (
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
+	shortcuts "github.com/lesenelir/lesenelir.me/apps/elir/internal/shortcut"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -65,7 +66,6 @@ type Screenshot struct {
 	host     *app.Host
 	settings *store.Section[Settings]
 	lib      *Library
-	keys     *shortcut
 	popup    *mygo.Window
 	busy     atomic.Bool // a capture runs
 	load     chan string // thumbnails to make, by path
@@ -95,7 +95,6 @@ func New() *Screenshot {
 		thumbs:  map[string]*ui.Bitmap{},
 		loading: map[string]bool{},
 	}
-	s.keys = &shortcut{fire: s.take}
 	return s
 }
 
@@ -121,7 +120,8 @@ func (s *Screenshot) Start(h *app.Host) error {
 			time.Sleep(pruneEvery)
 		}
 	}()
-	h.HandleKeys(s.keys)
+	h.Shortcuts.Register(shortcuts.Capture, nil, s.take)
+	h.Shortcuts.Exclusive = s.busy.Load
 	return nil
 }
 
@@ -134,6 +134,7 @@ func (s *Screenshot) take() {
 	if !s.busy.CompareAndSwap(false, true) {
 		return
 	}
+	bindings := shortcuts.Clone(s.host.Shortcuts.Bindings)
 	go func() {
 		defer s.busy.Store(false)
 		// Without the permission, macOS captures the desktop alone.
@@ -142,7 +143,7 @@ func (s *Screenshot) take() {
 			s.host.ShowSettings("permissions")
 			return
 		}
-		shot, thumb, err := s.capture()
+		shot, thumb, err := s.capture(bindings)
 		if err != nil {
 			log.Printf("screenshot: %v", err)
 		}
@@ -160,9 +161,9 @@ func (s *Screenshot) take() {
 
 // capture takes a screenshot into the library and copies it. A cancelled
 // capture returns no thumbnail and no error.
-func (s *Screenshot) capture() (Shot, *ui.Bitmap, error) {
+func (s *Screenshot) capture(bindings shortcuts.Bindings) (Shot, *ui.Bitmap, error) {
 	path := s.lib.NewPath(time.Now())
-	ok, err := capture(context.Background(), path)
+	ok, err := capture(context.Background(), path, bindings, s.host.Shortcuts.Router)
 	if !ok || err != nil {
 		return Shot{}, nil, err
 	}
