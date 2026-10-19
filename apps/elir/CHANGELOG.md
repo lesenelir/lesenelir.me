@@ -2,6 +2,17 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.4.0
+
+- Every shortcut can be changed: click one in Dictation & Translation, Translate & Polish or Screenshot, press the new
+  keys and save. A shortcut can tell left from right modifiers, and Elir says when one conflicts with another. The
+  screenshot's `Space` and `Esc` stay those of macOS's own capture.
+- Quitting Elir while it records puts the sound it muted or lowered back first, and a muted output device that is no
+  longer there no longer keeps later recordings from quieting the sound.
+- A settings or API key file that Elir cannot make sense of is kept aside, as `settings.json.unreadable-…` or
+  `secrets.json.unreadable-…`, and Elir starts afresh instead of failing to save.
+- Elir also runs on Windows, built from source for now: see the README.
+
 ## 0.3.0
 
 - Translate and polish selected text: select text in any app and press `⌥T` to translate it, or `⌥R` to polish it.
