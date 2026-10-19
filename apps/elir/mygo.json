@@ -6,8 +6,7 @@
   "i18n": { "dir": "locales", "source": "en" },
   "updates": {
     "publicKey": "9Tom9En0S3Mn7VCu3wQuQ7VourkI8dtzJSo6nrDosTk=",
-    "url": "https://github.com/lesenelir/lesenelir.me/releases/download/kit-updates",
-    "privateKey": "~/Library/Application Support/mygo/update-keys/kit/mygo-update.key"
+    "url": "https://github.com/lesenelir/lesenelir.me/releases/download/kit-updates"
   },
   "macos": {
     "minimumSystemVersion": "13.0",

@@ -1,9 +1,10 @@
-//go:build darwin
+//go:build darwin || windows
 
 package screenshot
 
 import (
 	"os"
+	"runtime"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -42,15 +43,21 @@ func keepLabel(m locales.Messages, days int) string {
 func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 	t := c.Theme()
 	widget.Group(c, pal, m.SectionCapture(), func(g *widget.Rows) {
-		g.Row(c, m.ShortcutCapture(), m.CaptureNote(), func() { widget.Keycaps(c, pal, "⌘", "⇧", "2") })
-		g.Row(c, m.ShortcutWindow(), "", func() { widget.Keycaps(c, pal, "space") })
+		g.Row(c, m.ShortcutCapture(), m.CaptureNote(runtime.GOOS), func() { widget.Keycaps(c, pal, "⌘", "⇧", "2") })
+		g.Row(c, m.ShortcutWindow(runtime.GOOS), "", func() { widget.Keycaps(c, pal, "space") })
 		g.Row(c, m.ShortcutCancel(), "", func() { widget.Keycaps(c, pal, "esc") })
 	})
 	// A terminal's ⌘V pastes text alone; Claude Code reads an image
 	// itself on ⌃V.
 	widget.Group(c, pal, m.SectionPaste(), func(g *widget.Rows) {
 		g.Row(c, m.PasteApps(), "", func() { widget.Keycaps(c, pal, "⌘", "V") })
-		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(), func() { widget.Keycaps(c, pal, "⌃", "V") })
+		g.Row(c, m.PasteTerminals(), m.PasteTerminalsNote(runtime.GOOS), func() {
+			if runtime.GOOS == "windows" {
+				widget.Keycaps(c, pal, "Ctrl", "Shift", "V")
+			} else {
+				widget.Keycaps(c, pal, "⌃", "V")
+			}
+		})
 	})
 	widget.Group(c, pal, m.SectionScreenshots(), func(g *widget.Rows) {
 		g.Row(c, m.FieldKeep(), m.KeepNote(), func() {
@@ -63,14 +70,14 @@ func (s *Screenshot) page(c *ui.Context, m locales.Messages, pal widget.Palette)
 			}
 		})
 	})
-	if ui.AlertDialog(c, &s.confirm, m.ClearScreenshotsTitle(), m.ClearScreenshotsMessage(), m.ButtonCancel(), m.ButtonClearHistory()) == 1 {
+	if ui.AlertDialog(c, &s.confirm, m.ClearScreenshotsTitle(), m.ClearScreenshotsMessage(runtime.GOOS), m.ButtonCancel(), m.ButtonClearHistory()) == 1 {
 		s.clear()
 	}
 	if s.err != nil {
 		ui.Text(c, m.ScreenshotFailed(s.err.Error())).FontSize(12).TextColor(t.Danger)
 	}
 	if len(s.shots) == 0 {
-		widget.EmptyState(c, pal, iconScreenshot, m.ScreenshotsEmpty())
+		widget.EmptyState(c, pal, iconScreenshot, m.ScreenshotsEmpty(runtime.GOOS))
 		return
 	}
 	shown := min(len(s.shots), max(s.shown, shotBatch))
@@ -107,7 +114,7 @@ func (s *Screenshot) card(c *ui.Context, m locales.Messages, pal widget.Palette,
 		if menu.Item(m.ButtonCopy()).Chosen() {
 			copyIt()
 		}
-		if menu.Item(m.ShowInFinder()).Chosen() {
+		if menu.Item(m.ShowInFinder(runtime.GOOS)).Chosen() {
 			mygo.Shell.ShowItemInFolder(shot.Path)
 		}
 		menu.Separator()

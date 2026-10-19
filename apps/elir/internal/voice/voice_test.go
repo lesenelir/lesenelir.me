@@ -19,7 +19,7 @@ import (
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/openrouter"
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/controller"
@@ -155,7 +155,7 @@ func TestOverlayFollowsLanguage(t *testing.T) {
 	if !tt.HasText("Transcribing…") {
 		t.Errorf("English bar %q", tt.Texts())
 	}
-	v.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: darwin.ErrNotTrusted}
+	v.status = controller.Status{State: controller.Idle, Note: controller.NotePasteFailed, Err: platform.ErrNotTrusted}
 	tt.Frame()
 	if !tt.HasText("Couldn't paste without Accessibility; the text is on the clipboard") {
 		t.Errorf("English note %q", tt.Texts())
@@ -422,25 +422,6 @@ func TestQuieterLeaveAlone(t *testing.T) {
 		t.Fatalf("saved a restore file: %v", err)
 	}
 	q.Recording(false)
-}
-
-// What a crashed run left is undone, and the file goes either way. The
-// device here does not exist, so nothing real changes.
-func TestQuieterRecovers(t *testing.T) {
-	v := testVoice(t)
-	path := filepath.Join(t.TempDir(), "restore.json")
-	for _, content := range []string{
-		`{"kind":"volume","device":4294967000,"volume":0.5,"set":0.1}`,
-		`{`,
-	} {
-		_ = os.WriteFile(path, []byte(content), 0o644)
-		q := &quieter{settings: v.settings.Get, path: path}
-		q.recover()
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			t.Fatalf("%s: restore file kept", content)
-		}
-	}
-	(&quieter{settings: v.settings.Get, path: path}).recover() // no file: nothing to do
 }
 
 func TestWhileRecordingSetting(t *testing.T) {

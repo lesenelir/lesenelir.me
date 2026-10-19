@@ -1,10 +1,11 @@
-//go:build darwin
+//go:build darwin || windows
 
 package app
 
 import (
 	_ "embed"
 	"log"
+	"runtime"
 
 	"github.com/egoist/mygo"
 
@@ -22,6 +23,9 @@ func (a *App) setupTray() {
 	if err != nil {
 		log.Printf("tray: %v", err)
 		return
+	}
+	if runtime.GOOS == "windows" {
+		a.tray.OnClick(func() { a.showSettings("") })
 	}
 	mygo.App.OnWillQuit(func(*mygo.QuitEvent) { a.tray.Destroy() })
 }

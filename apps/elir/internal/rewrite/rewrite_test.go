@@ -12,7 +12,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
@@ -76,7 +76,7 @@ func TestNoteText(t *testing.T) {
 	m := locales.In("zh-Hans")
 	for err, want := range map[error]string{
 		errNoSelection:           "请先选中文字",
-		darwin.ErrNotTrusted:     "请先在设置中允许辅助功能",
+		platform.ErrNotTrusted:   "请先在设置中允许辅助功能",
 		context.Canceled:         "已取消",
 		context.DeadlineExceeded: "没能完成：模型响应超时",
 		errors.New("boom"):       "没能完成：boom",

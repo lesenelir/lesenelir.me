@@ -1,8 +1,10 @@
-//go:build darwin
+//go:build darwin || windows
 
 package rewrite
 
 import (
+	"runtime"
+
 	"github.com/egoist/mygo/ui"
 
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/app"
@@ -29,5 +31,5 @@ func (r *Rewrite) page(c *ui.Context, m locales.Messages, pal widget.Palette) {
 		g.Row(c, m.ShortcutPolishText(), m.PolishTextNote(), func() { widget.Keycaps(c, pal, "⌥", "R") })
 		g.Row(c, m.ShortcutCancel(), m.RewriteCancelNote(), func() { widget.Keycaps(c, pal, "esc") })
 	})
-	widget.Note(c, pal, m.RewriteHowNote())
+	widget.Note(c, pal, m.RewriteHowNote(runtime.GOOS))
 }

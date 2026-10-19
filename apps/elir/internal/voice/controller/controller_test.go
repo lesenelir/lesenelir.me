@@ -166,6 +166,12 @@ func (h *harness) until(t *testing.T, state State) Status {
 func TestDictation(t *testing.T) {
 	h := newHarness(t)
 	h.asr.delay = 5 * time.Millisecond
+	// A synchronous fake can finish within one Windows clock tick.
+	rewrite := h.llm.out
+	h.llm.out = func(r prompt.Request) (string, error) {
+		time.Sleep(5 * time.Millisecond)
+		return rewrite(r)
+	}
 	h.c.Handle(hotkey.Dictate)
 	if s := h.until(t, Recording); s.Mode != prompt.Dictate {
 		t.Fatalf("recording %+v", s)
@@ -180,7 +186,7 @@ func TestDictation(t *testing.T) {
 	if s.Text != "我们周四开会。" || s.Note != NoteNone {
 		t.Fatalf("done %+v", s)
 	}
-	if s.Timings.Transcribe < 5*time.Millisecond || s.Timings.Rewrite <= 0 {
+	if s.Timings.Transcribe < 5*time.Millisecond || s.Timings.Rewrite < 5*time.Millisecond {
 		t.Fatalf("timings %+v", s.Timings)
 	}
 	if got := h.paster.pasted(); len(got) != 1 || got[0] != "我们周四开会。" {

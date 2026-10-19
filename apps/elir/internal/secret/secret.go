@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package secret keeps API keys in a file of the app's data that only the
 // user can read, or takes them from an environment variable in
@@ -14,15 +14,15 @@ package secret
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"log"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/egoist/mygo"
 )
 
 // TypingDelay is how long typing must pause before SetLater writes a key,
@@ -34,11 +34,16 @@ const TypingDelay = 600 * time.Millisecond
 type Store struct {
 	path string
 
-	mu     sync.Mutex
-	values map[string]string // a name present with "" is a key removed
+	mu      sync.Mutex
+	values  map[string]string // a name present with "" is a key removed
+	loadErr error
 }
 
-// OpenStore reads the keys at path. A missing file is an empty store.
+// OpenStore reads the keys at path. A missing file is an empty store. A
+// file that cannot be read keeps the store from writing, so that it is
+// not replaced; one read but not understood, as one Windows can no longer
+// decrypt after the user's password was reset, is moved aside to
+// path.unreadable-<time>, and the store starts empty.
 func OpenStore(path string) (*Store, error) {
 	st := &Store{path: path, values: map[string]string{}}
 	data, err := os.ReadFile(path)
@@ -46,9 +51,34 @@ func OpenStore(path string) (*Store, error) {
 		return st, nil
 	}
 	if err != nil {
+		st.loadErr = err
 		return st, err
 	}
-	return st, json.Unmarshal(data, &st.values)
+	if err = decode(data, &st.values); err == nil {
+		return st, nil
+	}
+	st.values = map[string]string{}
+	aside := path + ".unreadable-" + time.Now().Format("20060102-150405")
+	if moveErr := os.Rename(path, aside); moveErr != nil {
+		st.loadErr = err
+		return st, errors.Join(err, moveErr)
+	}
+	return st, fmt.Errorf("%w; moved it to %s", err, filepath.Base(aside))
+}
+
+// decode reads the keys of a file's contents.
+func decode(data []byte, values *map[string]string) error {
+	data, err := decodeSecretFile(data)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, values); err != nil {
+		return err
+	}
+	if *values == nil {
+		return errors.New("secret: expected a JSON object")
+	}
+	return nil
 }
 
 // lookup returns a key, and whether the file has it, even as removed.
@@ -63,8 +93,12 @@ func (st *Store) lookup(name string) (string, bool) {
 func (st *Store) put(name, value string) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	st.values[name] = value
-	data, err := json.MarshalIndent(st.values, "", "  ")
+	if st.loadErr != nil {
+		return st.loadErr
+	}
+	values := maps.Clone(st.values)
+	values[name] = value
+	data, err := json.MarshalIndent(values, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -72,10 +106,14 @@ func (st *Store) put(name, value string) error {
 		return err
 	}
 	tmp := st.path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+	if err := writeSecretFile(tmp, data); err != nil {
 		return err
 	}
-	return os.Rename(tmp, st.path)
+	if err := os.Rename(tmp, st.path); err != nil {
+		return err
+	}
+	st.values = values
+	return nil
 }
 
 // Import keeps a key from elsewhere, unless the file has it already, and
@@ -127,16 +165,6 @@ func (s *Secret) Load(st *Store) {
 	s.mu.Lock()
 	s.st, s.value = st, v
 	s.mu.Unlock()
-}
-
-// fromKeychain reads a key the app kept in the Keychain before, "" when
-// there is none.
-func fromKeychain(name string) string {
-	b, err := mygo.Secrets.Get(name)
-	if err != nil && !errors.Is(err, mygo.ErrSecretNotFound) {
-		log.Printf("keychain %s: %v", name, err)
-	}
-	return strings.TrimSpace(string(b))
 }
 
 // Get returns the secret, "" when there is none. It reads the store, so

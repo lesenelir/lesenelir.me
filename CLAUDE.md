@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A pnpm monorepo (`apps/*`, `packages/*`; Node >= 24, pnpm 11) holding lesenelir's personal projects:
 
 - `apps/website` — the lesenelir.me site (Next.js 16 App Router, React 19, Tailwind CSS 4, MDX, Jotai), deployed on Vercel.
-- `apps/elir` — Elir (formerly Kit, and Voice before it), a personal macOS menu bar toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
+- `apps/elir` — Elir (formerly Kit, and Voice before it), a macOS and Windows tray toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
 - `apps/ts-starter` — the TypeScript library template (bunchee + vitest).
 - `packages/create-ts-starter` — the `npm create @lesenelir/ts-starter` CLI. Its `template` script copies `apps/ts-starter` into a gitignored `template/` folder that gets published.
 
@@ -20,6 +20,8 @@ pnpm dev:website        # next dev
 pnpm build:website      # next build
 pnpm dev:elir            # go tool mygo dev
 pnpm build:elir          # Elir.app + disk image in apps/elir/build
+pnpm dev:elir:windows    # Windows development, without macOS signing
+pnpm build:elir:windows  # Windows amd64 executable + NSIS installer
 pnpm release:elir 0.1.0  # test, build a universal dmg, tag kit-v0.1.0, push, GitHub release (--dry-run to stop before tagging)
 pnpm typecheck          # every package; the website runs `next typegen && tsc --noEmit`
 pnpm lint               # biome check (no writes)
@@ -53,7 +55,7 @@ TypeScript is v7 (native), which no longer auto-includes `@types/*`, so global t
 
 ## Elir architecture (`apps/elir`)
 
-macOS only (`//go:build darwin`; `main_other.go` is a stub). Go 1.27.1+, with `mygo` pinned as a `go tool` in `go.mod`. `main.go` creates the app shell and adds each tool to it.
+macOS and Windows (`//go:build darwin || windows`; `main_other.go` is a stub for other systems). Go 1.27.1+, with `mygo` pinned as a `go tool` in `go.mod`. `main.go` creates the app shell and adds each tool to it. See `apps/elir/design/windows-support.md` for the platform contract and actual verification. Windows uses F8 / Left Shift+F8 for voice, Alt+T / Alt+R for text, and Ctrl+Shift+2 for screenshots. Imports of OS integration go through `internal/platform`; the macOS facade aliases the existing Darwin backend. Windows secrets use DPAPI, screenshots use an embedded WinForms PowerShell helper, and Windows updates are manual.
 
 - `internal/app` is the shell: a single-instance menu bar app (accessory policy, no Dock icon) with one settings window laid out as System Settings (sidebar, pages of grouped rows, glass scroll edge), the menu bar icon, the General page (interface language, appearance, accent color) and the Permissions page. A tool implements `app.Feature` (`Start(*Host)`, `Pages()`), plus optional `NeedsSetup`, `SettingsShown`, `SettingsBlurred`, `PermissionRows` and `PermissionTips`. The shell owns the one global `darwin.EventTap` and starts it once Accessibility is allowed; tools add their `darwin.KeyHandler` with `Host.HandleKeys` in `Start`, and every handler sees every key (an event is swallowed when any handler swallows it). The sidebar lists General, the tools' everyday pages, their `Setup` pages, then Permissions. `migrate.go` moves Kit's data directory (`Kit/`, `Kit Dev/`) into Elir's on first launch, and brings over the data of Voice, the standalone app before Kit, on a new install. The bundle ID stays `me.lesenelir.kit`, so permissions and the Keychain keys of earlier versions are read once.
 - `internal/store` keeps `settings.json` as one section per part (`"app"`, `"voice"`, …); `store.NewSection[T]` gives a part its typed section over defaults. `internal/secret` keeps API keys in `secrets.json` of the data directory (mode 0600), or takes them from an environment variable in development. Not the Keychain: a self-signed app has no Team ID, so the Keychain binds an item to the build's cdhash and asked for the login password after every update; a key missing from the file is read from the Keychain once (0.2.3 and before kept them there). `internal/widget` holds the settings window's shared building blocks (`Group`/`Rows`, `Dropdown` with a Liquid Glass popup, `Badge`, `Keycaps`, `IconButton`, `EmptyState`, `PaletteFor`).

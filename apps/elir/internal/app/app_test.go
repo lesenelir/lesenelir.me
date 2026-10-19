@@ -10,7 +10,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/widget"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -51,7 +51,7 @@ func testApp(t *testing.T, features ...Feature) *App {
 		t.Fatal(err)
 	}
 	a.pages = a.collectPages()
-	a.tap = &darwin.EventTap{Handler: a.keys}
+	a.tap = &platform.EventTap{Handler: a.keys}
 	return a
 }
 

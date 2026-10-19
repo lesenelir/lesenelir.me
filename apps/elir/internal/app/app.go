@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 // Package app is Elir's shell: a menu bar app without a Dock icon, its
 // settings window and menu bar menu, the settings of the app itself
@@ -14,7 +14,7 @@ import (
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/secret"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/store"
 	"github.com/lesenelir/lesenelir.me/apps/elir/locales"
@@ -30,7 +30,7 @@ type App struct {
 	window   *mygo.Window
 	tray     *mygo.Tray
 	keys     keys
-	tap      *darwin.EventTap
+	tap      *platform.EventTap
 	updater  updater
 	quitting bool
 
@@ -144,7 +144,7 @@ func (a *App) ready() {
 		DataDir:      dir,
 		Settings:     a.window,
 		ShowSettings: a.showSettings,
-		HandleKeys:   func(h darwin.KeyHandler) { a.keys = append(a.keys, h) },
+		HandleKeys:   func(h platform.KeyHandler) { a.keys = append(a.keys, h) },
 	}
 	for _, f := range a.features {
 		if err := f.Start(host); err != nil {
@@ -152,7 +152,7 @@ func (a *App) ready() {
 		}
 	}
 	a.pages = a.collectPages()
-	a.tap = &darwin.EventTap{Handler: a.keys}
+	a.tap = &platform.EventTap{Handler: a.keys}
 
 	// MyGo refreshes the light or dark look of the windows that exist when
 	// the appearance is set, so set it once the features' are made too.
@@ -166,10 +166,10 @@ func (a *App) ready() {
 	})
 
 	// Ask for Accessibility once; macOS shows its own dialog.
-	darwin.AccessibilityTrusted(true)
+	platform.AccessibilityTrusted(true)
 	go a.watchPermissions()
 	go a.watchUpdates()
-	if a.needsSetup() || !darwin.AccessibilityTrusted(false) {
+	if a.needsSetup() || !platform.AccessibilityTrusted(false) {
 		a.showSettings("")
 	}
 }

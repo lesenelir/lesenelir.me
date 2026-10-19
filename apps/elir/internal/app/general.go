@@ -1,9 +1,10 @@
-//go:build darwin
+//go:build darwin || windows
 
 package app
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
@@ -35,12 +36,14 @@ func (a *App) generalPage() Page {
 				g.Row(c, m.FieldAccent(), "", func() { a.accentSelect(c, m, a.systemAccent) })
 			})
 			widget.Group(c, pal, "", func(g *widget.Rows) {
-				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(), func() {
+				g.Row(c, m.FieldOpenAtLogin(), m.OpenAtLoginNote(runtime.GOOS), func() {
 					ui.Switch(c.Key("open-at-login"), &a.openAtLogin).Label(m.FieldOpenAtLogin()).OnChange(a.setOpenAtLogin)
 				})
-				g.Row(c, m.FieldShowInDock(), m.ShowInDockNote(), func() {
-					ui.Switch(c.Key("show-in-dock"), &a.showInDock).Label(m.FieldShowInDock()).OnChange(a.setShowInDock)
-				})
+				if runtime.GOOS == "darwin" {
+					g.Row(c, m.FieldShowInDock(), m.ShowInDockNote(), func() {
+						ui.Switch(c.Key("show-in-dock"), &a.showInDock).Label(m.FieldShowInDock()).OnChange(a.setShowInDock)
+					})
+				}
 			})
 			a.updatesGroup(c, m, pal)
 		},
@@ -167,6 +170,9 @@ func (a *App) updatesGroup(c *ui.Context, m locales.Messages, pal widget.Palette
 
 // updateNote says where updating stands, under the version.
 func (a *App) updateNote(m locales.Messages) string {
+	if runtime.GOOS == "windows" {
+		return m.UpdatesManual()
+	}
 	u := a.upd
 	switch {
 	case !a.updater.Enabled() && mygo.IsDev():

@@ -1,4 +1,4 @@
-//go:build darwin
+//go:build darwin || windows
 
 package voice
 
@@ -10,13 +10,16 @@ import (
 	"os"
 	"sync"
 
-	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform/darwin"
+	"github.com/lesenelir/lesenelir.me/apps/elir/internal/platform"
 	"github.com/lesenelir/lesenelir.me/apps/elir/internal/voice/config"
 )
 
 // lowerLevel is how loud the computer stays, of what it was, with
 // WhileRecording "lower".
 const lowerLevel = 0.2
+
+var quietOutput = platform.QuietOutput
+var restoreOutput = platform.RestoreOutput
 
 // quieter mutes or lowers the computer's sound while the microphone
 // records, and puts it back after. What it must undo is saved in a file
@@ -27,7 +30,7 @@ type quieter struct {
 	path     string
 
 	mu    sync.Mutex
-	state darwin.OutputState
+	state platform.OutputState
 }
 
 // Recording is the controller's Recording hook.
@@ -38,6 +41,12 @@ func (q *quieter) Recording(on bool) {
 		q.restore()
 		return
 	}
+	if q.state.Kind != "" {
+		q.restore()
+		if q.state.Kind != "" {
+			return
+		}
+	}
 	level := float32(0)
 	switch q.settings().WhileRecording {
 	case "none":
@@ -45,7 +54,7 @@ func (q *quieter) Recording(on bool) {
 	case "lower":
 		level = lowerLevel
 	}
-	state, err := darwin.QuietOutput(level)
+	state, err := quietOutput(level)
 	if err != nil {
 		log.Printf("quiet output: %v", err)
 		return
@@ -63,10 +72,15 @@ func (q *quieter) restore() {
 	if q.state.Kind == "" {
 		return
 	}
-	if err := darwin.RestoreOutput(q.state); err != nil {
+	if err := restoreOutput(q.state); err != nil {
 		log.Printf("restore output: %v", err)
+		// Kept to try again, so that quieting anew cannot take the lowered
+		// volume for the user's; a device gone has nothing left to undo.
+		if !errors.Is(err, platform.ErrOutputGone) {
+			return
+		}
 	}
-	q.state = darwin.OutputState{}
+	q.state = platform.OutputState{}
 	_ = os.Remove(q.path)
 }
 
@@ -76,7 +90,7 @@ func (q *quieter) recover() {
 	if errors.Is(err, fs.ErrNotExist) {
 		return
 	}
-	var state darwin.OutputState
+	var state platform.OutputState
 	if err == nil {
 		err = json.Unmarshal(b, &state)
 	}
