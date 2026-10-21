@@ -2,6 +2,13 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.5.0
+
+- Dictation writes for the app in front. In a terminal or an AI app, such as Claude Code, Codex or ChatGPT, file names,
+  commands and other code come out spelled exactly, in backticks; in a chat, such as WeChat, Telegram or Discord, the
+  text reads as a message you typed, without a full stop at the end. Turn it off with "Format for the app in front" in
+  Dictation & Translation.
+
 ## 0.4.3
 
 - Dictation keeps what you said when "actually", 其实 or 不是…而是… only stress or contrast rather than correct
