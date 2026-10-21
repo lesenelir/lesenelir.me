@@ -1,7 +1,7 @@
 {
   "name": "Elir",
   "identifier": "me.lesenelir.kit",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "out": "build",
   "i18n": { "dir": "locales", "source": "en" },
   "updates": {
