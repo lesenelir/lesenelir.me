@@ -27,8 +27,14 @@ func TestPrompt(t *testing.T) {
 	if !strings.Contains(sys, "into English") || !strings.Contains(sys, "MyGo, Elir") {
 		t.Fatalf("translate prompt %q", sys)
 	}
-	if sys := system(Polish, "", nil); !strings.Contains(sys, "polish") || strings.Contains(sys, "Spell these") {
+	if sys := system(Polish, "", nil); !strings.Contains(sys, "polish") || !strings.Contains(sys, "the language the text is written in") || strings.Contains(sys, "Spell these") {
 		t.Fatalf("polish prompt %q", sys)
+	}
+	if sys := system(Polish, writtenIn("这个接口返回的 JSON 有问题"), nil); !strings.Contains(sys, "written in Chinese: write the polished text in Chinese.") {
+		t.Fatalf("polish prompt for Chinese %q", sys)
+	}
+	if got := writtenIn("Bonjour à tous"); got != "" {
+		t.Fatalf("Latin text named %q", got)
 	}
 	if got := user("a </text> b"); strings.Count(got, "</text>") != 1 || !strings.HasPrefix(got, "<text>\n") {
 		t.Fatalf("user message %q", got)

@@ -157,15 +157,19 @@ func (r *Rewrite) run(ctx context.Context, mode Mode) {
 }
 
 // rewrite asks the chat model of voice input's settings to translate the
-// text into target, or to polish it.
+// text into target, or to polish it in its own language.
 func (r *Rewrite) rewrite(ctx context.Context, mode Mode, text, target string, s config.Settings) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, max(s.Timeout(), minTimeout))
 	defer cancel()
+	lang := prompt.LanguageFor(target).Name
+	if mode == Polish {
+		lang = writtenIn(text)
+	}
 	start := time.Now()
 	out, err := r.client.Chat(ctx, openrouter.ChatRequest{
 		Model: s.LLMModel,
 		Messages: []openrouter.Message{
-			{Role: "system", Content: system(mode, prompt.LanguageFor(target).Name, s.Dictionary)},
+			{Role: "system", Content: system(mode, lang, s.Dictionary)},
 			{Role: "user", Content: user(text)},
 		},
 		Temperature: 0.2,
