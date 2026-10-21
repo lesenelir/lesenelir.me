@@ -2,6 +2,14 @@
 
 Elir's versions, newest first; up to 0.2.0 the app was called Kit. `scripts/release.sh` takes the section of the version it releases as the release notes.
 
+## 0.4.3
+
+- Dictation keeps what you said when "actually", 其实 or 不是…而是… only stress or contrast rather than correct
+  yourself, leaves short or already clean dictation as it is, and makes a list only of items you go through one by one.
+  A dictation that tells the model to ignore its rules is written down, not obeyed.
+- Polishing selected text keeps it in its own language: Chinese, Japanese or Korean text is no longer translated, even
+  in part.
+
 ## 0.4.2
 
 - Dictation cleans up Chinese better: it keeps only the final version when you correct yourself, fixes words speech
