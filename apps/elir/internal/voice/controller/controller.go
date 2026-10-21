@@ -106,6 +106,9 @@ type Deps struct {
 	// once it closes, however the recording ends: to quiet the computer's
 	// own sound meanwhile.
 	Recording func(on bool)
+	// FrontApp returns the app in front as a dictation starts, the one its
+	// text goes into: a bundle identifier, or on Windows an executable name.
+	FrontApp func() string
 }
 
 // Status is what the voice bar and the settings show.
@@ -182,6 +185,7 @@ type Controller struct {
 	manual    bool
 	fellBack  bool
 	timings   Timings
+	app       prompt.App
 }
 
 type action struct {
@@ -216,6 +220,9 @@ func New(ctx context.Context, d Deps) *Controller {
 	}
 	if d.Recording == nil {
 		d.Recording = func(bool) {}
+	}
+	if d.FrontApp == nil {
+		d.FrontApp = func() string { return "" }
 	}
 	if d.OnResult == nil {
 		d.OnResult = func(Result) {}
@@ -329,6 +336,11 @@ func (c *Controller) onAction(ctx context.Context, a hotkey.Action) {
 }
 
 func (c *Controller) start(ctx context.Context, mode prompt.Mode) {
+	// The app in front before anything of the session shows.
+	app := prompt.AnyApp
+	if mode == prompt.Dictate && !c.d.Settings().NoAppFormat {
+		app = prompt.AppFor(c.d.FrontApp())
+	}
 	sess, cancel := context.WithCancel(ctx)
 	var stream Stream
 	if c.d.Streamer != nil {
@@ -348,7 +360,7 @@ func (c *Controller) start(ctx context.Context, mode prompt.Mode) {
 		c.set(func(s *Status) { s.State, s.Note, s.Err = Idle, NoteMicFailed, err })
 		return
 	}
-	c.sess, c.cancel, c.stream, c.fellBack = sess, cancel, stream, false
+	c.sess, c.cancel, c.stream, c.fellBack, c.app = sess, cancel, stream, false, app
 	c.session++
 	c.manual = false
 	target := ""
@@ -429,7 +441,7 @@ func (c *Controller) onTranscribed(ctx context.Context, m transcribed) {
 		return
 	}
 	settings := c.d.Settings()
-	req := prompt.Request{Mode: st.Mode, Transcript: m.text, Dictionary: settings.Dictionary}
+	req := prompt.Request{Mode: st.Mode, Transcript: m.text, Dictionary: settings.Dictionary, App: c.app}
 	if st.Mode == prompt.Translate {
 		req.Target = st.Target
 		if !c.manual {

@@ -111,6 +111,7 @@ func (v *Voice) Start(h *app.Host) error {
 		Capture:     func(cancel, cycle bool) { v.cancelable.Store(cancel); v.cycling.Store(cycle) },
 		OnChange:    v.onStatus,
 		Recording:   quiet.Recording,
+		FrontApp:    platform.FrontApp,
 		OnResult:    v.onResult,
 		OnTargetPicked: func(target string) {
 			if v.settings.Get().RememberTarget {

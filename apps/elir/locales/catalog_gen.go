@@ -1386,6 +1386,26 @@ func (msgs Messages) CancelNote() string {
 	return Catalog.Format(msgs.locale, "cancelNote", nil)
 }
 
+// FieldAppFormat says "Format for the app in front"
+// in the language the app shows.
+func FieldAppFormat() string { return In(i18n.Locale()).FieldAppFormat() }
+
+// FieldAppFormat says "Format for the app in front"
+// in the language of msgs.
+func (msgs Messages) FieldAppFormat() string {
+	return Catalog.Format(msgs.locale, "fieldAppFormat", nil)
+}
+
+// AppFormatNote says "In terminals and AI apps, file names, commands and other code go in backticks; in chats, a message reads as typed, wi…"
+// in the language the app shows.
+func AppFormatNote() string { return In(i18n.Locale()).AppFormatNote() }
+
+// AppFormatNote says "In terminals and AI apps, file names, commands and other code go in backticks; in chats, a message reads as typed, wi…"
+// in the language of msgs.
+func (msgs Messages) AppFormatNote() string {
+	return Catalog.Format(msgs.locale, "appFormatNote", nil)
+}
+
 // TranslateNote says "Speak any language; the text comes out translated. The dictation shortcut finishes."
 // in the language the app shows.
 func TranslateNote() string { return In(i18n.Locale()).TranslateNote() }

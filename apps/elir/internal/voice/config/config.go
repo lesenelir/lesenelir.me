@@ -19,6 +19,9 @@ type Settings struct {
 	HideTimings bool `json:"hideTimings"`
 	// NoHistory keeps pasted text out of the local history.
 	NoHistory bool `json:"noHistory"`
+	// NoAppFormat writes dictation the same way in every app, rather than
+	// as a prompt in a terminal or AI app and as a message in a chat.
+	NoAppFormat bool `json:"noAppFormat"`
 	// WhileRecording is what happens to the computer's own sound while the
 	// microphone records, so that music and videos stay out of the text:
 	// "mute", "lower" or "none".

@@ -39,6 +39,7 @@ type settingsForm struct {
 	showTimings bool
 	whileRec    int // index in whileRecording
 	saveHistory bool
+	appFormat   bool
 }
 
 // whileRecording are the choices for the computer's sound while recording,
@@ -70,6 +71,7 @@ func formFrom(s config.Settings, keys apiKeys) settingsForm {
 		showTimings: !s.HideTimings,
 		whileRec:    max(0, slices.Index(whileRecording, s.WhileRecording)),
 		saveHistory: !s.NoHistory,
+		appFormat:   !s.NoAppFormat,
 	}
 	for i, l := range prompt.Languages {
 		f.targets[i] = slices.Contains(s.Targets, l.Code)
@@ -134,6 +136,7 @@ func (f settingsForm) apply(s *config.Settings) {
 	s.HideTimings = !f.showTimings
 	s.WhileRecording = whileRecording[f.whileRec]
 	s.NoHistory = !f.saveHistory
+	s.NoAppFormat = !f.appFormat
 }
 
 // saveResult is the outcome of the last save that failed, if any.

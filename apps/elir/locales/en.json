@@ -155,6 +155,8 @@
   "sectionTranslate": "Translation",
   "sectionVoiceBar": "Recording and voice bar",
   "cancelNote": "While recording, transcribing or cleaning up.",
+  "fieldAppFormat": "Format for the app in front",
+  "appFormatNote": "In terminals and AI apps, file names, commands and other code go in backticks; in chats, a message reads as typed, without a full stop at the end.",
   "translateNote": "Speak any language; the text comes out translated. The dictation shortcut finishes.",
   "targetsTabNote": "Use the current switch shortcut to cycle through the languages ticked below while translating.",
   "navScreenshot": "Screenshot",

@@ -139,6 +139,9 @@ func (v *Voice) voicePage(c *ui.Context, m locales.Messages, pal widget.Palette)
 	widget.Group(c, pal, m.SectionDictation(), func(g *widget.Rows) {
 		g.Row(c, m.ShortcutDictate(), "", func() { v.host.Shortcut(c, shortcuts.Dictate) })
 		g.Row(c, m.ShortcutCancel(), m.CancelNote(), func() { v.host.Shortcut(c, shortcuts.VoiceCancel) })
+		g.Row(c, m.FieldAppFormat(), m.AppFormatNote(), func() {
+			ui.Switch(c.Key("app-format"), &v.form.appFormat).Label(m.FieldAppFormat()).OnChange(v.commit)
+		})
 	})
 	widget.Group(c, pal, m.SectionTranslate(), func(g *widget.Rows) {
 		g.Row(c, m.ShortcutTranslate(), m.TranslateNote(), func() { v.host.Shortcut(c, shortcuts.Translate) })

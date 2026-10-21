@@ -133,6 +133,8 @@
   "sectionTranslate": "翻译",
   "sectionVoiceBar": "录音与语音条",
   "cancelNote": "录音、转写和整理时都可以取消。",
+  "fieldAppFormat": "按当前 app 调整格式",
+  "appFormatNote": "在终端和 AI 应用里，文件名、命令等代码会包进反引号；在聊天软件里像随手发的消息，末尾不加句号。",
   "translateNote": "说任何语言，输出翻译后的文字；按听写快捷键结束。",
   "targetsTabNote": "翻译录音时使用当前切换快捷键，在下面勾选的语言之间切换。",
   "navScreenshot": "截图",

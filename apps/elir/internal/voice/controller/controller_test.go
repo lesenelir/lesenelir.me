@@ -107,6 +107,10 @@ type harness struct {
 
 	recMu     sync.Mutex
 	recording []bool
+
+	// Set before the session that reads them starts.
+	settings config.Settings
+	front    string
 }
 
 func (h *harness) recordingCalls() []bool {
@@ -128,13 +132,16 @@ func newHarness(t *testing.T) *harness {
 		changes: make(chan Status, 64),
 		capture: make(chan [2]bool, 64),
 		picked:  make(chan string, 64),
+
+		settings: config.Defaults(),
 	}
 	h.c = New(ctx, Deps{
 		Recorder:       h.rec,
 		Transcriber:    h.asr,
 		Rewriter:       h.llm,
 		Paster:         h.paster,
-		Settings:       config.Defaults,
+		Settings:       func() config.Settings { return h.settings },
+		FrontApp:       func() string { return h.front },
 		Capture:        func(esc, tab bool) { h.capture <- [2]bool{esc, tab} },
 		OnChange:       func(s Status) { h.changes <- s },
 		OnTargetPicked: func(target string) { h.picked <- target },
@@ -194,6 +201,32 @@ func TestDictation(t *testing.T) {
 	}
 	if r := h.llm.got[0]; r.Mode != prompt.Dictate || r.Transcript != "嗯我们周三，不对，周四开会" {
 		t.Fatalf("rewrite request %+v", r)
+	}
+}
+
+func TestDictationFormatsForApp(t *testing.T) {
+	for _, tc := range []struct {
+		front string
+		off   bool
+		mode  hotkey.Action
+		want  prompt.App
+	}{
+		{"com.mitchellh.ghostty", false, hotkey.Dictate, prompt.AIApp},
+		{"com.tencent.xinWeChat", false, hotkey.Dictate, prompt.ChatApp},
+		{"com.apple.Safari", false, hotkey.Dictate, prompt.AnyApp},
+		{"com.tencent.xinWeChat", true, hotkey.Dictate, prompt.AnyApp},
+		{"com.tencent.xinWeChat", false, hotkey.Translate, prompt.AnyApp},
+	} {
+		h := newHarness(t)
+		h.front, h.settings.NoAppFormat = tc.front, tc.off
+		h.c.Handle(tc.mode)
+		h.until(t, Recording)
+		h.front = "com.apple.Safari" // what comes in front later does not count
+		h.c.Handle(hotkey.Dictate)
+		h.until(t, Idle)
+		if r := h.llm.got[0]; r.App != tc.want {
+			t.Errorf("%+v: rewrite for app %v", tc, r.App)
+		}
 	}
 }
 

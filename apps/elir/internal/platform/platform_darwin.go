@@ -33,4 +33,5 @@ var (
 	CopySelection               = darwin.CopySelection
 	QuietOutput                 = darwin.QuietOutput
 	RestoreOutput               = darwin.RestoreOutput
+	FrontApp                    = darwin.FrontApp
 )
