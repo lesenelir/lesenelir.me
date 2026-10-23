@@ -42,8 +42,8 @@ export function SongItem({ song }: SongItemProps) {
       </div>
 
       <div className={'min-w-0 flex-1 text-left'}>
-        <p className={'truncate font-medium text-sm text-text-primary'}>{song.title}</p>
-        <p className={'truncate text-text-foreground/85 text-xs'}>{song.artist}</p>
+        <p className={'truncate text-sm font-medium text-text-primary'}>{song.title}</p>
+        <p className={'truncate text-xs text-text-foreground/85'}>{song.artist}</p>
       </div>
     </button>
   )

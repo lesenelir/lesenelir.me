@@ -77,14 +77,14 @@ export function SongPlayer() {
           <span className={'i-mingcute-music-2-fill size-6 text-text-foreground'} />
         </div>
         <div className={'min-w-0 flex-1 space-y-0.5'}>
-          <p className={'truncate font-medium text-sm text-text-primary'}>{currentSong?.title}</p>
-          <p className={'truncate text-text-foreground/85 text-xs'}>{currentSong?.artist}</p>
+          <p className={'truncate text-sm font-medium text-text-primary'}>{currentSong?.title}</p>
+          <p className={'truncate text-xs text-text-foreground/85'}>{currentSong?.artist}</p>
         </div>
       </div>
 
       {/* Progress Section */}
       <div className={'flex flex-wrap items-center gap-3'}>
-        <span className={'text-text-foreground/85 text-xs'}>{formatTime(currentTime)}</span>
+        <span className={'text-xs text-text-foreground/85'}>{formatTime(currentTime)}</span>
         <div className={'flex flex-1 items-center'}>
           <button
             type='button'
@@ -94,7 +94,7 @@ export function SongPlayer() {
             <div className={'h-1 rounded-full bg-text-foreground/50'} style={{ width: `${progressPercentage}%` }} />
           </button>
         </div>
-        <span className={'text-text-foreground/85 text-xs'}>{formatTime(duration)}</span>
+        <span className={'text-xs text-text-foreground/85'}>{formatTime(duration)}</span>
       </div>
 
       {/* Player Controls */}

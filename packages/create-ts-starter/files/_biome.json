@@ -36,6 +36,16 @@
       "arrowParentheses": "asNeeded"
     }
   },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
   "overrides": [
     {
       "includes": ["**/tsconfig.json"],

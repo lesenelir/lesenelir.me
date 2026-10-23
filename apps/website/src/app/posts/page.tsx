@@ -20,7 +20,7 @@ export default function Page() {
           <Link key={post.id} href={`/posts/${post.id}`} className={'group flex items-start justify-between gap-4'}>
             <span
               className={
-                'wrap-break-word min-w-0 flex-1 leading-relaxed transition-all duration-200 group-hover:text-text-primary'
+                'min-w-0 flex-1 leading-relaxed wrap-break-word transition-all duration-200 group-hover:text-text-primary'
               }
             >
               {post.metadata.title}

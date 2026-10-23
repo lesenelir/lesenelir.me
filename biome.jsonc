@@ -16,6 +16,7 @@
       "!**/build",
       "!**/public",
       "!**/template",
+      "!pnpm-lock.yaml",
       "!.claude",
       "!.idea"
     ]
@@ -31,14 +32,10 @@
     "rules": {
       "preset": "recommended",
       "nursery": {
-        // https://biomejs.dev/linter/rules/use-sorted-classes/
-        "useSortedClasses": {
+        // https://biomejs.dev/linter/rules/use-tailwind-sorted-classes/
+        "useTailwindSortedClasses": {
           "fix": "safe",
-          "level": "warn",
-          "options": {
-            "attributes": ["classList"],
-            "functions": ["cn", "clsx", "cva", "tw"]
-          }
+          "level": "warn"
         }
       }
     }
@@ -81,6 +78,22 @@
       "semicolons": "asNeeded",
       "trailingCommas": "es5",
       "arrowParentheses": "asNeeded"
+    }
+  },
+  "tailwind": {
+    "stylesheet": "apps/website/src/styles/main.css",
+    "attributes": ["class", "className", "classList"],
+    "mergeFunctions": ["cn", "clsx", "tw"],
+    "variantFunctions": ["cva"]
+  },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
     }
   },
   "css": {

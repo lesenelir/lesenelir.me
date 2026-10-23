@@ -24,12 +24,12 @@ type DelProps = ComponentPropsWithoutRef<'del'>
 type InputProps = ComponentPropsWithoutRef<'input'>
 
 const components = {
-  h1: (props: HeadingProps) => <h1 className={'mb-4 font-bold text-2xl text-text-primary'} {...props} />,
-  h2: (props: HeadingProps) => <h2 className={'mb-3 font-semibold text-text-primary text-xl'} {...props} />,
-  h3: (props: HeadingProps) => <h3 className={'mb-2 font-medium text-lg text-text-primary'} {...props} />,
+  h1: (props: HeadingProps) => <h1 className={'mb-4 text-2xl font-bold text-text-primary'} {...props} />,
+  h2: (props: HeadingProps) => <h2 className={'mb-3 text-xl font-semibold text-text-primary'} {...props} />,
+  h3: (props: HeadingProps) => <h3 className={'mb-2 text-lg font-medium text-text-primary'} {...props} />,
   h4: (props: HeadingProps) => <h4 className={'mb-1 text-text-primary'} {...props} />,
-  p: (props: ParagraphProps) => <p className={'my-4 text-md text-text-primary/85 leading-relaxed'} {...props} />,
-  hr: (props: HorizontalRuleProps) => <hr className={'my-12 w-1/3 border-dividing border-t'} {...props} />,
+  p: (props: ParagraphProps) => <p className={'my-4 text-md leading-relaxed text-text-primary/85'} {...props} />,
+  hr: (props: HorizontalRuleProps) => <hr className={'my-12 w-1/3 border-t border-dividing'} {...props} />,
   strong: (props: StrongProps) => <strong className={'font-semibold text-text-primary'} {...props} />,
   ol: (props: ListProps) => (
     <ol className={'my-4 list-inside list-decimal space-y-4 text-md text-text-primary/85'} {...props} />
@@ -38,7 +38,7 @@ const components = {
     <ul className={'my-4 list-inside list-disc space-y-4 text-md text-text-primary/85'} {...props} />
   ),
   blockquote: (props: BlockquoteProps) => (
-    <blockquote className={'my-4 border-dividing border-l-3 pl-4 text-text-primary/75 italic'} {...props} />
+    <blockquote className={'my-4 border-l-3 border-dividing pl-4 text-text-primary/75 italic'} {...props} />
   ),
   pre: ({ children, ...props }: PreProps) => {
     const codeElement = Array.isArray(children) ? children[0] : children
@@ -79,7 +79,7 @@ const components = {
   a: ({ children, href, ...props }: AnchorProps) => {
     const className = cn(
       'text-link',
-      'underline decoration-1 decoration-link/85 underline-offset-2 hover:decoration-link',
+      'underline decoration-link/85 decoration-1 underline-offset-2 hover:decoration-link',
       'transition-colors duration-200'
     )
 
@@ -126,12 +126,12 @@ const components = {
   ),
   thead: (props: TableHeadProps) => <thead className='bg-foreground/80' {...props} />,
   tbody: (props: TableBodyProps) => <tbody {...props} />,
-  tr: (props: TableRowProps) => <tr className={'border-dividing border-b'} {...props} />,
+  tr: (props: TableRowProps) => <tr className={'border-b border-dividing'} {...props} />,
   th: (props: TableHeaderProps) => (
-    <th className={'border-dividing border-r px-4 py-2 text-left font-semibold text-text-primary'} {...props} />
+    <th className={'border-r border-dividing px-4 py-2 text-left font-semibold text-text-primary'} {...props} />
   ),
   td: (props: TableDataProps) => (
-    <td className={'border-dividing border-r px-4 py-2 text-text-primary/85'} {...props} />
+    <td className={'border-r border-dividing px-4 py-2 text-text-primary/85'} {...props} />
   ),
   del: (props: DelProps) => <del className={'text-text-primary/60 line-through'} {...props} />,
   input: (props: InputProps) => {

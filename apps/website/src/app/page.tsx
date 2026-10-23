@@ -25,7 +25,7 @@ export default function Page() {
 
         <p>Or mail me: hi@lesenelir.me</p>
 
-        <hr className={'my-12 w-1/3 border-dividing border-t'} />
+        <hr className={'my-12 w-1/3 border-t border-dividing'} />
 
         <ExternalLink href={'https://github.com/lesenelir/lesenelir.me/tree/master/apps/website'}>
           View source

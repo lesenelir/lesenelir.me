@@ -16,7 +16,7 @@ export default function ExternalLink({ href, children, icon }: ExternalLinkProps
       rel={'noopener noreferrer'}
       className={cn(
         'inline-flex w-fit items-center gap-1 text-link',
-        'underline decoration-1 decoration-link/85 underline-offset-2 hover:decoration-link',
+        'underline decoration-link/85 decoration-1 underline-offset-2 hover:decoration-link',
         'transition-colors duration-200'
       )}
     >

@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -35,6 +35,6 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lesenelir/create-ts-starter smoke

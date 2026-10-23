@@ -6,6 +6,6 @@ pre-commit:
       stage_fixed: true
     - name: go fmt and vet (elir)
       root: apps/elir/
-      glob: "*.go"
+      glob: '*.go'
       run: gofmt -l -w {staged_files} && go vet ./...
       stage_fixed: true
