@@ -1,9 +1,12 @@
 {
   "name": "@lesenelir/create-ts-starter",
   "version": "0.0.7",
-  "description": "Lesenelir ts start template",
+  "description": "Create a TypeScript library from lesenelir's ts-starter",
   "keywords": [
-    "ts project template"
+    "create",
+    "starter",
+    "template",
+    "typescript"
   ],
   "repository": {
     "type": "git",
@@ -27,17 +30,16 @@
     "template": "rm -rf template && cp -R ../../apps/ts-starter template && rm -rf template/dist template/node_modules template/coverage && mv template/.gitignore template/_gitignore && cp files/_biome.json template/biome.json",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "fs-extra": "^11.4.1",
-    "kolorist": "^1.8.0",
-    "prompts": "^2.4.2"
-  },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.6.4",
-    "@types/prompts": "^2.4.9",
     "@typescript/typescript6": "^6.0.2",
     "bunchee": "^7.0.1",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }

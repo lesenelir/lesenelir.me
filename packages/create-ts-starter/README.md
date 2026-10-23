@@ -1,16 +1,39 @@
-# create-ts-starter
+# @lesenelir/create-ts-starter
 
-##### dev:
+Create a TypeScript library from [ts-starter](https://github.com/lesenelir/lesenelir.me/tree/master/apps/ts-starter): ESM-only, built with tsdown, tested with vitest, linted with biome, released through npm trusted publishing.
 
-1. `pnpm @lesenelir/create-ts-starter`
+```sh
+pnpm create @lesenelir/ts-starter
+npm create @lesenelir/ts-starter
+yarn create @lesenelir/ts-starter
+```
 
-or
+It asks where to create the project, its package name when the directory name isn't a valid one, whether to run `git init` (skipped inside another repository) and whether to install dependencies.
 
-1. `npm link`
-2. `npx @lesenelir/create-ts-starter`
+## Options
 
-##### prod:
+```sh
+pnpm create @lesenelir/ts-starter my-lib -y
+```
 
-`npm create @lesenelir/ts-starter`
-`yarn create @lesenelir/ts-starter`
-`pnpm create @lesenelir/ts-starter`
+| Option          | Meaning                                       |
+| --------------- | --------------------------------------------- |
+| `[dir]`         | where to create the project                   |
+| `--name <name>` | package name (defaults to the directory name) |
+| `--overwrite`   | empty a non-empty directory without asking    |
+| `--no-git`      | don't run `git init`                          |
+| `--no-install`  | don't install dependencies                    |
+| `-y`, `--yes`   | take the defaults instead of asking           |
+
+The template's GitHub workflows use pnpm. With another package manager, the `packageManager` field is dropped and the workflows need changing by hand.
+
+## Development
+
+The template is `apps/ts-starter` of this monorepo. `pnpm template` copies it into `template/`, shipping `.gitignore` as `_gitignore` (npm never publishes a `.gitignore`) and adding `files/_biome.json` as `biome.json` (a second root biome config would break the monorepo's).
+
+```sh
+pnpm template && pnpm build
+node dist/bin/index.js my-lib --no-install
+```
+
+`pnpm release:patch` bumps the version and publishes; `prepublishOnly` regenerates the template and rebuilds first.

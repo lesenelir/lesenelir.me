@@ -28,7 +28,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "biome check",
-    "prepack": "pnpm build",
+    "prepack": "tsdown",
     "release": "bumpp",
     "test": "vitest",
     "test:ci": "vitest run",
