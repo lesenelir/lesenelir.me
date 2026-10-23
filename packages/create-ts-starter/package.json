@@ -24,7 +24,7 @@
     "dev": "bunchee src/index.ts -w",
     "prepublishOnly": "pnpm template && pnpm build",
     "release:patch": "npm version patch && npm publish",
-    "template": "rm -rf template && cp -R ../../apps/ts-starter template && rm -rf template/dist template/node_modules template/coverage && mv template/.gitignore template/_gitignore",
+    "template": "rm -rf template && cp -R ../../apps/ts-starter template && rm -rf template/dist template/node_modules template/coverage && mv template/.gitignore template/_gitignore && cp files/_biome.json template/biome.json",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

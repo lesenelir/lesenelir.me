@@ -8,8 +8,8 @@ A pnpm monorepo (`apps/*`, `packages/*`; Node >= 24, pnpm 11) holding lesenelir'
 
 - `apps/website` — the lesenelir.me site (Next.js 16 App Router, React 19, Tailwind CSS 4, MDX, Jotai), deployed on Vercel.
 - `apps/elir` — Elir (formerly Kit, and Voice before it), a macOS and Windows tray toolbox written in Go with [MyGo](https://mygo.egoist.dev/) native UI; its tools are voice input and screenshots. Its `package.json` only wraps Go commands.
-- `apps/ts-starter` — the TypeScript library template (bunchee + vitest).
-- `packages/create-ts-starter` — the `npm create @lesenelir/ts-starter` CLI. Its `template` script copies `apps/ts-starter` into a gitignored `template/` folder that gets published.
+- `apps/ts-starter` — the TypeScript library template: ESM-only, tsdown (with publint) + vitest + biome, `#/*` subpath imports, released with bumpp and npm trusted publishing.
+- `packages/create-ts-starter` — the `npm create @lesenelir/ts-starter` CLI. Its `template` script copies `apps/ts-starter` into a gitignored `template/` folder that gets published, with `.gitignore` shipped as `_gitignore` and `files/_biome.json` added as `biome.json`. Files a standalone project needs but the monorepo can't hold (a second root `biome.json` breaks the workspace) come from the CLI, not `apps/ts-starter`.
 
 ## Commands
 

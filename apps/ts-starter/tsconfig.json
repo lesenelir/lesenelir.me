@@ -1,27 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ESNext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-    "module": "ESNext" /* Specify what module code is generated. */,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"] /* Specify library files to be included in the compilation. */,
-    "moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
-    "declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
-    "declarationMap": true /* Create sourcemaps for d.ts files. */,
-    "declarationDir": "./dist" /* Specify the output directory for generated declaration files. */,
-    "sourceMap": true /* Create source map files for emitted JavaScript files. */,
-    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
-    "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
-    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
-
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
     "types": ["node"] /* TS 7 no longer auto-includes node_modules/@types. */,
-    "strict": true /* Enable all strict type-checking options. */,
-    "noUnusedLocals": true /* Report errors on unused locals. */,
-    "noUnusedParameters": true /* Report errors on unused parameters. */,
-    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in a switch statement. */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "declaration": true /* Needed by isolatedDeclarations; noEmit still writes nothing. */,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "verbatimModuleSyntax": true /* Type-only imports must use `import type`, so files transpile on their own. */,
+    "isolatedDeclarations": true /* Exports carry explicit types, so tsdown emits .d.ts without the type checker. */,
+    "erasableSyntaxOnly": true /* No enums or namespaces, so Node can run the source with type stripping. */,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["dist"]
+  "include": ["src", "test"]
 }

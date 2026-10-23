@@ -150,10 +150,6 @@ async function main() {
     )
   }
 
-  // pnpm 11 blocks dependency build scripts unless allowed; bunchee needs @swc/core's.
-  // Inside the monorepo the root pnpm-workspace.yaml allows it, so the template can't carry its own.
-  await fsPromises.writeFile(path.join(root, 'pnpm-workspace.yaml'), `allowBuilds:\n  '@swc/core': true\n`)
-
   // -----------------------------------------------------------------------------------
   const manager = process.env.npm_config_user_agent ?? ''
   const packageManager = /pnpm/.test(manager) ? 'pnpm' : /yarn/.test(manager) ? 'yarn' : 'npm'

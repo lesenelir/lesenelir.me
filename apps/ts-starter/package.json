@@ -7,44 +7,47 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/lesenelir/[project-name]"
+    "url": "git+https://github.com/lesenelir/[project-name].git"
   },
   "license": "MIT",
   "author": "lesenelir <hi@lesenelir.me>",
+  "sideEffects": false,
   "type": "module",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/es/index.d.ts",
-        "default": "./dist/es/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.cts",
-        "default": "./dist/cjs/index.cjs"
-      }
-    }
+  "imports": {
+    "#/*": "./src/*.ts"
   },
-  "main": "./dist/cjs/index.cjs",
-  "module": "./dist/es/index.js",
-  "types": "./dist/es/index.d.ts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.mts",
   "files": [
-    "dist",
-    "README.md",
-    "CHANGELOG.md"
+    "dist"
   ],
   "scripts": {
-    "build": "bunchee src/index.ts",
-    "dev": "bunchee src/index.ts -w",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "biome check",
+    "prepack": "pnpm build",
+    "release": "bumpp",
     "test": "vitest",
     "test:ci": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@types/node": "^26.6.4",
-    "@typescript/typescript6": "^6.0.2",
-    "bunchee": "^7.0.1",
+    "bumpp": "^12.3.0",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.4"
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

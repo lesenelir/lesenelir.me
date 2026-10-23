@@ -1,1 +1,1 @@
-export { sayName } from '@/name'
+export { sayName } from '#/name'
