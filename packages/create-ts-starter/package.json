@@ -7,7 +7,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/lesenelir/lesenelir.me/packages/create-ts-starter"
+    "url": "git+https://github.com/lesenelir/lesenelir.me.git",
+    "directory": "packages/create-ts-starter"
   },
   "license": "MIT",
   "author": "lesenelir <hi@lesenelir.me>",
@@ -21,8 +22,9 @@
     "@lesenelir/create-ts-starter": "node dist/bin/index.js",
     "build": "bunchee src/index.ts",
     "dev": "bunchee src/index.ts -w",
+    "prepublishOnly": "pnpm template && pnpm build",
     "release:patch": "npm version patch && npm publish",
-    "template": "cp -r ../../apps/ts-starter template && rm -rf template/dist && rm -rf template/node_modules",
+    "template": "rm -rf template && cp -R ../../apps/ts-starter template && rm -rf template/dist template/node_modules template/coverage && mv template/.gitignore template/_gitignore",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

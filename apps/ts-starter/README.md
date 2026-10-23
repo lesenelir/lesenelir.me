@@ -1,3 +1,3 @@
 # ts-starter
 
-ts-starter pkg
+lesenelir's TypeScript library starter.

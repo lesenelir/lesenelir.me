@@ -115,21 +115,44 @@ async function main() {
 
   fse.copySync(templateDir, root)
 
-  if (existsSync(path.join(root, 'gitignore'))) {
-    await fsPromises.rename(path.join(root, 'gitignore'), path.join(root, '.gitignore'))
+  // npm never publishes a .gitignore, so the template ships it as _gitignore
+  if (existsSync(path.join(root, '_gitignore'))) {
+    await fsPromises.rename(path.join(root, '_gitignore'), path.join(root, '.gitignore'))
   }
+
+  // the repository url is named after the package, without its scope
+  const repoName = pkg.name.split('/').pop() ?? pkg.name
 
   await fsPromises.writeFile(
     packageJsonPath,
-    JSON.stringify(
+    `${JSON.stringify(
       {
         ...templatePackageJson,
         ...pkg,
+        repository: {
+          ...templatePackageJson.repository,
+          url: String(templatePackageJson.repository?.url ?? '').replace('[project-name]', repoName),
+        },
       },
       null,
       2
-    )
+    )}\n`
   )
+
+  await fsPromises.writeFile(path.join(root, 'README.md'), `# ${pkg.name}\n`)
+
+  const licensePath = path.join(root, 'LICENSE')
+  if (existsSync(licensePath)) {
+    const license = await fsPromises.readFile(licensePath, 'utf-8')
+    await fsPromises.writeFile(
+      licensePath,
+      license.replace(/Copyright \(c\) \d{4}/, `Copyright (c) ${new Date().getFullYear()}`)
+    )
+  }
+
+  // pnpm 11 blocks dependency build scripts unless allowed; bunchee needs @swc/core's.
+  // Inside the monorepo the root pnpm-workspace.yaml allows it, so the template can't carry its own.
+  await fsPromises.writeFile(path.join(root, 'pnpm-workspace.yaml'), `allowBuilds:\n  '@swc/core': true\n`)
 
   // -----------------------------------------------------------------------------------
   const manager = process.env.npm_config_user_agent ?? ''
@@ -142,9 +165,9 @@ async function main() {
       npm: 'npm install',
     },
     dev: {
-      pnpm: 'pnpm start',
-      yarn: 'yarn start',
-      npm: 'npm run start',
+      pnpm: 'pnpm dev',
+      yarn: 'yarn dev',
+      npm: 'npm run dev',
     },
   }
 

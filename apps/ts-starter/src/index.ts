@@ -1,3 +1,1 @@
-import { sayName } from '@/name'
-
-console.log(sayName('lesenelir'))
+export { sayName } from '@/name'

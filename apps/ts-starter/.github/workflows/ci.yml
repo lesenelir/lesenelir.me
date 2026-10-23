@@ -13,12 +13,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
       - run: pnpm test:ci
+      - run: pnpm build
