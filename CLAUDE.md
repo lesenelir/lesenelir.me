@@ -34,11 +34,14 @@ Tests:
 cd apps/elir && go test ./...                              # all Go tests
 cd apps/elir && go test ./internal/voice/hotkey -run TestX # a single Go test
 pnpm --filter @lesenelir/ts-starter exec vitest run test/index.test.ts
+pnpm --filter @lesenelir/create-ts-starter smoke           # create a project from the packed CLI and check it
 ```
 
 The website has no tests. For Elir changes, the repo's MyGo skill (`apps/elir/.agents/skills/mygo-maintenance/SKILL.md`) also recommends `go tool mygo vet .` and `CGO_ENABLED=0 go test ./...`. Read that skill before touching any MyGo UI code (`internal/app`, `internal/widget`, the views in `internal/voice`); it covers element lifetimes, handles/keys, and keeping work off the UI thread.
 
 Lefthook pre-commit runs `biome check --write` on staged files, plus `gofmt -w` and `go vet ./...` for staged Go files in `apps/elir`.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs `pnpm lint`, `pnpm typecheck`, the ts-starter tests and build, and the create-ts-starter smoke test on pushes and pull requests to master. Elir's Go code is not checked there. `apps/ts-starter/.github` holds the workflows of generated projects, not of this repository.
 
 ## Code style
 

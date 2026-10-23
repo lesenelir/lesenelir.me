@@ -36,4 +36,6 @@ pnpm template && pnpm build
 node dist/bin/index.js my-lib --no-install
 ```
 
+`pnpm smoke` (`scripts/smoke.sh`, also run by the monorepo's CI) packs the CLI as npm would publish it, creates a project from the tarball in a temporary directory and checks that it installs, lints, typechecks, tests and builds.
+
 `pnpm release:patch` bumps the version and publishes; `prepublishOnly` regenerates the template and rebuilds first.
