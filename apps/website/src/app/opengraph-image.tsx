@@ -9,5 +9,5 @@ export const alt = siteConfig.name
 
 // The link preview of every page that has none of its own
 export default function Image() {
-  return renderOgImage({ title: siteConfig.name, footer: 'Software engineer in Beijing' })
+  return renderOgImage({ title: siteConfig.name, footer: 'Posts, photos and songs' })
 }
