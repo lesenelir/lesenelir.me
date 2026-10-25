@@ -8,6 +8,9 @@ export const postsMetadata: Record<string, TPostMetadata> = {
     title: '再见，青春',
     date: '2024-06-28',
     readTime: '05 min',
+    // The opening lines; taken automatically, the description would start with the editor's note
+    description:
+      '走在北京三元桥上，迎面而来的汽车，怔怔的走在只允许一个人通过的人行道上。霎那间 ... 我想到了广州很多美好往事，想到了很多生活片段 ... 而这些过往回忆、我的青春伴随着北京忙碌的车流消逝在下一个路口。',
   },
   'go-concurrency': {
     title: 'Go 并发编程浅析',

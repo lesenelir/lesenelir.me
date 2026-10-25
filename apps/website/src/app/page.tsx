@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { cn } from '@/lib/utils'
+
 import ExternalLink from '@/components/common/external-link'
 import TimeClock from '@/components/common/time-clock'
 
@@ -16,7 +18,7 @@ export default function Page() {
         <p>Hello, I'm lesenelir, a software engineer who loves building anything.</p>
 
         <p>
-          Beijing is where I currently work and live. Local time here: <TimeClock />. Prior to Beijing, My life journey
+          Beijing is where I currently work and live. Local time here: <TimeClock />. Prior to Beijing, my life journey
           has taken me to live in Quzhou, Wuhan, and Guangzhou.
         </p>
 
@@ -25,11 +27,23 @@ export default function Page() {
         <p className={'flex flex-col gap-0.5'}>
           Find me on:
           <ExternalLink href={'https://github.com/lesenelir'} icon={<span className={'i-mingcute-github-line'} />}>
-            Github
+            GitHub
           </ExternalLink>
         </p>
 
-        <p>Or mail me: hi@lesenelir.me</p>
+        <p>
+          Or mail me:{' '}
+          <a
+            href={'mailto:hi@lesenelir.me'}
+            className={cn(
+              'text-link',
+              'underline decoration-link/85 decoration-1 underline-offset-2 hover:decoration-link',
+              'transition-colors duration-200'
+            )}
+          >
+            hi@lesenelir.me
+          </a>
+        </p>
 
         <hr className={'my-12 w-1/3 border-t border-dividing'} />
 

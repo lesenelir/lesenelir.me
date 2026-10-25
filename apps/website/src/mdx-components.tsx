@@ -83,39 +83,32 @@ const components = {
       'transition-colors duration-200'
     )
 
+    // Spacing around a link is the post's own: the source has spaces where they belong, and none before punctuation
+
     // Internal links (Next.js)
     if (href?.startsWith('/')) {
       return (
-        <>
-          {' '}
-          <Link href={href} className={className} {...props}>
-            {children}
-          </Link>{' '}
-        </>
+        <Link href={href} className={className} {...props}>
+          {children}
+        </Link>
       )
     }
 
     // Hash links (internal anchors)
     if (href?.startsWith('#')) {
       return (
-        <>
-          {' '}
-          <a href={href} className={className} {...props}>
-            {children}
-          </a>{' '}
-        </>
+        <a href={href} className={className} {...props}>
+          {children}
+        </a>
       )
     }
 
     // External links
     return (
-      <>
-        {' '}
-        <a href={href} target='_blank' rel='noopener noreferrer' className={className} {...props}>
-          {children}
-          <span className={'i-mingcute-right-line relative -top-1.5 -ml-0.5 inline-block size-3.5 -rotate-45'} />
-        </a>{' '}
-      </>
+      <a href={href} target='_blank' rel='noopener noreferrer' className={className} {...props}>
+        {children}
+        <span className={'i-mingcute-right-line relative -top-1.5 -ml-0.5 inline-block size-3.5 -rotate-45'} />
+      </a>
     )
   },
   // GFM Extensions

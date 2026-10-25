@@ -36,7 +36,7 @@ export const photoMetadata: Record<string, { desc: string }> = {
   R0000112: { desc: '2025/01/23 (Thur) Beijing, China @ Train Station (2)' },
   R0000110: { desc: '2025/01/23 (Thur) Beijing, China @ Train Station (1)' },
   R0000093: { desc: '2025/01/23 (Thur) Beijing, China @ Bro' },
-  R0000064: { desc: '2024/12/12 (Sun) Beijing, China @ Beneath Your Window' },
-  R0000052: { desc: '2024/12/12 (Sun) Beijing, China @ Apple Banana Left Behind' },
-  R0000041: { desc: '2024/12/12 (Sun) Beijing, China @ Yummy' },
+  R0000064: { desc: '2024/12/12 (Thur) Beijing, China @ Beneath Your Window' },
+  R0000052: { desc: '2024/12/12 (Thur) Beijing, China @ Apple Banana Left Behind' },
+  R0000041: { desc: '2024/12/12 (Thur) Beijing, China @ Yummy' },
 }
