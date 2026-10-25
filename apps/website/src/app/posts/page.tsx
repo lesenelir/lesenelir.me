@@ -6,6 +6,7 @@ import { getAllPosts } from '@/lib/mdx'
 export const metadata: Metadata = {
   title: 'Posts',
   description: "Lesenelir Zhou's personal website - Posts",
+  alternates: { canonical: '/posts' },
 }
 
 export default function Page() {
@@ -19,6 +20,7 @@ export default function Page() {
         {posts.map(post => (
           <Link key={post.id} href={`/posts/${post.id}`} className={'group flex items-start justify-between gap-4'}>
             <span
+              lang={'zh-CN'}
               className={
                 'min-w-0 flex-1 leading-relaxed wrap-break-word transition-all duration-200 group-hover:text-text-primary'
               }

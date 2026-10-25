@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
+
 import ExternalLink from '@/components/common/external-link'
 import TimeClock from '@/components/common/time-clock'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export default function Page() {
   return (

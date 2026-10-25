@@ -11,6 +11,7 @@ export const revalidate = 3600
 export const metadata: Metadata = {
   title: 'Photos',
   description: "Lesenelir Zhou's personal website - Photos",
+  alternates: { canonical: '/photos' },
 }
 
 export default async function Page() {

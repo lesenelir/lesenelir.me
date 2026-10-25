@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import type React from 'react'
 
 import '@/styles/main.css'
@@ -10,24 +10,34 @@ import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
 
+import { siteConfig } from '@/constants'
+
+// Pages inherit this, so it holds no canonical URL or og:title: each page sets its own canonical, and without an
+// og:title, link previews use the page's <title>
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'Lesenelir Zhou',
-    template: '%s - Lesenelir Zhou',
+    default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
   },
-  description: "Lesenelir Zhou's personal website",
-  authors: [
-    {
-      name: 'Lesenelir Zhou',
-      url: 'https://lesenelir.me',
-    },
-    {
-      name: 'Lesenelir Zhou',
-      url: 'https://github.com/lesenelir',
-    },
+  description: siteConfig.description,
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  openGraph: {
+    type: 'website',
+    siteName: siteConfig.name,
+    locale: 'en_US',
+  },
+  twitter: { card: 'summary_large_image' },
+}
+
+// The browser UI matches the page background (src/styles/colors.css)
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fcfcfc' },
+    { media: '(prefers-color-scheme: dark)', color: '#131413' },
   ],
-  creator: 'Lesenelir Zhou',
-  publisher: 'Lesenelir Zhou',
 }
 
 export default function RootLayout({
@@ -39,6 +49,8 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <head>
         <script>{photosLayoutScript}</script>
+        {/* Here rather than in metadata.alternates, which a page's own alternates (its canonical URL) replace */}
+        <link rel='alternate' type='application/rss+xml' title={siteConfig.name} href={'/feed.xml'} />
       </head>
       <body className={'bg-background antialiased max-sm:p-6 sm:p-16'} suppressHydrationWarning>
         <Providers>

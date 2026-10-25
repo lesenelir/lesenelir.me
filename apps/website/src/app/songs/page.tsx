@@ -13,6 +13,7 @@ export const revalidate = 3600
 export const metadata: Metadata = {
   title: 'Songs',
   description: "Lesenelir Zhou's personal website - Songs",
+  alternates: { canonical: '/songs' },
 }
 
 export default async function Page() {
