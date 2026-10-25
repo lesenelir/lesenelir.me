@@ -43,28 +43,23 @@ const photoMetadata: Record<string, { desc: string }> = {
 }
 
 export const getPhotos = async (): Promise<TPhoto[]> => {
-  try {
-    const s3Objects = await listPhotos()
+  const s3Objects = await listPhotos()
 
-    const photos: TPhoto[] = s3Objects.flatMap(obj => {
-      if (!obj.Key) return []
+  const photos: TPhoto[] = s3Objects.flatMap(obj => {
+    if (!obj.Key) return []
 
-      const fileName = obj.Key.replace('photos/', '')
-      const id = fileName.replace(/\.[^.]+$/i, '')
+    const fileName = obj.Key.replace('photos/', '')
+    const id = fileName.replace(/\.[^.]+$/i, '')
 
-      return [
-        {
-          id,
-          src: getPublicUrl(obj.Key),
-          alt: id,
-          desc: photoMetadata[id]?.desc ?? '',
-        },
-      ]
-    })
+    return [
+      {
+        id,
+        src: getPublicUrl(obj.Key),
+        alt: id,
+        desc: photoMetadata[id]?.desc ?? '',
+      },
+    ]
+  })
 
-    return photos.reverse()
-  } catch (error) {
-    console.error('Error fetching photos:', error)
-    return []
-  }
+  return photos.reverse()
 }
