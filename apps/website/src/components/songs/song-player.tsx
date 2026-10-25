@@ -35,20 +35,14 @@ const PlayModeIcon = () => {
   }
 }
 
-export function SongPlayer() {
-  const currentSong = useAtomValue(currentSongAtom)
-  const isPlaying = useAtomValue(isPlayingAtom)
+// The only part that follows the playback time, which ticks about 4 times a second, so the rest of the player
+// doesn't re-render with it
+const SongProgress = () => {
   const currentTime = useAtomValue(currentTimeAtom)
   const duration = useAtomValue(durationAtom)
-  const volume = useAtomValue(volumeAtom)
-  const isMuted = useAtomValue(isMutedAtom)
-  const playMode = useAtomValue(playModeAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
-
-  const baseButtonClass =
-    'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
 
   const handleProgressClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (duration === 0) return
@@ -60,6 +54,34 @@ export function SongPlayer() {
 
     setAudioControls({ type: 'seek', time: newTime })
   }
+
+  return (
+    <div className={'flex flex-wrap items-center gap-3'}>
+      <span className={'text-xs text-text-foreground/85'}>{formatTime(currentTime)}</span>
+      <div className={'flex flex-1 items-center'}>
+        <button
+          type='button'
+          className={'h-1 w-full cursor-pointer rounded-full bg-text-foreground/10'}
+          onClick={handleProgressClick}
+        >
+          <div className={'h-1 rounded-full bg-text-foreground/50'} style={{ width: `${progressPercentage}%` }} />
+        </button>
+      </div>
+      <span className={'text-xs text-text-foreground/85'}>{formatTime(duration)}</span>
+    </div>
+  )
+}
+
+export function SongPlayer() {
+  const currentSong = useAtomValue(currentSongAtom)
+  const isPlaying = useAtomValue(isPlayingAtom)
+  const volume = useAtomValue(volumeAtom)
+  const isMuted = useAtomValue(isMutedAtom)
+  const playMode = useAtomValue(playModeAtom)
+  const setAudioControls = useSetAtom(audioControlsAtom)
+
+  const baseButtonClass =
+    'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
 
   const handleVolumeClick = (e: MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -83,19 +105,7 @@ export function SongPlayer() {
       </div>
 
       {/* Progress Section */}
-      <div className={'flex flex-wrap items-center gap-3'}>
-        <span className={'text-xs text-text-foreground/85'}>{formatTime(currentTime)}</span>
-        <div className={'flex flex-1 items-center'}>
-          <button
-            type='button'
-            className={'h-1 w-full cursor-pointer rounded-full bg-text-foreground/10'}
-            onClick={handleProgressClick}
-          >
-            <div className={'h-1 rounded-full bg-text-foreground/50'} style={{ width: `${progressPercentage}%` }} />
-          </button>
-        </div>
-        <span className={'text-xs text-text-foreground/85'}>{formatTime(duration)}</span>
-      </div>
+      <SongProgress />
 
       {/* Player Controls */}
       <div className={'flex flex-wrap items-center justify-between'}>
