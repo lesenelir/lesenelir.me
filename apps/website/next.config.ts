@@ -29,7 +29,8 @@ const withMDX = createMDX({
   extension: /\.(md|mdx)$/,
   options: {
     // Turbopack can't pass JS functions to Rust, so plugins are referenced by package name
-    remarkPlugins: ['remark-gfm'],
+    // remark-frontmatter keeps a post's frontmatter out of the rendered page; src/lib/mdx.ts reads it
+    remarkPlugins: ['remark-gfm', 'remark-frontmatter'],
     rehypePlugins: [],
   },
 })

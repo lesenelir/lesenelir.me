@@ -1,49 +1,99 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { parse as parseYaml } from 'yaml'
 
 import type { TPost, TPostMetadata } from '@/types'
 
-import { postsMetadata } from '@/constants'
-
 const postsDirectory = path.join(process.cwd(), 'content/posts')
 
-export function getAllPosts(): TPost[] {
-  const fileNames = fs.readdirSync(postsDirectory)
-  return fileNames
-    .filter(name => name.endsWith('.mdx'))
-    .map(name => {
-      const id = name.replace(/\.mdx$/, '')
-      const metadata = postsMetadata[id]
+const FRONTMATTER = /^---\n([\s\S]*?)\n---\n/
 
-      if (!metadata) {
-        throw new Error(`Metadata not found for post: ${id}`)
-      }
-
-      return {
-        id,
-        metadata,
-      }
-    })
-    .sort((a, b) => {
-      return new Date(b.metadata.date).getTime() - new Date(a.metadata.date).getTime()
-    })
-}
-
-export function getPostMetadata(id: string): TPostMetadata | null {
-  return postsMetadata[id] || null
-}
+// Reading speed: Chinese characters and English words a minute, and code lines a minute when skimmed
+const CHARS_PER_MINUTE = 300
+const WORDS_PER_MINUTE = 200
+const CODE_LINES_PER_MINUTE = 100
 
 // Enough text for a search result or a link preview, cut on a character so Chinese stays whole
 const EXCERPT_MIN_LENGTH = 80
 const EXCERPT_MAX_LENGTH = 120
 
+interface TPostSource {
+  metadata: TPostMetadata
+  // The post without its frontmatter
+  body: string
+}
+
+// Each post is read once per process; pages, the sitemap, the feed and the images all ask for the same posts
+const sources = new Map<string, TPostSource | null>()
+
+// A post's title, date and optional description are in its frontmatter; its reading time is worked out from its text
+function readPost(id: string): TPostSource | null {
+  if (sources.has(id)) return sources.get(id) ?? null
+
+  const file = path.join(postsDirectory, `${id}.mdx`)
+  if (!fs.existsSync(file)) {
+    sources.set(id, null)
+    return null
+  }
+
+  const source = fs.readFileSync(file, 'utf8')
+  const match = source.match(FRONTMATTER)
+  const frontmatter = match ? parseYaml(match[1]) : null
+  if (typeof frontmatter?.title !== 'string' || typeof frontmatter?.date !== 'string') {
+    throw new Error(`${id}.mdx needs a title and a date ('YYYY-MM-DD') in its frontmatter`)
+  }
+
+  const body = match ? source.slice(match[0].length) : source
+  const post = {
+    metadata: {
+      title: frontmatter.title,
+      date: frontmatter.date,
+      description: typeof frontmatter.description === 'string' ? frontmatter.description : undefined,
+      readTime: getReadTime(body),
+    },
+    body,
+  }
+
+  sources.set(id, post)
+  return post
+}
+
+function getReadTime(body: string): string {
+  const codeBlocks = body.match(/```[\s\S]*?```/g) ?? []
+  const codeLines = codeBlocks.reduce((lines, block) => lines + block.split('\n').length - 2, 0)
+  const prose = body.replace(/```[\s\S]*?```/g, '').replace(/<[A-Z][\s\S]*?\/>/g, '')
+  const chars = prose.match(/\p{Script=Han}/gu)?.length ?? 0
+  const words = prose.match(/[A-Za-z0-9]+/g)?.length ?? 0
+
+  const minutes = Math.max(
+    1,
+    Math.ceil(chars / CHARS_PER_MINUTE + words / WORDS_PER_MINUTE + codeLines / CODE_LINES_PER_MINUTE)
+  )
+  return `${String(minutes).padStart(2, '0')} min`
+}
+
+export function getAllPosts(): TPost[] {
+  return fs
+    .readdirSync(postsDirectory)
+    .filter(name => name.endsWith('.mdx'))
+    .flatMap(name => {
+      const id = name.replace(/\.mdx$/, '')
+      const post = readPost(id)
+      return post ? [{ id, metadata: post.metadata }] : []
+    })
+    .sort((a, b) => new Date(b.metadata.date).getTime() - new Date(a.metadata.date).getTime())
+}
+
+export function getPostMetadata(id: string): TPostMetadata | null {
+  return readPost(id)?.metadata ?? null
+}
+
 // Plain text from the opening paragraphs of a post. Blockquotes (epigraphs, disclaimers) are only used when a post
 // has no other paragraphs.
-function getPostExcerpt(id: string): string {
-  const source = fs
-    .readFileSync(path.join(postsDirectory, `${id}.mdx`), 'utf8')
-    .replace(/^import .*$/gm, '')
+function getPostExcerpt(body: string): string {
+  const source = body
     .replace(/```[\s\S]*?```/g, '')
+    .replace(/^import .*$/gm, '')
     .replace(/<[A-Z][\s\S]*?\/>/g, '')
 
   // Paragraphs, without headings, rules, tables and lists
@@ -73,7 +123,9 @@ function getPostExcerpt(id: string): string {
 }
 
 export function getPostDescription(id: string): string {
-  return postsMetadata[id]?.description ?? getPostExcerpt(id)
+  const post = readPost(id)
+  if (!post) return ''
+  return post.metadata.description ?? getPostExcerpt(post.body)
 }
 
 export async function getPostComponent(id: string) {

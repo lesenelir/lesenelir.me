@@ -1,9 +1,12 @@
 import type { MDXComponents } from 'mdx/types'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ComponentPropsWithoutRef } from 'react'
 import { highlight } from 'sugar-high'
 
 import { cn } from '@/lib/utils'
+
+import { ImageMdx } from '@/components/common/image-mdx'
 
 type HeadingProps = ComponentPropsWithoutRef<'h1'>
 type ParagraphProps = ComponentPropsWithoutRef<'p'>
@@ -24,6 +27,9 @@ type DelProps = ComponentPropsWithoutRef<'del'>
 type InputProps = ComponentPropsWithoutRef<'input'>
 
 const components = {
+  // Available in every post without an import
+  Image,
+  ImageMdx,
   h1: (props: HeadingProps) => <h1 className={'mb-4 text-2xl font-bold text-text-primary'} {...props} />,
   h2: (props: HeadingProps) => <h2 className={'mb-3 text-xl font-semibold text-text-primary'} {...props} />,
   h3: (props: HeadingProps) => <h3 className={'mb-2 text-lg font-medium text-text-primary'} {...props} />,

@@ -20,10 +20,12 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-hotkeys-hook": "^5.3.3",
+    "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
     "sugar-high": "^2.6.2",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.9.2",
