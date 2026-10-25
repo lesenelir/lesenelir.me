@@ -18,6 +18,13 @@ export default function Page() {
         <p>Hi, I'm Lesenelir. I'm a software engineer, and I enjoy building things.</p>
 
         <p>
+          I started writing code because it felt like building with LEGO, and I could get completely lost in it for
+          hours. Now that AI writes a lot of the code, that feeling doesn't come around as often (only half joking).
+          These days, I'm spending most of my time on <ExternalLink href={'https://hyper.ai'}>HyperAI</ExternalLink>, a
+          platform for people working in AI, with open datasets, the latest papers, and GPU compute.
+        </p>
+
+        <p>
           This is my personal site, where I write about programming and whatever else I've been thinking about. I also
           share some of my photos and the songs I've been listening to.
         </p>
