@@ -6,23 +6,29 @@ import { getObjectStart, getPublicUrl, listPhotos } from '@/lib/s3'
 
 import { photoMetadata } from '@/constants'
 
-// The dimensions sit in the JPEG header, after the camera's EXIF preview: about 100 KB into a 10-15 MB file
-const HEADER_BYTES = 256 * 1024
+// The dimensions sit in the JPEG header, after the camera's EXIF preview: about 100 KB into a 10-15 MB file. A
+// photo with a bigger preview or more metadata (e.g. exported from Lightroom) gets a second, larger read.
+const HEADER_BYTES = [256 * 1024, 2 * 1024 * 1024]
 
-// Used when a header can't be parsed: the camera's 3:2 landscape
+// Used when no header can be parsed: the camera's 3:2 landscape
 const FALLBACK_DIMENSIONS = { width: 6000, height: 4000 }
 
 const getPhotoDimensions = async (key: string) => {
-  const header = await getObjectStart(key, HEADER_BYTES)
+  let lastError: unknown
 
-  try {
-    const { width, height, orientation } = imageSize(header)
-    // EXIF orientations 5-8 are turned a quarter, and browsers display them that way
-    return orientation && orientation >= 5 ? { width: height, height: width } : { width, height }
-  } catch (error) {
-    console.warn(`Could not read the dimensions of ${key}:`, error)
-    return FALLBACK_DIMENSIONS
+  for (const bytes of HEADER_BYTES) {
+    const header = await getObjectStart(key, bytes)
+    try {
+      const { width, height, orientation } = imageSize(header)
+      // EXIF orientations 5-8 are turned a quarter, and browsers display them that way
+      return orientation && orientation >= 5 ? { width: height, height: width } : { width, height }
+    } catch (error) {
+      lastError = error
+    }
   }
+
+  console.warn(`Could not read the dimensions of ${key}:`, lastError)
+  return FALLBACK_DIMENSIONS
 }
 
 export const getPhotos = async (): Promise<TPhoto[]> => {
