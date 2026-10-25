@@ -4,6 +4,8 @@ import type React from 'react'
 
 import '@/styles/main.css'
 
+import { photosLayoutScript } from '@/lib/photos-layout'
+
 import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
@@ -35,6 +37,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
+      <head>
+        <script>{photosLayoutScript}</script>
+      </head>
       <body className={'bg-background antialiased max-sm:p-6 sm:p-16'} suppressHydrationWarning>
         <Providers>
           <Sidebar />

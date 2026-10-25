@@ -2,7 +2,9 @@
 
 import { useAtomValue } from 'jotai'
 
-import { layoutModeAtom, photosAtom } from '@/atoms/photos'
+import { cn } from '@/lib/utils'
+
+import { photosAtom } from '@/atoms/photos'
 
 import { LayoutSelector } from '@/components/photos/layout-selector'
 import { PhotoItem } from '@/components/photos/photo-item'
@@ -12,27 +14,19 @@ import { PhotoModal } from '@/components/photos/photo-modal'
 const PRELOAD_COUNT = 3
 
 export function PhotoGallery() {
-  const layoutMode = useAtomValue(layoutModeAtom)
   const photos = useAtomValue(photosAtom)
-
-  const getContainerClassName = () => {
-    switch (layoutMode) {
-      case 'grid':
-        return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-      case 'row':
-        return 'flex gap-6 overflow-x-auto scroll-smooth pb-4 scrollbar-thin scrollbar-thumb-text-foreground/20 scrollbar-track-transparent'
-      case 'single':
-        return 'flex flex-col items-center space-y-8'
-      default:
-        return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-    }
-  }
 
   return (
     <div className={'w-full'}>
       <LayoutSelector />
 
-      <div className={getContainerClassName()}>
+      <div
+        className={cn(
+          'photos-single:flex photos-single:flex-col photos-single:items-center photos-single:space-y-8',
+          'photos-row:flex photos-row:gap-6 photos-row:overflow-x-auto photos-row:scroll-smooth photos-row:pb-4',
+          'photos-grid:grid photos-grid:grid-cols-1 photos-grid:gap-6 photos-grid:sm:grid-cols-2 photos-grid:lg:grid-cols-3'
+        )}
+      >
         {photos.map((photo, index) => (
           <PhotoItem key={photo.id} photo={photo} preload={index < PRELOAD_COUNT} />
         ))}

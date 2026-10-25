@@ -1,9 +1,6 @@
 import { atom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
 
-import type { LayoutMode, TPhoto } from '@/types'
-
-export const layoutModeAtom = atomWithStorage<LayoutMode>('photos-layout-mode', 'single')
+import type { TPhoto } from '@/types'
 
 export const photosAtom = atom<TPhoto[]>([])
 

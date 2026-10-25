@@ -1,5 +1,10 @@
 @plugin '@egoist/tailwindcss-icons';
 
+/* Photo gallery layouts, from <html data-photos-layout> (see src/lib/photos-layout.ts); single is the default */
+@custom-variant photos-single (&:where(:root:not([data-photos-layout='row'], [data-photos-layout='grid']) *));
+@custom-variant photos-row (&:where([data-photos-layout='row'] *));
+@custom-variant photos-grid (&:where([data-photos-layout='grid'] *));
+
 @theme {
   /* font family */
   --font-comic: Comic Sans MS;
