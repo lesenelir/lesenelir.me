@@ -6,12 +6,20 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { getModalImageProps, preloadModalImage } from '@/lib/photo-modal-image'
 import { cn } from '@/lib/utils'
 
-import { closePhotoModalAtom, isPhotoModalOpenAtom, navigatePhotoAtom, selectedPhotoAtom } from '@/atoms/photos'
+import {
+  closePhotoModalAtom,
+  isPhotoModalOpenAtom,
+  navigatePhotoAtom,
+  photosAtom,
+  selectedPhotoAtom,
+} from '@/atoms/photos'
 
 export function PhotoModal() {
   const [mounted, setMounted] = useState(false)
+  const photos = useAtomValue(photosAtom)
   const isOpen = useAtomValue(isPhotoModalOpenAtom)
   const selectedPhoto = useAtomValue(selectedPhotoAtom)
   const closeModal = useSetAtom(closePhotoModalAtom)
@@ -26,6 +34,17 @@ export function PhotoModal() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Fetch the neighbors of the open photo, so the arrow keys show them without waiting
+  useEffect(() => {
+    if (!isOpen || !selectedPhoto) return
+
+    const index = photos.findIndex(photo => photo.id === selectedPhoto.id)
+    if (index === -1) return
+
+    preloadModalImage(photos[(index + 1) % photos.length])
+    preloadModalImage(photos[(index - 1 + photos.length) % photos.length])
+  }, [isOpen, selectedPhoto, photos])
 
   // Keyboard navigation
   useHotkeys('esc', closeModal, { enabled: isOpen })
@@ -55,13 +74,11 @@ export function PhotoModal() {
         )}
       >
         <Image
-          src={shownPhoto.src}
+          {...getModalImageProps(shownPhoto)}
           alt={shownPhoto.alt}
-          width={1200}
-          height={800}
           className={'h-auto max-h-full w-full max-w-full object-contain lg:h-full lg:w-auto'}
-          sizes={'(max-width: 1024px) 100vw, 100vh'}
-          priority
+          loading={'eager'}
+          fetchPriority={'high'}
         />
       </div>
     </div>,

@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     // In dev, let the browser fetch photos straight from the CDN. Proxies in fake-ip mode (e.g. Clash) resolve it
     // to 198.18.x.x, which Next 16's optimizer rejects as a private IP. Production keeps optimization.
     unoptimized: process.env.NODE_ENV === 'development',
+    formats: ['image/avif', 'image/webp'],
+    // Photos and post images never change under the same URL, so keep each optimized file for 31 days
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       ...(process.env.S3_PUBLIC_URL
         ? [

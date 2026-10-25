@@ -1,7 +1,7 @@
 // The SDK must never reach the browser: importing this module from a client component fails the build
 import 'server-only'
 
-import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 
 const s3Client = new S3Client({
   region: process.env.S3_REGION,
@@ -33,6 +33,18 @@ export const listPhotos = async () => {
 
   const response = await s3Client.send(command)
   return response.Contents || []
+}
+
+// Downloads only the first bytes of an object, e.g. the header of a photo
+export const getObjectStart = async (key: string, bytes: number) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: key,
+    Range: `bytes=0-${bytes - 1}`,
+  })
+
+  const response = await s3Client.send(command)
+  return response.Body ? response.Body.transformToByteArray() : new Uint8Array()
 }
 
 export const getPublicUrl = (key: string) => {
