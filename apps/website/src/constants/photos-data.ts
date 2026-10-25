@@ -1,8 +1,7 @@
-import type { TPhoto } from '@/types'
-
-import { getPublicUrl, listPhotos } from '@/lib/s3'
-
-const photoMetadata: Record<string, { desc: string }> = {
+/**
+ * Photo captions, keyed by the photo's filename without its extension.
+ */
+export const photoMetadata: Record<string, { desc: string }> = {
   R0000466: { desc: '2025/07/01 (Tues) Nagoya, Japan @ Male Companion' },
   R0000454: { desc: '2025/07/01 (Tues) Nagoya, Japan @ Walking (2)' },
   R0000450: { desc: '2025/07/01 (Tues) Nagoya, Japan @ Walking (1)' },
@@ -40,26 +39,4 @@ const photoMetadata: Record<string, { desc: string }> = {
   R0000064: { desc: '2024/12/12 (Sun) Beijing, China @ Beneath Your Window' },
   R0000052: { desc: '2024/12/12 (Sun) Beijing, China @ Apple Banana Left Behind' },
   R0000041: { desc: '2024/12/12 (Sun) Beijing, China @ Yummy' },
-}
-
-export const getPhotos = async (): Promise<TPhoto[]> => {
-  const s3Objects = await listPhotos()
-
-  const photos: TPhoto[] = s3Objects.flatMap(obj => {
-    if (!obj.Key) return []
-
-    const fileName = obj.Key.replace('photos/', '')
-    const id = fileName.replace(/\.[^.]+$/i, '')
-
-    return [
-      {
-        id,
-        src: getPublicUrl(obj.Key),
-        alt: id,
-        desc: photoMetadata[id]?.desc ?? '',
-      },
-    ]
-  })
-
-  return photos.reverse()
 }

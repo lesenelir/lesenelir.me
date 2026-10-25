@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
+import { getPhotos } from '@/lib/photos'
+
 import { PhotoGallery } from '@/components/photos/photo-gallery'
 import { PhotoProvider } from '@/components/photos/photo-provider'
-
-import { getPhotos } from '@/constants'
 
 // Re-list the bucket at most once an hour, so new photos show up without a redeploy
 export const revalidate = 3600

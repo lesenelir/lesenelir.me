@@ -1,3 +1,6 @@
+// The SDK must never reach the browser: importing this module from a client component fails the build
+import 'server-only'
+
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 
 const s3Client = new S3Client({
