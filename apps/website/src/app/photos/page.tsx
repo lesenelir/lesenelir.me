@@ -18,7 +18,7 @@ export default async function Page() {
 
   return (
     <PhotoProvider photos={photos}>
-      <h3 className={'mb-11 font-comic text-text-primary'}>Photos</h3>
+      <h1 className={'mb-11 font-comic text-text-primary'}>Photos</h1>
       <PhotoGallery />
     </PhotoProvider>
   )

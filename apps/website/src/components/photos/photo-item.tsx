@@ -25,18 +25,11 @@ export function PhotoItem({ photo, preload = false }: PhotoItemProps) {
   return (
     // Full width in the single column: the column centers its items, which would shrink this to the photo, and a
     // photo that hasn't loaded yet would then be only as wide as its alt text
-    <div className={'cursor-pointer photos-single:w-full photos-row:shrink-0 photos-grid:relative'}>
-      <Image
-        src={photo.src}
-        alt={photo.alt}
-        // The real dimensions, so the photo holds its place before it loads
-        width={photo.width}
-        height={photo.height}
-        className={cn(
-          'photos-single:mx-auto photos-single:w-full photos-single:max-w-2xl photos-single:object-contain',
-          'photos-row:h-96 photos-row:w-auto photos-row:max-w-md photos-row:shrink-0 photos-row:object-contain',
-          'photos-grid:h-96 photos-grid:w-full photos-grid:object-cover'
-        )}
+    <div className={'photos-single:w-full photos-row:shrink-0 photos-grid:relative'}>
+      {/* A button, so the photo opens from the keyboard too; the photo's alt names it */}
+      <button
+        type='button'
+        className={'block w-full cursor-pointer photos-row:w-auto'}
         onClick={() => openModal(photo)}
         // Fetch the modal's larger image once the pointer rests on the photo or presses it, so it is ready, or
         // well under way, when the modal opens
@@ -45,11 +38,25 @@ export function PhotoItem({ photo, preload = false }: PhotoItemProps) {
         }}
         onPointerLeave={() => clearTimeout(hoverTimer.current)}
         onPointerDown={() => preloadModalImage(photo)}
-        // One value for every layout, since the layout is only known to CSS: the widest a photo shows is 672px
-        // (single column); grid and row photos are narrower and fetch a slightly larger file than they need
-        sizes={'(max-width: 640px) 100vw, 672px'}
-        preload={preload}
-      />
+        onFocus={() => preloadModalImage(photo)}
+      >
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          // The real dimensions, so the photo holds its place before it loads
+          width={photo.width}
+          height={photo.height}
+          className={cn(
+            'photos-single:mx-auto photos-single:w-full photos-single:max-w-2xl photos-single:object-contain',
+            'photos-row:h-96 photos-row:w-auto photos-row:max-w-md photos-row:shrink-0 photos-row:object-contain',
+            'photos-grid:h-96 photos-grid:w-full photos-grid:object-cover'
+          )}
+          // One value for every layout, since the layout is only known to CSS: the widest a photo shows is 672px
+          // (single column); grid and row photos are narrower and fetch a slightly larger file than they need
+          sizes={'(max-width: 640px) 100vw, 672px'}
+          preload={preload}
+        />
+      </button>
       {photo.desc && (
         <p
           className={cn(

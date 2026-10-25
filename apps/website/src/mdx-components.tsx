@@ -133,7 +133,7 @@ const components = {
   td: (props: TableDataProps) => (
     <td className={'border-r border-dividing px-4 py-2 text-text-primary/85'} {...props} />
   ),
-  del: (props: DelProps) => <del className={'text-text-primary/60 line-through'} {...props} />,
+  del: (props: DelProps) => <del className={'text-text-primary/70 line-through'} {...props} />,
   input: (props: InputProps) => {
     if (props.type === 'checkbox') {
       return <input className={'mr-2 accent-link'} disabled {...props} />

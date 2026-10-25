@@ -43,7 +43,7 @@ export default async function Page({ params }: TProps) {
       <header className={'mb-8 space-y-4'}>
         <h1 className={'font-comic text-2xl text-text-primary'}>{metadata.title}</h1>
 
-        <div className={'flex items-center gap-3 text-sm text-text-primary/60'}>
+        <div className={'flex items-center gap-3 text-sm text-text-primary/70'}>
           <time dateTime={metadata.date}>
             {new Date(metadata.date).toLocaleDateString('en-US', {
               month: 'long',

@@ -2,7 +2,7 @@
 
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
@@ -46,6 +46,27 @@ export function PhotoModal() {
     preloadModalImage(photos[(index - 1 + photos.length) % photos.length])
   }, [isOpen, selectedPhoto, photos])
 
+  // While open, focus moves into the modal and the page behind it is inert, out of reach of Tab and screen readers;
+  // closing gives focus back to the photo that opened it
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!isOpen) return
+
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const modal = closeButtonRef.current?.closest('[role="dialog"]')
+    const background = [...document.body.children].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el !== modal
+    )
+
+    for (const el of background) el.inert = true
+    closeButtonRef.current?.focus()
+
+    return () => {
+      for (const el of background) el.inert = false
+      opener?.focus({ preventScroll: true })
+    }
+  }, [isOpen])
+
   // Keyboard navigation
   useHotkeys('esc', closeModal, { enabled: isOpen })
   useHotkeys('arrowleft', () => navigatePhoto('prev'), { enabled: isOpen })
@@ -55,6 +76,9 @@ export function PhotoModal() {
 
   return createPortal(
     <div
+      role={'dialog'}
+      aria-modal={'true'}
+      aria-label={shownPhoto.alt}
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm',
         'transition-[opacity,visibility] duration-300 ease-out motion-reduce:transition-none',
@@ -63,7 +87,13 @@ export function PhotoModal() {
       )}
     >
       {/* Backdrop: a click anywhere closes the modal, the photo lets clicks through to it */}
-      <button type='button' aria-label={'Close'} className={'absolute inset-0'} onClick={closeModal} />
+      <button
+        ref={closeButtonRef}
+        type='button'
+        aria-label={'Close'}
+        className={'absolute inset-0'}
+        onClick={closeModal}
+      />
 
       {/* Photo content */}
       <div

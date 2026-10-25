@@ -30,7 +30,8 @@ export function SongItem({ song }: SongItemProps) {
       className={
         'flex w-full cursor-pointer items-center gap-3 rounded-lg px-1.5 py-3 transition-colors duration-200 hover:bg-foreground'
       }
-      aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
+      // Names the song as well as the action; "Play" alone made every row sound the same to a screen reader
+      aria-label={`${isCurrentlyPlaying ? 'Pause' : 'Play'} ${song.title} by ${song.artist}`}
       onClick={handlePlay}
     >
       <div className={'flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground'}>
@@ -43,7 +44,7 @@ export function SongItem({ song }: SongItemProps) {
 
       <div className={'min-w-0 flex-1 text-left'}>
         <p className={'truncate text-sm font-medium text-text-primary'}>{song.title}</p>
-        <p className={'truncate text-xs text-text-foreground/85'}>{song.artist}</p>
+        <p className={'truncate text-xs text-text-foreground'}>{song.artist}</p>
       </div>
     </button>
   )

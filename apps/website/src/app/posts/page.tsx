@@ -13,7 +13,7 @@ export default function Page() {
 
   return (
     <>
-      <h3 className={'mb-11 font-comic text-text-primary'}>Posts</h3>
+      <h1 className={'mb-11 font-comic text-text-primary'}>Posts</h1>
 
       <div className={'flex flex-col gap-3 text-md text-text-primary/85'}>
         {posts.map(post => (
@@ -27,7 +27,7 @@ export default function Page() {
             </span>
             <div
               className={
-                'flex shrink-0 items-center gap-1.5 text-[13px] text-text-primary/60 transition-all duration-200 group-hover:text-text-primary'
+                'flex shrink-0 items-center gap-1.5 text-[13px] text-text-primary/70 transition-all duration-200 group-hover:text-text-primary'
               }
             >
               <time dateTime={post.metadata.date}>

@@ -40,7 +40,8 @@ export const getPhotos = async (): Promise<TPhoto[]> => {
         getPhotoDimensions(key).then(({ width, height }) => ({
           id,
           src: getPublicUrl(key),
-          alt: id,
+          // The caption tells a screen reader what the photo is; the filename (R0000466) doesn't
+          alt: photoMetadata[id]?.desc || id,
           desc: photoMetadata[id]?.desc ?? '',
           width,
           height,

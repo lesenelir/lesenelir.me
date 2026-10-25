@@ -1,7 +1,8 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
-import type { MouseEvent } from 'react'
+
+import type { TPlayMode } from '@/types'
 
 import { cn, formatTime } from '@/lib/utils'
 
@@ -35,6 +36,52 @@ const PlayModeIcon = () => {
   }
 }
 
+const playModeLabels: Record<TPlayMode, string> = {
+  forward: 'Play in order',
+  'repeat-all': 'Repeat all',
+  'repeat-one': 'Repeat one',
+  shuffle: 'Shuffle',
+}
+
+interface RangeBarProps {
+  label: string
+  value: number
+  max: number
+  step: number
+  valueText: string
+  onChange: (value: number) => void
+  className?: string
+}
+
+// A thin bar with an invisible native range input laid over it: the input brings clicking, dragging, the arrow keys
+// and a slider to screen readers, and the bar keeps the look. The taller input is also an easier target.
+const RangeBar = ({ label, value, max, step, valueText, onChange, className }: RangeBarProps) => (
+  <div
+    className={cn(
+      'relative h-1 rounded-full bg-text-foreground/10',
+      'has-focus-visible:ring-2 has-focus-visible:ring-text-foreground/50 has-focus-visible:ring-offset-4 has-focus-visible:ring-offset-background',
+      className
+    )}
+  >
+    <div
+      className={'h-1 rounded-full bg-text-foreground/80'}
+      style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }}
+    />
+    <input
+      type='range'
+      aria-label={label}
+      aria-valuetext={valueText}
+      min={0}
+      max={max}
+      step={step}
+      value={value}
+      disabled={max === 0}
+      onChange={e => onChange(Number(e.currentTarget.value))}
+      className={'absolute inset-x-0 -top-2 h-5 w-full cursor-pointer opacity-0 disabled:cursor-default'}
+    />
+  </div>
+)
+
 // The only part that follows the playback time, which ticks about 4 times a second, so the rest of the player
 // doesn't re-render with it
 const SongProgress = () => {
@@ -42,32 +89,19 @@ const SongProgress = () => {
   const duration = useAtomValue(durationAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
-
-  const handleProgressClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (duration === 0) return
-
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const percentage = Math.max(0, Math.min(1, clickX / rect.width))
-    const newTime = percentage * duration
-
-    setAudioControls({ type: 'seek', time: newTime })
-  }
-
   return (
     <div className={'flex flex-wrap items-center gap-3'}>
-      <span className={'text-xs text-text-foreground/85'}>{formatTime(currentTime)}</span>
-      <div className={'flex flex-1 items-center'}>
-        <button
-          type='button'
-          className={'h-1 w-full cursor-pointer rounded-full bg-text-foreground/10'}
-          onClick={handleProgressClick}
-        >
-          <div className={'h-1 rounded-full bg-text-foreground/50'} style={{ width: `${progressPercentage}%` }} />
-        </button>
-      </div>
-      <span className={'text-xs text-text-foreground/85'}>{formatTime(duration)}</span>
+      <span className={'text-xs text-text-foreground'}>{formatTime(currentTime)}</span>
+      <RangeBar
+        label={'Seek'}
+        value={Math.min(currentTime, duration)}
+        max={duration}
+        step={1}
+        valueText={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+        onChange={time => setAudioControls({ type: 'seek', time })}
+        className={'flex-1'}
+      />
+      <span className={'text-xs text-text-foreground'}>{formatTime(duration)}</span>
     </div>
   )
 }
@@ -80,16 +114,11 @@ export function SongPlayer() {
   const playMode = useAtomValue(playModeAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
+  // /80 is the lightest these icons can be and still stand out 3:1 from the background, in both themes
   const baseButtonClass =
-    'text-text-foreground/50 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
+    'text-text-foreground/80 hover:text-text-foreground flex cursor-pointer items-center justify-center rounded-full transition-colors duration-200'
 
-  const handleVolumeClick = (e: MouseEvent<HTMLButtonElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const percentage = Math.max(0, Math.min(1, clickX / rect.width))
-
-    setAudioControls({ type: 'setVolume', volume: percentage })
-  }
+  const shownVolume = isMuted ? 0 : volume
 
   return (
     <div className={'mb-4 w-full space-y-4 bg-background px-2 py-4'}>
@@ -100,7 +129,7 @@ export function SongPlayer() {
         </div>
         <div className={'min-w-0 flex-1 space-y-0.5'}>
           <p className={'truncate text-sm font-medium text-text-primary'}>{currentSong?.title}</p>
-          <p className={'truncate text-xs text-text-foreground/85'}>{currentSong?.artist}</p>
+          <p className={'truncate text-xs text-text-foreground'}>{currentSong?.artist}</p>
         </div>
       </div>
 
@@ -148,7 +177,7 @@ export function SongPlayer() {
           <button
             type='button'
             className={cn(baseButtonClass, 'size-10')}
-            aria-label={playMode}
+            aria-label={`Play mode: ${playModeLabels[playMode]}`}
             onClick={() => setAudioControls({ type: 'togglePlayMode' })}
           >
             <PlayModeIcon />
@@ -157,26 +186,24 @@ export function SongPlayer() {
           <button
             type='button'
             className={cn(baseButtonClass, 'size-10')}
-            aria-label={'Volume'}
+            aria-label={shownVolume === 0 ? 'Unmute' : 'Mute'}
             onClick={() => setAudioControls({ type: 'toggleMute' })}
           >
-            {isMuted || volume === 0 ? (
+            {shownVolume === 0 ? (
               <span className={'i-mingcute-volume-mute-fill size-5'} />
             ) : (
               <span className={'i-mingcute-volume-fill size-5'} />
             )}
           </button>
-          <button
-            type='button'
-            className={'h-1 w-16 cursor-pointer rounded-full bg-text-foreground/10'}
-            aria-label={'Volume Progress'}
-            onClick={handleVolumeClick}
-          >
-            <div
-              className={'h-1 rounded-full bg-text-foreground/50'}
-              style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
-            />
-          </button>
+          <RangeBar
+            label={'Volume'}
+            value={shownVolume}
+            max={1}
+            step={0.05}
+            valueText={`${Math.round(shownVolume * 100)}%`}
+            onChange={value => setAudioControls({ type: 'setVolume', volume: value })}
+            className={'w-16'}
+          />
         </div>
       </div>
     </div>

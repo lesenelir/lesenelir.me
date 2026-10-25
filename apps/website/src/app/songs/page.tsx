@@ -21,7 +21,7 @@ export default async function Page() {
   return (
     <SongsProvider songs={songs}>
       <DynamicTitle />
-      <h3 className={'mb-11 font-comic text-text-primary'}>Songs</h3>
+      <h1 className={'mb-11 font-comic text-text-primary'}>Songs</h1>
 
       <SongPlayer />
       <SongLists />

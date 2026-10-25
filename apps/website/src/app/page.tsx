@@ -4,7 +4,7 @@ import TimeClock from '@/components/common/time-clock'
 export default function Page() {
   return (
     <div className={'max-w-2xl'}>
-      <h3 className={'mb-11 font-comic text-text-primary'}>Lesenelir Zhou</h3>
+      <h1 className={'mb-11 font-comic text-text-primary'}>Lesenelir Zhou</h1>
 
       <div className={'space-y-8 text-text-primary/85'}>
         <p>Hello, I'm lesenelir, a software engineer who loves building anything.</p>

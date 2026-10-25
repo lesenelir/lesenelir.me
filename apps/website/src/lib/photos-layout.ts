@@ -7,6 +7,11 @@ const STORAGE_KEY = 'photos-layout-mode'
 // Runs in <head> before the first paint. The value is stored as JSON, the way jotai's atomWithStorage kept it.
 export const photosLayoutScript = `try{var m=JSON.parse(localStorage.getItem('${STORAGE_KEY}'));if(m==='single'||m==='row'||m==='grid')document.documentElement.dataset.photosLayout=m}catch(e){}`
 
+export function getPhotosLayout(): LayoutMode {
+  const mode = document.documentElement.dataset.photosLayout
+  return mode === 'row' || mode === 'grid' ? mode : 'single'
+}
+
 export function setPhotosLayout(mode: LayoutMode) {
   document.documentElement.dataset.photosLayout = mode
   try {

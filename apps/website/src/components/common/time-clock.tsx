@@ -28,7 +28,7 @@ export default function TimeClock() {
   return (
     <>
       {hours}
-      <span className={'animate-blink'}>:</span>
+      <span className={'motion-safe:animate-blink'}>:</span>
       {minutes}
     </>
   )
