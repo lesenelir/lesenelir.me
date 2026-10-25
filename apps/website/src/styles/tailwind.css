@@ -18,6 +18,16 @@
 
   /* animate */
   --animate-blink: blink 2s infinite;
+  --animate-page-in: page-in 0.3s ease-in;
+
+  @keyframes page-in {
+    from {
+      filter: blur(1.5px);
+    }
+    to {
+      filter: blur(0);
+    }
+  }
 
   @keyframes blink {
     0% {

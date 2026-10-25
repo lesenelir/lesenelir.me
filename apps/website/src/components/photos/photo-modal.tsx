@@ -1,31 +1,14 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
-import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { cn } from '@/lib/utils'
+
 import { closePhotoModalAtom, isPhotoModalOpenAtom, navigatePhotoAtom, selectedPhotoAtom } from '@/atoms/photos'
-
-const backdropVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-}
-
-const imageContainerVariants = {
-  initial: { scale: 0.8, opacity: 0 },
-  animate: { scale: 1, opacity: 1 },
-  exit: { scale: 0.8, opacity: 0 },
-}
-
-const transition = {
-  type: 'tween' as const,
-  ease: 'easeOut' as const,
-  duration: 0.3,
-}
 
 export function PhotoModal() {
   const [mounted, setMounted] = useState(false)
@@ -33,6 +16,12 @@ export function PhotoModal() {
   const selectedPhoto = useAtomValue(selectedPhotoAtom)
   const closeModal = useSetAtom(closePhotoModalAtom)
   const navigatePhoto = useSetAtom(navigatePhotoAtom)
+
+  // Closing clears the selected photo at once, so keep showing the last one while the modal fades out
+  const [shownPhoto, setShownPhoto] = useState(selectedPhoto)
+  if (selectedPhoto && selectedPhoto !== shownPhoto) {
+    setShownPhoto(selectedPhoto)
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -43,42 +32,39 @@ export function PhotoModal() {
   useHotkeys('arrowleft', () => navigatePhoto('prev'), { enabled: isOpen })
   useHotkeys('arrowright', () => navigatePhoto('next'), { enabled: isOpen })
 
-  if (!mounted) return null
+  if (!mounted || !shownPhoto) return null
 
   return createPortal(
-    <AnimatePresence mode='wait'>
-      {isOpen && selectedPhoto && (
-        <motion.div
-          onClick={closeModal}
-          className={'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm'}
-          variants={backdropVariants}
-          initial='initial'
-          animate='animate'
-          exit='exit'
-          transition={transition}
-        >
-          {/* Photo content */}
-          <motion.div
-            className={'relative flex size-full items-center justify-center'}
-            variants={imageContainerVariants}
-            initial='initial'
-            animate='animate'
-            exit='exit'
-            transition={transition}
-          >
-            <Image
-              src={selectedPhoto.src}
-              alt={selectedPhoto.alt}
-              width={1200}
-              height={800}
-              className={'h-auto max-h-full w-full max-w-full object-contain lg:h-full lg:w-auto'}
-              sizes={'(max-width: 1024px) 100vw, 100vh'}
-              priority
-            />
-          </motion.div>
-        </motion.div>
+    <div
+      className={cn(
+        'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm',
+        'transition-[opacity,visibility] duration-300 ease-out motion-reduce:transition-none',
+        // starting: animates the first open too, when the element mounts already open
+        isOpen ? 'visible opacity-100 starting:opacity-0' : 'invisible opacity-0'
       )}
-    </AnimatePresence>,
+    >
+      {/* Backdrop: a click anywhere closes the modal, the photo lets clicks through to it */}
+      <button type='button' aria-label={'Close'} className={'absolute inset-0'} onClick={closeModal} />
+
+      {/* Photo content */}
+      <div
+        className={cn(
+          'pointer-events-none relative flex size-full items-center justify-center',
+          'transition-[opacity,scale] duration-300 ease-out motion-reduce:transition-none',
+          isOpen ? 'scale-100 opacity-100 starting:scale-80 starting:opacity-0' : 'scale-80 opacity-0'
+        )}
+      >
+        <Image
+          src={shownPhoto.src}
+          alt={shownPhoto.alt}
+          width={1200}
+          height={800}
+          className={'h-auto max-h-full w-full max-w-full object-contain lg:h-full lg:w-auto'}
+          sizes={'(max-width: 1024px) 100vw, 100vh'}
+          priority
+        />
+      </div>
+    </div>,
     document.body
   )
 }
