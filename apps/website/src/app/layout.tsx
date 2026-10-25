@@ -1,25 +1,12 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
 import type React from 'react'
 
 import '@/styles/main.css'
 
-import { cn } from '@/lib/utils'
-
 import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
 
 export const metadata: Metadata = {
   title: {
@@ -48,10 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body
-        className={cn(geistSans.variable, geistMono.variable, 'bg-background antialiased max-sm:p-6 sm:p-16')}
-        suppressHydrationWarning
-      >
+      <body className={'bg-background antialiased max-sm:p-6 sm:p-16'} suppressHydrationWarning>
         <Providers>
           <Sidebar />
           <main
