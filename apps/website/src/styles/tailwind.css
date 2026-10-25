@@ -1,5 +1,8 @@
 @plugin '@egoist/tailwindcss-icons';
 
+/* dark: follows the theme next-themes puts on <html data-theme> before the first paint, not the media query */
+@custom-variant dark (&:where([data-theme='dark'] *));
+
 /* Photo gallery layouts, from <html data-photos-layout> (see src/lib/photos-layout.ts); single is the default */
 @custom-variant photos-single (&:where(:root:not([data-photos-layout='row'], [data-photos-layout='grid']) *));
 @custom-variant photos-row (&:where([data-photos-layout='row'] *));
