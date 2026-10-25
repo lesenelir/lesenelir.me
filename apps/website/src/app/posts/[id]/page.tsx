@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { getPostComponent, getPostMetadata } from '@/lib/mdx'
+import { getAllPosts, getPostComponent, getPostMetadata } from '@/lib/mdx'
 
 type TProps = {
   params: Promise<{ id: string }>
+}
+
+// Every post is prerendered at build time; any other id is a 404
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return getAllPosts().map(post => ({ id: post.id }))
 }
 
 export async function generateMetadata({ params }: TProps): Promise<Metadata> {
