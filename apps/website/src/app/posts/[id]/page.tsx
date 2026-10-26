@@ -112,11 +112,12 @@ export default async function Page({ params }: TProps) {
 
       {showToc && (
         <>
-          {/* Wide screens: beside the post, in the room right of the 672px column, following the reader down */}
-          <TableOfContents
-            headings={headings}
-            className={'fixed top-16 right-16 hidden max-h-[calc(100vh-8rem)] w-56 overflow-y-auto xl:block'}
-          />
+          {/* Wide screens: beside the post, at the right edge of the page, following the reader down. Sticky in a
+              column as tall as the post rather than fixed: while the page's enter animation (a filter) plays, a fixed
+              element is placed against the page instead of the window, and jumped when it ended. */}
+          <div className={'absolute inset-y-0 right-0 hidden w-56 xl:block'}>
+            <TableOfContents headings={headings} className={'sticky top-16 max-h-[calc(100vh-8rem)] overflow-y-auto'} />
+          </div>
           {/* Narrower screens: folded up above the post */}
           <details className={'mb-8 text-sm xl:hidden'}>
             <summary className={'cursor-pointer text-text-foreground hover:text-text-primary'}>Contents</summary>
