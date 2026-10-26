@@ -39,7 +39,7 @@ const withMDX = createMDX({
       [
         '@shikijs/rehype',
         {
-          themes: { light: 'vitesse-light', dark: 'vitesse-dark' },
+          themes: { light: 'kanagawa-lotus', dark: 'nord' },
           defaultColor: false,
           langs: ['go', 'typescript', 'tsx', 'javascript', 'bash'],
           fallbackLanguage: 'text',
