@@ -1,8 +1,12 @@
+import type { Getter, Setter } from 'jotai'
 import { atom } from 'jotai'
 
 import type { TPlayMode, TSong } from '@/types'
 
 export const DEFAULT_VOLUME = 0.6
+
+// "Previous" restarts the song once it has played longer than this, as music players do
+const RESTART_AFTER = 3
 
 export const songsAtom = atom<TSong[]>([])
 
@@ -14,67 +18,17 @@ export const currentSongAtom = atom<TSong | null>(null)
 // SongsProvider creates the element when the page mounts and tears it down when it unmounts
 export const audioInstanceAtom = atom<HTMLAudioElement | null>(null)
 
-// Picks the next song when one ends, following the play mode
-export const songEndedAtom = atom(null, (get, set) => {
-  const audio = get(audioInstanceAtom)
-  const songs = get(songsAtom)
-  const currentSong = get(currentSongAtom)
-  const playMode = get(playModeAtom)
-
-  if (!audio || !currentSong || songs.length === 0) return
-
-  const currentIndex = songs.findIndex(song => song.id === currentSong.id)
-  let nextSong: TSong | null = null
-
-  switch (playMode) {
-    case 'forward': {
-      // Stop at the end of playlists
-      if (currentIndex >= songs.length - 1) {
-        set(isPlayingAtom, false)
-        return
-      }
-      nextSong = songs[currentIndex + 1]
-      break
-    }
-
-    case 'repeat-all': {
-      // Loop to first song after last song
-      nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
-      break
-    }
-
-    case 'repeat-one': {
-      // Replay the same song
-      nextSong = currentSong
-      break
-    }
-
-    case 'shuffle': {
-      // Play random next song (avoid current song if possible)
-      if (songs.length === 1) {
-        nextSong = currentSong
-      } else {
-        const availableSongs = songs.filter((_, index) => index !== currentIndex)
-        const randomIndex = Math.floor(Math.random() * availableSongs.length)
-        nextSong = availableSongs[randomIndex]
-      }
-      break
-    }
-  }
-
-  if (nextSong) {
-    set(currentSongAtom, nextSong)
-    audio.src = nextSong.src
-    audio
-      .play()
-      .then(() => set(isPlayingAtom, true))
-      .catch(() => set(isPlayingAtom, false))
-  }
-})
-
 export const playModeAtom = atom<TPlayMode>('forward')
 
+// Set from the audio element's own events (SongsProvider), so pauses from outside the page (media keys, unplugged
+// headphones) show too
 export const isPlayingAtom = atom<boolean>(false)
+
+// Waiting for data: from asking to play until the audio actually plays
+export const isBufferingAtom = atom<boolean>(false)
+
+// The current song failed to load; playing it again retries
+export const loadErrorAtom = atom<boolean>(false)
 
 export const currentTimeAtom = atom<number>(0)
 
@@ -84,112 +38,165 @@ export const volumeAtom = atom<number>(DEFAULT_VOLUME)
 
 export const isMutedAtom = atom<boolean>(false)
 
-export const audioControlsAtom = atom<
-  null,
-  [
-    | { type: 'play'; song: TSong }
-    | { type: 'continue' }
-    | { type: 'pause' }
-    | { type: 'previous' }
-    | { type: 'next' }
-    | { type: 'seek'; time: number }
-    | { type: 'setVolume'; volume: number }
-    | { type: 'toggleMute' }
-    | { type: 'togglePlayMode' },
-  ],
-  void
->(null, (get, set, action) => {
+// Shuffle plays the songs in a shuffled order rather than one random pick at a time: none repeats until all have
+// played, and "previous" goes back to the song actually played before. An order starts at the song it's made for.
+const shuffleOrderAtom = atom<string[]>([])
+
+const makeShuffleOrder = (songs: TSong[], first: TSong | null) => {
+  const rest = songs.filter(song => song.id !== first?.id).map(song => song.id)
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[rest[i], rest[j]] = [rest[j], rest[i]]
+  }
+  return first ? [first.id, ...rest] : rest
+}
+
+// The song before or after the current one, in list order or the shuffle order. Null in shuffle when there is
+// nothing before the first song played, or nothing after the only song.
+const songInDirection = (get: Getter, set: Setter, direction: 1 | -1): TSong | null => {
+  const songs = get(songsAtom)
+  const currentSong = get(currentSongAtom)
+  if (!currentSong || songs.length === 0) return null
+
+  if (get(playModeAtom) !== 'shuffle') {
+    const index = songs.findIndex(song => song.id === currentSong.id)
+    return songs[(index + direction + songs.length) % songs.length]
+  }
+
+  let order = get(shuffleOrderAtom)
+  let index = order.indexOf(currentSong.id)
+  // No order for this song yet, or every song has played: shuffle again, starting from this one
+  if (index === -1 || (direction === 1 && index === order.length - 1)) {
+    order = makeShuffleOrder(songs, currentSong)
+    set(shuffleOrderAtom, order)
+    index = 0
+  }
+  return songs.find(song => song.id === order[index + direction]) ?? null
+}
+
+const playAudio = (set: Setter, audio: HTMLAudioElement) => {
+  // A song that failed to load (e.g. a dropped connection) stays failed: play() only rejects again until the
+  // source is reloaded. A new src already reloads, so this matters when playing the same song again.
+  if (audio.error) audio.load()
+  set(loadErrorAtom, false)
+  set(isBufferingAtom, true)
+  // isPlaying follows the element's playing/pause events; this only covers a play() that never starts
+  audio.play().catch(() => {
+    set(isBufferingAtom, false)
+    set(isPlayingAtom, false)
+  })
+}
+
+const startSong = (set: Setter, audio: HTMLAudioElement, song: TSong) => {
+  set(currentSongAtom, song)
+  // A new source resets the element's duration without a durationchange event, so the last song's length and
+  // position would show until the new one's metadata loads
+  set(currentTimeAtom, 0)
+  set(durationAtom, 0)
+  audio.src = song.src
+  playAudio(set, audio)
+}
+
+const restartSong = (set: Setter, audio: HTMLAudioElement) => {
+  audio.currentTime = 0
+  set(currentTimeAtom, 0)
+}
+
+// Picks the next song when one ends, following the play mode
+export const songEndedAtom = atom(null, (get, set) => {
+  const audio = get(audioInstanceAtom)
+  const songs = get(songsAtom)
+  const currentSong = get(currentSongAtom)
+  if (!audio || !currentSong || songs.length === 0) return
+
+  switch (get(playModeAtom)) {
+    case 'forward': {
+      // Stop at the end of the list
+      const isLast = songs[songs.length - 1].id === currentSong.id
+      if (isLast) return
+      startSong(set, audio, songInDirection(get, set, 1) ?? currentSong)
+      break
+    }
+
+    case 'repeat-one': {
+      restartSong(set, audio)
+      playAudio(set, audio)
+      break
+    }
+
+    // repeat-all wraps to the first song; shuffle moves along its order and reshuffles at the end
+    default: {
+      const next = songInDirection(get, set, 1)
+      if (next && next.id !== currentSong.id) {
+        startSong(set, audio, next)
+      } else {
+        restartSong(set, audio)
+        playAudio(set, audio)
+      }
+    }
+  }
+})
+
+export type TAudioAction =
+  | { type: 'play'; song: TSong }
+  | { type: 'continue' }
+  | { type: 'pause' }
+  | { type: 'previous' }
+  | { type: 'next' }
+  | { type: 'seek'; time: number }
+  | { type: 'setVolume'; volume: number }
+  | { type: 'toggleMute' }
+  | { type: 'togglePlayMode' }
+
+export const audioControlsAtom = atom<null, [TAudioAction], void>(null, (get, set, action) => {
   const audio = get(audioInstanceAtom)
   if (!audio) return
 
   const songs = get(songsAtom)
   const currentSong = get(currentSongAtom)
 
-  const playAudio = () => {
-    // A song that failed to load (e.g. a dropped connection) stays failed: play() only rejects again until the
-    // source is reloaded. A new src already reloads, so this matters when playing the same song again.
-    if (audio.error) audio.load()
-    audio
-      .play()
-      .then(() => set(isPlayingAtom, true))
-      .catch(() => set(isPlayingAtom, false))
-  }
-
   switch (action.type) {
     case 'play': {
-      if (!action.song) return
-
-      if (currentSong?.id !== action.song.id) {
-        set(currentSongAtom, action.song)
-        audio.src = action.song.src
+      if (currentSong?.id === action.song.id) {
+        playAudio(set, audio)
+        break
       }
-      playAudio()
+      // A song picked by hand starts a new shuffle order from it
+      if (get(playModeAtom) === 'shuffle') set(shuffleOrderAtom, makeShuffleOrder(songs, action.song))
+      startSong(set, audio, action.song)
       break
     }
 
     case 'continue': {
-      if (!currentSong) return
-      playAudio()
+      // With nothing picked yet, start the list
+      if (currentSong) {
+        playAudio(set, audio)
+      } else if (songs.length > 0) {
+        startSong(set, audio, songs[0])
+      }
       break
     }
 
     case 'pause': {
       audio.pause()
-      set(isPlayingAtom, false)
       break
     }
 
     case 'previous': {
-      if (!currentSong || songs.length === 0) return
-
-      const playMode = get(playModeAtom)
-      const currentIndex = songs.findIndex(song => song.id === currentSong.id)
-      let previousSong: TSong
-
-      if (playMode === 'shuffle') {
-        // In shuffle mode, select random previous song (avoid current if possible)
-        if (songs.length === 1) {
-          previousSong = currentSong
-        } else {
-          const availableSongs = songs.filter((_, index) => index !== currentIndex)
-          const randomIndex = Math.floor(Math.random() * availableSongs.length)
-          previousSong = availableSongs[randomIndex]
-        }
+      if (!currentSong) return
+      const previous = audio.currentTime > RESTART_AFTER ? null : songInDirection(get, set, -1)
+      if (previous) {
+        startSong(set, audio, previous)
       } else {
-        // For other modes, use normal previous logic
-        previousSong = currentIndex <= 0 ? songs[songs.length - 1] : songs[currentIndex - 1]
+        restartSong(set, audio)
       }
-
-      set(currentSongAtom, previousSong)
-      audio.src = previousSong.src
-      playAudio()
       break
     }
 
     case 'next': {
-      if (!currentSong || songs.length === 0) return
-
-      const playMode = get(playModeAtom)
-      const currentIndex = songs.findIndex(song => song.id === currentSong.id)
-      let nextSong: TSong
-
-      if (playMode === 'shuffle') {
-        // In shuffle mode, select random next song (avoid current if possible)
-        if (songs.length === 1) {
-          nextSong = currentSong
-        } else {
-          const availableSongs = songs.filter((_, index) => index !== currentIndex)
-          const randomIndex = Math.floor(Math.random() * availableSongs.length)
-          nextSong = availableSongs[randomIndex]
-        }
-      } else {
-        // For other modes, use normal next logic
-        nextSong = currentIndex >= songs.length - 1 ? songs[0] : songs[currentIndex + 1]
-      }
-
-      set(currentSongAtom, nextSong)
-      audio.src = nextSong.src
-      playAudio()
+      if (!currentSong) return
+      const next = songInDirection(get, set, 1)
+      if (next) startSong(set, audio, next)
       break
     }
 
@@ -205,48 +212,28 @@ export const audioControlsAtom = atom<
       const volume = Math.max(0, Math.min(1, action.volume))
       audio.volume = volume
       set(volumeAtom, volume)
-      if (volume > 0) {
-        set(isMutedAtom, false)
-      } else {
-        set(isMutedAtom, true)
-      }
+      set(isMutedAtom, volume === 0)
       break
     }
 
     case 'toggleMute': {
-      const currentVolume = get(volumeAtom)
       const isMuted = get(isMutedAtom)
-
-      if (isMuted) {
-        audio.volume = currentVolume
-        set(isMutedAtom, false)
-      } else {
-        audio.volume = 0
-        set(isMutedAtom, true)
-      }
+      audio.volume = isMuted ? get(volumeAtom) : 0
+      set(isMutedAtom, !isMuted)
       break
     }
 
     case 'togglePlayMode': {
-      const currentMode = get(playModeAtom)
-      let nextMode: TPlayMode
-
-      switch (currentMode) {
-        case 'forward':
-          nextMode = 'repeat-all'
-          break
-        case 'repeat-all':
-          nextMode = 'repeat-one'
-          break
-        case 'repeat-one':
-          nextMode = 'shuffle'
-          break
-        case 'shuffle':
-          nextMode = 'forward'
-          break
+      const nextMode: Record<TPlayMode, TPlayMode> = {
+        forward: 'repeat-all',
+        'repeat-all': 'repeat-one',
+        'repeat-one': 'shuffle',
+        shuffle: 'forward',
       }
-
-      set(playModeAtom, nextMode)
+      const mode = nextMode[get(playModeAtom)]
+      // Shuffle starts its order from the song playing now
+      if (mode === 'shuffle') set(shuffleOrderAtom, makeShuffleOrder(songs, currentSong))
+      set(playModeAtom, mode)
       break
     }
   }

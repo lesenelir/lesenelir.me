@@ -3,6 +3,8 @@ import { useMemo } from 'react'
 
 import type { TSong } from '@/types/songs'
 
+import { cn } from '@/lib/utils'
+
 import { audioControlsAtom, currentSongAtom, isPlayingAtom } from '@/atoms/songs'
 
 interface SongItemProps {
@@ -10,35 +12,42 @@ interface SongItemProps {
 }
 
 export function SongItem({ song }: SongItemProps) {
-  // Whether this song is the one playing: a row re-renders only when that changes, not on every play, pause or
-  // switch to another song
-  const isCurrentlyPlayingAtom = useMemo(
-    () => atom(get => get(isPlayingAtom) && get(currentSongAtom)?.id === song.id),
+  // This song's state: a row re-renders only when its own state changes, not on every play, pause or switch to
+  // another song
+  const stateAtom = useMemo(
+    () =>
+      atom(get => {
+        if (get(currentSongAtom)?.id !== song.id) return 'idle'
+        return get(isPlayingAtom) ? 'playing' : 'paused'
+      }),
     [song.id]
   )
-  const isCurrentlyPlaying = useAtomValue(isCurrentlyPlayingAtom)
+  const state = useAtomValue(stateAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
 
-  const handlePlay = () => {
-    if (isCurrentlyPlaying) {
-      setAudioControls({ type: 'pause' })
-    } else {
-      setAudioControls({ type: 'play', song })
-    }
-  }
+  const isPlaying = state === 'playing'
+  const isCurrent = state !== 'idle'
 
   return (
     <button
       type='button'
-      className={
-        'flex w-full cursor-pointer items-center gap-3 rounded-lg px-1.5 py-3 transition-colors duration-200 hover:bg-foreground'
-      }
+      // The current song stays highlighted while paused too
+      aria-current={isCurrent ? 'true' : undefined}
+      className={cn(
+        'flex w-full cursor-pointer items-center gap-3 rounded-lg px-1.5 py-3 transition-colors duration-200 hover:bg-foreground',
+        isCurrent && 'bg-foreground'
+      )}
       // Names the song as well as the action; "Play" alone made every row sound the same to a screen reader
-      aria-label={`${isCurrentlyPlaying ? 'Pause' : 'Play'} ${song.title} by ${song.artist}`}
-      onClick={handlePlay}
+      aria-label={`${isPlaying ? 'Pause' : 'Play'} ${song.title} by ${song.artist}`}
+      onClick={() => setAudioControls(isPlaying ? { type: 'pause' } : { type: 'play', song })}
     >
-      <div className={'flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground'}>
-        {isCurrentlyPlaying ? (
+      <div
+        className={cn(
+          'flex size-8 shrink-0 items-center justify-center rounded-full',
+          isCurrent ? 'bg-background' : 'bg-foreground'
+        )}
+      >
+        {isPlaying ? (
           <span className={'i-mingcute-pause-fill size-4'} />
         ) : (
           <span className={'i-mingcute-play-fill size-4'} />

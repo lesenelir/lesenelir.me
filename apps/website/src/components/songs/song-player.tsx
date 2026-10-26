@@ -1,6 +1,7 @@
 'use client'
 
 import { useAtomValue, useSetAtom } from 'jotai'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import type { TPlayMode } from '@/types'
 
@@ -11,8 +12,10 @@ import {
   currentSongAtom,
   currentTimeAtom,
   durationAtom,
+  isBufferingAtom,
   isMutedAtom,
   isPlayingAtom,
+  loadErrorAtom,
   playModeAtom,
   volumeAtom,
 } from '@/atoms/songs'
@@ -109,10 +112,23 @@ const SongProgress = () => {
 export function SongPlayer() {
   const currentSong = useAtomValue(currentSongAtom)
   const isPlaying = useAtomValue(isPlayingAtom)
+  const isBuffering = useAtomValue(isBufferingAtom)
+  const loadError = useAtomValue(loadErrorAtom)
   const volume = useAtomValue(volumeAtom)
   const isMuted = useAtomValue(isMutedAtom)
   const playMode = useAtomValue(playModeAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
+
+  // Loading counts as playing for the button: pressing it then stops the song from starting
+  const isActive = isPlaying || isBuffering
+  const togglePlay = () => setAudioControls({ type: isActive ? 'pause' : 'continue' })
+
+  // Space plays and pauses, except on a focused control, which Space already presses
+  useHotkeys('space', togglePlay, {
+    preventDefault: true,
+    ignoreEventWhen: e =>
+      e.target instanceof Element && e.target.closest('button, a, input, select, textarea') !== null,
+  })
 
   // /80 is the lightest these icons can be and still stand out 3:1 from the background, in both themes
   const baseButtonClass =
@@ -128,8 +144,21 @@ export function SongPlayer() {
           <span className={'i-mingcute-music-2-fill size-6 text-text-foreground'} />
         </div>
         <div className={'min-w-0 flex-1 space-y-0.5'}>
-          <p className={'truncate text-sm font-medium text-text-primary'}>{currentSong?.title}</p>
-          <p className={'truncate text-xs text-text-foreground'}>{currentSong?.artist}</p>
+          {currentSong ? (
+            <>
+              <p className={'truncate text-sm font-medium text-text-primary'}>{currentSong.title}</p>
+              <p className={'truncate text-xs text-text-foreground'}>{currentSong.artist}</p>
+            </>
+          ) : (
+            <>
+              <p className={'truncate text-sm font-medium text-text-primary'}>Not playing</p>
+              <p className={'truncate text-xs text-text-foreground'}>Pick a song below, or press play</p>
+            </>
+          )}
+          {/* Announced when a song fails to load */}
+          <p role={'status'} className={'text-xs text-text-primary empty:hidden'}>
+            {loadError ? "Couldn't load this song. Press play to try again." : ''}
+          </p>
         </div>
       </div>
 
@@ -152,10 +181,13 @@ export function SongPlayer() {
           <button
             type='button'
             className={cn(baseButtonClass, 'size-12')}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-            onClick={() => setAudioControls({ type: isPlaying ? 'pause' : 'continue' })}
+            aria-label={isActive ? 'Pause' : 'Play'}
+            aria-busy={isBuffering}
+            onClick={togglePlay}
           >
-            {isPlaying ? (
+            {isBuffering ? (
+              <span className={'i-mingcute-loading-line size-7 animate-spin motion-reduce:animate-none'} />
+            ) : isPlaying ? (
               <span className={'i-mingcute-pause-fill size-8'} />
             ) : (
               <span className={'i-mingcute-play-fill size-8'} />
