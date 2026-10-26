@@ -21,13 +21,6 @@ import {
 // A horizontal swipe at least this long, and clearly more horizontal than vertical, turns the photo
 const SWIPE_DISTANCE = 50
 
-// Dark, translucent controls that read on any photo and either theme's backdrop
-const controlClassName = cn(
-  'pointer-events-auto flex size-10 cursor-pointer items-center justify-center rounded-full',
-  'bg-black/50 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-black/70',
-  'focus-visible:outline-2 focus-visible:outline-white'
-)
-
 export function PhotoModal() {
   const [mounted, setMounted] = useState(false)
   const photos = useAtomValue(photosAtom)
@@ -65,7 +58,7 @@ export function PhotoModal() {
     if (!isOpen) return
 
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const modal = closeButtonRef.current?.closest('[role="dialog"]')
+    const modal = closeButtonRef.current?.parentElement
     const background = [...document.body.children].filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el !== modal
     )
@@ -125,8 +118,9 @@ export function PhotoModal() {
   if (!mounted || !shownPhoto) return null
 
   const position = `${photos.findIndex(photo => photo.id === shownPhoto.id) + 1} / ${photos.length}`
-  const canNavigate = photos.length > 1
 
+  // Nothing but the photo and its caption, on a frosted layer: a click anywhere closes, the arrow keys and swipes turn
+  // the photo, Esc closes
   return createPortal(
     <div
       role={'dialog'}
@@ -138,7 +132,7 @@ export function PhotoModal() {
         swipeStartRef.current = null
       }}
       className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm',
+        'fixed inset-0 z-50 bg-white/75 backdrop-blur-[7px] dark:bg-black/50',
         // Horizontal swipes are ours; vertical panning and pinch-zooming stay the browser's
         'touch-pan-y touch-pinch-zoom',
         'transition-[opacity,visibility] duration-300 ease-out motion-reduce:transition-none',
@@ -146,79 +140,44 @@ export function PhotoModal() {
         isOpen ? 'visible opacity-100 starting:opacity-0' : 'invisible opacity-0'
       )}
     >
-      {/* Backdrop: a click anywhere outside the controls closes the modal, the photo lets clicks through to it. The
-          close button does the same for the keyboard and screen readers. */}
+      {/* Covers the whole modal, so a click anywhere closes it; the photo and caption let clicks through. It takes the
+          focus when the modal opens, so Enter and screen readers have a way out too. With the modal filling the
+          screen, its focus ring would only trace the window's edges, so it has none. */}
       <button
+        ref={closeButtonRef}
         type='button'
-        tabIndex={-1}
-        aria-hidden={'true'}
-        className={'absolute inset-0'}
+        aria-label={'Close'}
+        className={'absolute inset-0 cursor-zoom-out outline-none'}
         onClick={handleBackdropClick}
       />
 
-      {/* Photo content, inset so the controls sit around it rather than on it */}
       <div
         className={cn(
-          'pointer-events-none relative flex size-full items-center justify-center px-4 py-16 sm:px-20',
+          'pointer-events-none relative size-full',
           'transition-[opacity,scale] duration-300 ease-out motion-reduce:transition-none',
           isOpen ? 'scale-100 opacity-100 starting:scale-80 starting:opacity-0' : 'scale-80 opacity-0'
         )}
       >
         {/* A new <img> per photo: reusing one keeps showing the previous photo until the next has loaded, under the
-            next one's caption and position */}
+            next one's caption */}
         <Image
           key={shownPhoto.id}
           {...getModalImageProps(shownPhoto)}
           alt={shownPhoto.alt}
-          className={'h-auto max-h-full w-full max-w-full object-contain lg:h-full lg:w-auto'}
+          className={'size-full object-contain'}
           loading={'eager'}
           fetchPriority={'high'}
         />
       </div>
 
-      {/* Position and close */}
-      <div className={'pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-4'}>
-        <span className={'rounded-full bg-black/50 px-3 py-1 text-xs text-white tabular-nums backdrop-blur-sm'}>
-          {position}
-        </span>
-        <button
-          ref={closeButtonRef}
-          type='button'
-          aria-label={'Close'}
-          className={controlClassName}
-          onClick={closeModal}
-        >
-          <span className={'i-mingcute-close-line size-5'} />
-        </button>
-      </div>
-
-      {canNavigate && (
-        <>
-          <button
-            type='button'
-            aria-label={'Previous photo'}
-            className={cn(controlClassName, 'absolute top-1/2 left-2 -translate-y-1/2 sm:left-4')}
-            onClick={() => navigatePhoto('prev')}
-          >
-            <span className={'i-mingcute-left-line size-5'} />
-          </button>
-          <button
-            type='button'
-            aria-label={'Next photo'}
-            className={cn(controlClassName, 'absolute top-1/2 right-2 -translate-y-1/2 sm:right-4')}
-            onClick={() => navigatePhoto('next')}
-          >
-            <span className={'i-mingcute-right-line size-5'} />
-          </button>
-        </>
-      )}
-
       {shownPhoto.desc && (
-        <div className={'pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-4'}>
-          <p className={'max-w-[90%] rounded-lg bg-black/50 px-3 py-1 text-center text-sm text-white backdrop-blur-sm'}>
-            {shownPhoto.desc}
-          </p>
-        </div>
+        <p
+          className={
+            'pointer-events-none absolute right-5 bottom-5 max-w-[calc(100%-2.5rem)] bg-white/75 px-2 py-1 text-sm text-text-primary dark:bg-black/50'
+          }
+        >
+          {shownPhoto.desc}
+        </p>
       )}
 
       {/* Tells screen readers which photo the arrows and swipes moved to */}
