@@ -1,4 +1,5 @@
-import { useAtomValue, useSetAtom } from 'jotai'
+import { atom, useAtomValue, useSetAtom } from 'jotai'
+import { useMemo } from 'react'
 
 import type { TSong } from '@/types/songs'
 
@@ -9,12 +10,14 @@ interface SongItemProps {
 }
 
 export function SongItem({ song }: SongItemProps) {
-  const currentSong = useAtomValue(currentSongAtom)
-  const isPlaying = useAtomValue(isPlayingAtom)
+  // Whether this song is the one playing: a row re-renders only when that changes, not on every play, pause or
+  // switch to another song
+  const isCurrentlyPlayingAtom = useMemo(
+    () => atom(get => get(isPlayingAtom) && get(currentSongAtom)?.id === song.id),
+    [song.id]
+  )
+  const isCurrentlyPlaying = useAtomValue(isCurrentlyPlayingAtom)
   const setAudioControls = useSetAtom(audioControlsAtom)
-
-  const isCurrentSong = currentSong?.id === song.id
-  const isCurrentlyPlaying = isCurrentSong && isPlaying
 
   const handlePlay = () => {
     if (isCurrentlyPlaying) {
