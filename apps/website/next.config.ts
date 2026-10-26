@@ -31,7 +31,22 @@ const withMDX = createMDX({
     // Turbopack can't pass JS functions to Rust, so plugins are referenced by package name
     // remark-frontmatter keeps a post's frontmatter out of the rendered page; src/lib/mdx.ts reads it
     remarkPlugins: ['remark-gfm', 'remark-frontmatter'],
-    rehypePlugins: [],
+    rehypePlugins: [
+      // Heading ids for anchors and the table of contents; src/lib/mdx.ts makes the same ids with github-slugger
+      'rehype-slug',
+      // Code highlighted at build time. Options must be plain data here; with defaultColor off, tokens carry
+      // --shiki-light and --shiki-dark, and src/styles/colors.css picks one per theme
+      [
+        '@shikijs/rehype',
+        {
+          themes: { light: 'vitesse-light', dark: 'vitesse-dark' },
+          defaultColor: false,
+          langs: ['go', 'typescript', 'tsx', 'javascript', 'bash'],
+          fallbackLanguage: 'text',
+          addLanguageClass: true,
+        },
+      ],
+    ],
   },
 })
 

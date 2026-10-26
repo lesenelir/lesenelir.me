@@ -1,8 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import GithubSlugger from 'github-slugger'
 import { parse as parseYaml } from 'yaml'
 
-import type { TPost, TPostMetadata } from '@/types'
+import type { TPost, TPostHeading, TPostMetadata } from '@/types'
 
 const postsDirectory = path.join(process.cwd(), 'content/posts')
 
@@ -120,6 +121,29 @@ function getPostExcerpt(body: string): string {
 
   const chars = [...excerpt]
   return chars.length > EXCERPT_MAX_LENGTH ? `${chars.slice(0, EXCERPT_MAX_LENGTH).join('').trimEnd()}…` : excerpt
+}
+
+// Markdown inline syntax off a heading, leaving the text the page shows
+const toHeadingText = (markdown: string) =>
+  markdown
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`~]/g, '')
+    .trim()
+
+// The sections of a post (## and ###), for its table of contents. The ids are the ones rehype-slug gives the
+// headings: the same slugger, fed every heading in order, so repeated titles get the same -1, -2 suffixes.
+export function getPostHeadings(id: string): TPostHeading[] {
+  const post = readPost(id)
+  if (!post) return []
+
+  const slugger = new GithubSlugger()
+  const prose = post.body.replace(/```[\s\S]*?```/g, '')
+
+  return [...prose.matchAll(/^(#{1,6}) (.+)$/gm)].flatMap(([, hashes, markdown]) => {
+    const text = toHeadingText(markdown)
+    const headingId = slugger.slug(text)
+    return hashes.length === 2 || hashes.length === 3 ? [{ id: headingId, text, level: hashes.length }] : []
+  })
 }
 
 export function getPostDescription(id: string): string {

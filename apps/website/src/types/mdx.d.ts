@@ -13,3 +13,10 @@ export type TPost = {
   id: string
   metadata: TPostMetadata
 }
+
+// A section heading of a post, for its table of contents
+export type TPostHeading = {
+  id: string
+  text: string
+  level: number
+}

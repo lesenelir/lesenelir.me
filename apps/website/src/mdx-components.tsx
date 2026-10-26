@@ -1,12 +1,13 @@
 import type { MDXComponents } from 'mdx/types'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ComponentPropsWithoutRef } from 'react'
-import { highlight } from 'sugar-high'
+import type { ComponentPropsWithoutRef, ElementType } from 'react'
+import { isValidElement } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { ImageMdx } from '@/components/common/image-mdx'
+import { CodeBlock } from '@/components/posts/code-block'
 
 type HeadingProps = ComponentPropsWithoutRef<'h1'>
 type ParagraphProps = ComponentPropsWithoutRef<'p'>
@@ -26,62 +27,70 @@ type TableDataProps = ComponentPropsWithoutRef<'td'>
 type DelProps = ComponentPropsWithoutRef<'del'>
 type InputProps = ComponentPropsWithoutRef<'input'>
 
+// A section heading that links to itself, with a # on hover. rehype-slug gives it its id; scroll-mt keeps it off the
+// window's edge when a link jumps to it. The # is decoration, so the link and the heading are named by the text.
+const sectionHeading =
+  (Tag: ElementType, className: string) =>
+  ({ id, children, ...props }: HeadingProps) => (
+    <Tag id={id} className={cn('group scroll-mt-8 text-text-primary', className)} {...props}>
+      {id ? (
+        <a href={`#${id}`}>
+          {children}
+          <span
+            aria-hidden={'true'}
+            className={'ml-2 text-text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100'}
+          >
+            #
+          </span>
+        </a>
+      ) : (
+        children
+      )}
+    </Tag>
+  )
+
 const components = {
   // Available in every post without an import
   Image,
   ImageMdx,
-  h1: (props: HeadingProps) => <h1 className={'mb-4 text-2xl font-bold text-text-primary'} {...props} />,
-  h2: (props: HeadingProps) => <h2 className={'mb-3 text-xl font-semibold text-text-primary'} {...props} />,
-  h3: (props: HeadingProps) => <h3 className={'mb-2 text-lg font-medium text-text-primary'} {...props} />,
-  h4: (props: HeadingProps) => <h4 className={'mb-1 text-text-primary'} {...props} />,
+  // The page title is the h1, so a post's sections start at ##
+  h1: sectionHeading('h1', 'mb-4 text-2xl font-bold'),
+  h2: sectionHeading('h2', 'mb-2 text-lg font-medium'),
+  h3: sectionHeading('h3', 'mb-1'),
+  h4: sectionHeading('h4', 'mb-1'),
   p: (props: ParagraphProps) => <p className={'my-4 text-md leading-relaxed text-text-primary/85'} {...props} />,
   hr: (props: HorizontalRuleProps) => <hr className={'my-12 w-1/3 border-t border-dividing'} {...props} />,
   strong: (props: StrongProps) => <strong className={'font-semibold text-text-primary'} {...props} />,
+  // Markers sit outside the text, so a wrapped line lines up with the first; a list inside an item sits closer
   ol: (props: ListProps) => (
-    <ol className={'my-4 list-inside list-decimal space-y-4 text-md text-text-primary/85'} {...props} />
+    <ol
+      className={'my-4 list-outside list-decimal space-y-2 pl-6 text-md text-text-primary/85 [li>&]:my-2'}
+      {...props}
+    />
   ),
   ul: (props: ListProps) => (
-    <ul className={'my-4 list-inside list-disc space-y-4 text-md text-text-primary/85'} {...props} />
+    <ul className={'my-4 list-outside list-disc space-y-2 pl-6 text-md text-text-primary/85 [li>&]:my-2'} {...props} />
   ),
   blockquote: (props: BlockquoteProps) => (
     <blockquote className={'my-4 border-l-3 border-dividing pl-4 text-text-primary/75 italic'} {...props} />
   ),
+  // Code blocks come highlighted from Shiki (next.config.ts), with a language-* class on their <code>
   pre: ({ children, ...props }: PreProps) => {
-    const codeElement = Array.isArray(children) ? children[0] : children
-    if (codeElement && typeof codeElement === 'object' && 'props' in codeElement) {
-      const code = codeElement.props.children
-      if (typeof code === 'string') {
-        return (
-          <pre className={'my-4 overflow-x-auto rounded-lg bg-foreground p-4 font-mono text-sm'} {...props}>
-            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: sugar-high escapes the source before wrapping tokens in spans */}
-            <code dangerouslySetInnerHTML={{ __html: highlight(code) }} />
-          </pre>
-        )
-      }
-    }
+    const codeClassName = isValidElement<CodeProps>(children) ? children.props.className : undefined
+    const language = codeClassName?.match(/language-(\S+)/)?.[1]
     return (
-      <pre className={'my-4 overflow-x-auto rounded-lg bg-foreground p-4 font-mono text-sm'} {...props}>
+      <CodeBlock language={language === 'text' ? undefined : language} {...props}>
         {children}
-      </pre>
+      </CodeBlock>
     )
   },
-  code: ({ children, ...props }: CodeProps) => {
-    if (typeof children === 'string') {
-      return (
-        <code
-          className={'rounded bg-foreground px-1 py-0.5 font-mono text-sm'}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: sugar-high escapes the source before wrapping tokens in spans
-          dangerouslySetInnerHTML={{ __html: highlight(children) }}
-          {...props}
-        />
-      )
-    }
-    return (
-      <code className={'rounded bg-foreground px-1 py-0.5 font-mono text-sm'} {...props}>
-        {children}
-      </code>
-    )
-  },
+  // Inline code is plain; the <code> of a block keeps Shiki's markup as it is
+  code: ({ className, ...props }: CodeProps) =>
+    className?.includes('language-') ? (
+      <code className={className} {...props} />
+    ) : (
+      <code className={cn('rounded bg-foreground px-1 py-0.5 font-mono text-sm', className)} {...props} />
+    ),
   a: ({ children, href, ...props }: AnchorProps) => {
     const className = cn(
       'text-link',

@@ -1,9 +1,15 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { getAllPosts, getPostComponent, getPostDescription, getPostMetadata } from '@/lib/mdx'
+import { getAllPosts, getPostComponent, getPostDescription, getPostHeadings, getPostMetadata } from '@/lib/mdx'
+
+import { TableOfContents } from '@/components/posts/table-of-contents'
 
 import { siteConfig } from '@/constants'
+
+// A table of contents is only worth it for a post with a few sections
+const MIN_TOC_HEADINGS = 2
 
 type TProps = {
   params: Promise<{ id: string }>
@@ -69,6 +75,15 @@ export default async function Page({ params }: TProps) {
     author: { '@type': 'Person', name: siteConfig.name, url: siteConfig.url, sameAs: [siteConfig.github] },
   }
 
+  const headings = getPostHeadings(id)
+  const showToc = headings.length >= MIN_TOC_HEADINGS
+
+  // Posts are newest first, so the one before this in the list is newer
+  const posts = getAllPosts()
+  const index = posts.findIndex(post => post.id === id)
+  const newer = posts[index - 1]
+  const older = posts[index + 1]
+
   return (
     <article className={'text-text-primary/85'}>
       {/* < is escaped so a title can never close the script element */}
@@ -93,9 +108,50 @@ export default async function Page({ params }: TProps) {
         </div>
       </header>
 
-      <div lang={'zh-CN'} className={'prose prose-neutral max-w-none'}>
+      {showToc && (
+        <>
+          {/* Wide screens: beside the post, in the room right of the 672px column, following the reader down */}
+          <TableOfContents
+            headings={headings}
+            className={'fixed top-16 right-16 hidden max-h-[calc(100vh-8rem)] w-56 overflow-y-auto xl:block'}
+          />
+          {/* Narrower screens: folded up above the post */}
+          <details className={'mb-8 text-sm xl:hidden'}>
+            <summary className={'cursor-pointer text-text-foreground hover:text-text-primary'}>Contents</summary>
+            <TableOfContents headings={headings} className={'mt-3 border-l border-dividing pl-4'} />
+          </details>
+        </>
+      )}
+
+      <div lang={'zh-CN'}>
         <PostComponent />
       </div>
+
+      {(older || newer) && (
+        <nav
+          aria-label={'More posts'}
+          className={'mt-16 flex justify-between gap-8 border-t border-dividing pt-8 text-sm'}
+        >
+          {older ? (
+            <Link href={`/posts/${older.id}`} className={'group min-w-0'}>
+              <span className={'block text-text-foreground'}>← Previous</span>
+              <span lang={'zh-CN'} className={'block text-text-primary/85 group-hover:text-text-primary'}>
+                {older.metadata.title}
+              </span>
+            </Link>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <Link href={`/posts/${newer.id}`} className={'group min-w-0 text-right'}>
+              <span className={'block text-text-foreground'}>Next →</span>
+              <span lang={'zh-CN'} className={'block text-text-primary/85 group-hover:text-text-primary'}>
+                {newer.metadata.title}
+              </span>
+            </Link>
+          )}
+        </nav>
+      )}
     </article>
   )
 }

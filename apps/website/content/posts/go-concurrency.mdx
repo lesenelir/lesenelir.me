@@ -9,7 +9,7 @@ date: '2024-05-20'
 
 ---
 
-### 1. 进程、线程、协程
+## 1. 进程、线程、协程
 
 进程、线程、协程是操作系统中的概念，这里做一个简单的阐述。
 
@@ -44,11 +44,11 @@ date: '2024-05-20'
 
 ---
 
-### 2. 同步与异步
+## 2. 同步与异步
 
 熟悉 JavaScript 中的 Event Loop 的都对同步与异步有所了解，这里再阐述一下。
 
-```
+```go
 // function call
 A()
 B()
@@ -74,7 +74,7 @@ B()
 
 ---
 
-### 3. 并行与并发
+## 3. 并行与并发
 
 并行与并发是一个很简单的概念。
 
@@ -88,7 +88,7 @@ B()
 
 ---
 
-### 4. Go routine
+## 4. Go routine
 
 Go routine （简称 G）是 Golang 语言中的协程，是最基本的并发执行单元。 G 是由 Go 语言的运行时调度器来调度的，而不是由操作系统来调度的，这样就避免了操作系统调度线程的开销。
 
@@ -102,7 +102,7 @@ Go routine （简称 G）是 Golang 语言中的协程，是最基本的并发�
 
 Golang 中，可以直接在函数或方法调用前加一个 `go` 关键字就可以创建一个 Go routine(G)。
 
-```
+```go
 go func(){
 
 }()
@@ -112,7 +112,7 @@ Go 程序中至少有一个 G，即 main G。CPU 会在操作系统层面上的�
 
 ---
 
-### 5. GMP
+## 5. GMP
 
 GMP 是 Golang 的运行时调度器的三个核心组件。
 
@@ -138,13 +138,13 @@ Go 中的 P 调度器可以有多个 P，每个 P 都有自己的本地队列，
 
 ---
 
-### 6. Race Condition
+## 6. Race Condition
 
 对于多线程并发编程来说，最大的问题是有关「数据竞争」的问题，也就是我们常说的 Race Condition。**由于异步任务的执行是不确定的， 谁先执行完谁后执行都是不确定的，所以就会出现多个线程同时访问同一个共享资源进行读写，导致的数据获取不确定的问题**。
 
 在 Golang 中，如果有多个 G 同时访问同一个资源，并对这个资源进行修改，就会出现竞争问题。竞争关系使得变量的值变得不可预测， 所以当一个 G 操作一个资源或变量的时候，如果在其他的 G 中也会对这个资源进行操作，就需要用「锁机制」来让这个资源在同一时刻只能被一个 G 访问。 这就是我们常说的 Mutex「互斥锁」。
 
-```
+```go
 package main
 
 import (
@@ -192,7 +192,7 @@ func main() {
 
 方法1： 互斥锁
 
-```
+```go
 var lk sync.Mutex
 
 func plus() {
@@ -208,7 +208,7 @@ func plus() {
 
 方法2： 原子操作
 
-```
+```go
 import "sync/atomic"
 
 func plus() {
@@ -222,7 +222,7 @@ func plus() {
 
 方法3: 通道 Channel
 
-```
+```go
 var wg sync.WaitGroup
 var ch = make(chan int, 1)
 
@@ -253,7 +253,7 @@ func main() {
 
 ---
 
-### 7. Channel
+## 7. Channel
 
 多线程并发编程中，我们可以使用共享内存的方式来进行线程间的通信。 但是共享内存的方式会有很多问题，比如 Race Condition 等问题。 为了解决这些问题，Golang 提供了 Channel 通道来进行线程间的通信。
 
@@ -276,7 +276,7 @@ Channel 有两种类型：
 
 `select` 语句可以用来监听 channel 的信号，查看哪一个 channel 有信号，则会执行对应的 case 语句。 如果有多个 case 同时满足时，则会随机选择一个 case 语句执行。
 
-```
+```go
 for {
   data1, ok1 := <-ch1
   data2, ok2 := <-ch2
@@ -310,7 +310,7 @@ loop: {
 
 ---
 
-### 8. Deadlock
+## 8. Deadlock
 
 多线程并发编程除了会带来 race condition 的问题外，还有可能会带来 deadlock（死锁） 的问题。 死锁在操作系统中是指，多个进程或线程因互相等待对方释放资源而处于永久阻塞状态，无法继续推进下去。
 
@@ -331,7 +331,7 @@ G 如何会被永久阻塞呢？
 
 注意： 在 buffered channel 中，即使没有接收方G 来接收数据，发送方G 也不会永久阻塞，因为 channel 中还有缓冲区（缓冲区足够），可以存储数据。
 
-```
+```go
 // 场景1
 func main() {
 	ch := make(chan int)
@@ -394,7 +394,7 @@ func main() {
 
 ---
 
-### 9. Context
+## 9. Context
 
 Context 是 Golang 中的一个标准库，主要功能是在多个 Goroutine 之间传递上下文信息，包括：取消信号、超时控制（截止时间）、key-value 等。 相同的 context 可以运行在不同的 G 中。Context 总结一句：可以在不同的 G 中同步请求特定数据、取消信号以及处理请求截止时间。
 
@@ -402,7 +402,7 @@ Context 是 Golang 中的一个标准库，主要功能是在多个 Goroutine �
 
 Context 的数据结构类型如下：
 
-```
+```go
 type Context interface {
   Deadline() (deadline time.Time, ok bool) // 返回被取消的时间
   Done() <-chan struct{} // 当 context 被取消或超时，返回一个信号
@@ -420,7 +420,7 @@ Context 分为两种类型：
 
 派生 Context 是从一个已有的 Context 中派生出来的，派生 Context 会继承父 Context 的截止时间、取消信号等信息。所以，当父 Context 取消时，子 Context 也会取消。 派生出 Context 的方法有：
 
-```
+```go
 1. ctx, cancel := context.WithCancel(context.Background())
 2. ctx, cancel := context.WithDeadline(
       context.Background(),
@@ -436,7 +436,7 @@ Context 分为两种类型：
 
 超时控制的场景：
 
-```
+```go
 func doSth(ctx context.Context) {
   select {
     case <-ctx.Done(): // 当 ctx 被取消或超时，返回一个只读 channel
@@ -471,7 +471,7 @@ func main() {
 
 ---
 
-### Wrapping Up
+## Wrapping Up
 
 填坑「Go 与 TS 语法差异」 一文中，最后提到会写 Golang 并发编程的文章 ...
 

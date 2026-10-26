@@ -11,7 +11,7 @@ date: '2023-08-22'
 
 ---
 
-### 1. unknown 和 any
+## 1. unknown 和 any
 
 TypeScript 中最基础的概念是原始类型，其中 `unknown` 和 `any` 是其中比较容易混淆的概念。
 
@@ -33,7 +33,7 @@ let num: number = s // 不报错，因为 any 类型可以赋值给任何类型�
 
 ---
 
-### 2. 类型层级
+## 2. 类型层级
 
 如果说原始类型是 TS 中最基础的概念，那么「类型层级」就是 TS 中最重要的概念。你只有明白类型层级后，才能对条件类型判断甚至 TS 有更深的理解。
 
@@ -46,7 +46,7 @@ let num: number = s // 不报错，因为 any 类型可以赋值给任何类型�
 
 ---
 
-### 3. type 关键字
+## 3. type 关键字
 
 **3.1 工具类型**
 
@@ -139,7 +139,7 @@ const catAndDog2: CatOrDogOrBoth2 = {
 
 ---
 
-### 4. 鸭子类型
+## 4. 鸭子类型
 
 在 TS 中，「鸭子类型」也被称之为「结构化类型」。这是一个用来描述类型兼容性的关键概念。这个概念来自于“如果它看起来像鸭子，游泳像鸭子，叫声像鸭子，那么它就可能是一只鸭子”的说法。
 
@@ -188,7 +188,7 @@ let myDuck: Duck = duck // 有效，因为 duck 具有所有 Duck 接口的必�
 
 ---
 
-### 5. 条件类型和泛型约束
+## 5. 条件类型和泛型约束
 
 明白类型层级和鸭子类型后，条件类型和泛型约束都是比较简单的概念。
 
@@ -224,7 +224,7 @@ function handle<T extends string | number>(input: T): T {
 
 ---
 
-### 6. infer 关键字
+## 6. infer 关键字
 
 infer 关键字主要出现在「条件类型」中，主要用于 `extends` 子句中推断类型，捕获类型信息，从而省去了显式传递类型。
 
@@ -247,7 +247,7 @@ type AsyncDataType = UnwrapPromise<ReturnType<typeof getAsyncData>> // { key: st
 
 ---
 
-### 7. 分布式条件类型
+## 7. 分布式条件类型
 
 分布式条件类型是条件类型在处理联合类型时，会自动分布到每个成员上。这里会有一点反逻辑的地方🥲
 
@@ -304,7 +304,7 @@ type Res2 = Wrapped<number | boolean> // "N"
 
 ---
 
-### 8. 类
+## 8. 类
 
 在 TS 中，类的处理主要有两点需要注意：
 
@@ -313,7 +313,7 @@ type Res2 = Wrapped<number | boolean> // "N"
 
 ---
 
-### Wrapping Up
+## Wrapping Up
 
 以上就是我个人认为关于 TS 这门强制类型语言所包含的一些基础概念和核心理念。
 

@@ -21,7 +21,7 @@ date: '2024-04-01'
 
 ---
 
-### 状态管理
+## 状态管理
 
 简单写过 React 项目的人都知道，在 React 项目中，状态管理这个概念是非常重要的。可以说，很多项目的难点就在于对复杂状态的维护上。 而项目中的状态又不是仅仅由组件内部 `state` 来管理的。对于同一个状态值，我们可能需要把它在不同的组件中共享。如果当前需要共享状态的组件们是父子关系或可以通过`props`传递，即使传递的深度很深也没有太大问题，只要我们能明确每次交互的数据流转，那么我们写出来的 UI 都是可预测的。 但是如果这两个组件是处于上文描述的「混乱关系」（最近公共祖先节点极远）时，那么就需要用到一些状态管理库了。
 
@@ -33,7 +33,7 @@ date: '2024-04-01'
 
 ---
 
-### Jotai 核心
+## Jotai 核心
 
 Jotai 是一种状态管理的工具。但我们一般会把 Jotai 当作一种全局状态管理工具，因为我们能在任意组件中都可以拿到原子对应的状态。
 
@@ -67,11 +67,11 @@ Jotai 是一种状态管理的工具。但我们一般会把 Jotai 当作一种�
 
 ---
 
-### read-only derived atom
+## read-only derived atom
 
 在这么多原子的概念下，首先介绍只读派生原子。代码如下：
 
-```
+```tsx
 type TAnime = {
   name: string
   episodes: number
@@ -137,11 +137,11 @@ export default function DocumentPage() {
 
 ---
 
-### write-only derived atom
+## write-only derived atom
 
 介绍只写派生原子。代码如下：
 
-```
+```tsx
 export const priceAtom = atom<number>(10)
 
 export const writeOnlyPriceAtom = atom<
@@ -190,7 +190,7 @@ atom 函数接受两个参数，这两个参数都是函数。第一个函数是
 
 ---
 
-### read write derived atom
+## read write derived atom
 
 上述两小节分别介绍了只读派生原子和只写派生原子。这一节介绍可读可写派生原子。介绍可读可写派生原子前，对于一个原生原子，它既是可读原子，又是可写原子。
 
@@ -200,7 +200,7 @@ atom 函数接受两个参数，这两个参数都是函数。第一个函数是
 
 具体的可读可写派生原子代码如下：
 
-```
+```tsx
 export const userScoreAtom = atom<number>(0)
 
 export const readWriteUserLevelAtom = atom<
@@ -272,7 +272,7 @@ export default function Page() {
 
 ---
 
-### atom 实践
+## atom 实践
 
 这一节会结合上述撰写若干的派生原子概念，实现一个简单的登录相关的状态管理。
 
@@ -280,7 +280,7 @@ export default function Page() {
 
 下面是一个简单的登录状态管理的例子：
 
-```
+```tsx
 export type TUserInfo = {
   username: string
   password: string
@@ -447,7 +447,7 @@ export default function LoginPage() {
 
 ---
 
-### provider & store
+## provider & store
 
 上文介绍了 Jotai 是一个状态管理库，而不是一个全局状态管理库。这其中不单单是 Jotai 中的状态是由各个组件内部维护，只是原子是全局，状态值是全局。 还有一个原因是 Jotai 中的 Provider 与 Store。Provider 是 Jotai 中的一个 React 组件，它的作用是包裹组件树，使得组件树中的所有组件都能访问到 Jotai 的原子。
 
@@ -469,7 +469,7 @@ Provider 可以实现状态作用域的隔离原因在于 Store。在 Jotai 中�
 
 具体场景下的相关代码如下：
 
-```
+```tsx
 const countAtom = atom(0)
 
 // 情况1：共享全局 store
@@ -521,13 +521,13 @@ function ExplicitExample() {
 
 ---
 
-### suspense fetch
+## suspense fetch
 
 上文提到，atom 函数有两个函数，这两个函数都可以是异步函数。在 Jotai 中，可以实现 suspense fetch，即在组件中使用 `useAtom` 获取原子的状态值，同时在原子的 `getter` 函数中执行异步操作，返回一个 Promise，这样就可以在组件中使用 `useAtom` 获取到异步操作的结果。
 
 实现具体代码如下：
 
-```
+```tsx
 export type TUser = {
   id: number
   name: string
@@ -597,7 +597,7 @@ export default function FetchPage() {
 
 ---
 
-### atom query & atom cache
+## atom query & atom cache
 
 Jotai 可以和 React Query 结合使用，实现 atom query。但为什么需要把 Jotai 和 React Query 进行结合呢？
 
@@ -613,7 +613,7 @@ Jotai 可以和 React Query 结合使用，实现 atom query。但为什么需�
 
 举例来说：
 
-```
+```typescript
 export const userIdAtom = atom<number>(1)
 
 export const userAtom = atom<Promise<TUser>>(async (get) => {
@@ -649,11 +649,11 @@ Jotai 作者 [Daishi Kato](https://github.com/dai-shi) 在 [You Might Not Need R
 
 ---
 
-### Jotai 实现理念
+## Jotai 实现理念
 
 这一节会介绍 Jotai 状态值全局共享的实现理念，下一节会在实现理念基础上用代码实现 Jotai 第一个版本的代码。
 
-```
+```tsx
 let callback: (() => void) | null
 
 export default function DarkPage() {
@@ -679,7 +679,7 @@ export default function DarkPage() {
 
 答案是使用 `EventEmitter` 思想：
 
-```
+```tsx
 function SomeOtherComponent({children}: {children: React.ReactNode}) {
   return (
     <>
@@ -755,11 +755,11 @@ function ChildDiv() {
 
 ---
 
-### Jotai 简易实现
+## Jotai 简易实现
 
 Jotai 官方文档 [Jotai Core internals](https://jotai.org/docs/guides/core-internals) 章节中介绍了 Jotai 的实现。
 
-```
+```typescript
 export interface IAtom<T> {
   init: T
 }
@@ -832,7 +832,7 @@ export const useAtom = <T>(atom: IAtom<T>)
 
 ---
 
-### Wrapping Up
+## Wrapping Up
 
 以上就是我对 Jotai 的一些理解和实践，希望对你有所帮助。Jotai 是一个非常优秀的状态管理库，如果你用好了它，可以让你的代码组织更加的清晰，也能写出更加艺术的代码。
 
