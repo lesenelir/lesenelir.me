@@ -6,5 +6,6 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return <ThemeProvider>{children}</ThemeProvider>
+  // Without transitions while the theme switches, so colors change at once instead of element by element
+  return <ThemeProvider disableTransitionOnChange>{children}</ThemeProvider>
 }

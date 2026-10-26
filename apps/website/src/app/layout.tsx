@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
+import { ThemeToggle } from '@/components/common/theme-toggle'
 
 import { siteConfig } from '@/constants'
 
@@ -74,6 +75,7 @@ export default function RootLayout({
       <body className={'bg-background antialiased max-sm:p-6 sm:p-16'} suppressHydrationWarning>
         <Providers>
           <Sidebar />
+          <ThemeToggle />
           <main
             className={'border-dividing/70 max-sm:mt-12 max-sm:border-t max-sm:pt-16 sm:ml-24 sm:border-l sm:pl-16'}
           >
