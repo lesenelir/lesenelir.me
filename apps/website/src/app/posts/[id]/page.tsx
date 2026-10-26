@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
 
 import { getAllPosts, getPostComponent, getPostDescription, getPostHeadings, getPostMetadata } from '@/lib/mdx'
 
@@ -53,27 +52,10 @@ export async function generateMetadata({ params }: TProps): Promise<Metadata> {
   }
 }
 
-// A link prefetches the shell every post shares, which holds the fallback; the post itself comes with links that
-// prefetch it (the posts list, previous and next), and in full with the HTML of a direct visit
-export default function Page({ params }: TProps) {
-  return (
-    <Suspense fallback={<PostSkeleton />}>
-      <Post params={params} />
-    </Suspense>
-  )
-}
+// No loading shell: a post opens whole, so a link that hasn't prefetched it waits on the page it is on
+export const instant = false
 
-// The title and date lines, shown when a post is opened before its link has prefetched it
-function PostSkeleton() {
-  return (
-    <div aria-hidden={'true'} className={'mb-8 space-y-4 motion-safe:animate-pulse'}>
-      <div className={'h-8 w-2/3 bg-text-primary/10'} />
-      <div className={'h-5 w-40 bg-text-primary/10'} />
-    </div>
-  )
-}
-
-async function Post({ params }: TProps) {
+export default async function Page({ params }: TProps) {
   const { id } = await params
   const metadata = getPostMetadata(id)
   const PostComponent = await getPostComponent(id)
