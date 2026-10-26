@@ -1,46 +1,45 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
+import { setThemeChoice } from '@/lib/theme-choice'
 import { cn } from '@/lib/utils'
 
-const themes = [
-  { value: 'system', label: 'System', icon: 'i-mingcute-computer-line' },
-  { value: 'light', label: 'Light', icon: 'i-mingcute-sun-line' },
-  { value: 'dark', label: 'Dark', icon: 'i-mingcute-moon-line' },
-] as const
+const nextTheme: Record<string, string> = { system: 'light', light: 'dark', dark: 'system' }
 
 // Cycles the theme through system, light and dark. Under the sidebar on wider screens; in the top-left corner on
 // phones, across from the sidebar's links.
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
 
-  // The chosen theme is only known in the browser, so the server renders an empty button of the same size
-  const [mounted, setMounted] = useState(false)
+  // Also follows a theme changed in another tab, which next-themes picks up
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setThemeChoice(theme)
+  }, [theme])
 
-  const index = Math.max(
-    0,
-    themes.findIndex(t => t.value === theme)
-  )
-  const current = themes[index]
-  const next = themes[(index + 1) % themes.length]
+  // The icon shown is picked by CSS from <html data-theme-choice>, so it is right from the first paint. Hidden icons
+  // are left out of the button's accessible name, so it names the theme in use.
+  const iconClass = 'hidden size-4.5'
 
   return (
+    // /80 is the lightest this icon can be and still stand out 3:1 from the background, in both themes
     <button
       type='button'
-      onClick={() => setTheme(next.value)}
-      aria-label={mounted ? `Theme: ${current.label}. Switch to ${next.label}` : 'Theme'}
-      title={mounted ? `Theme: ${current.label}` : undefined}
+      onClick={() => setTheme(nextTheme[theme ?? 'system'] ?? 'system')}
+      title={'Switch theme'}
       className={cn(
-        'z-50 flex size-6 cursor-pointer items-center justify-center text-text-foreground transition-colors duration-200 hover:text-text-primary',
+        'z-50 flex size-6 cursor-pointer items-center justify-center text-text-foreground/80 transition-colors duration-200 hover:text-text-primary',
         'max-sm:absolute max-sm:top-6 max-sm:left-6 sm:fixed sm:bottom-16 sm:left-16'
       )}
     >
-      {mounted && <span className={cn(current.icon, 'size-4.5')} />}
+      <span
+        role='img'
+        aria-label={'Theme: system'}
+        className={cn('i-mingcute-computer-line theme-system:block', iconClass)}
+      />
+      <span role='img' aria-label={'Theme: light'} className={cn('i-mingcute-sun-line theme-light:block', iconClass)} />
+      <span role='img' aria-label={'Theme: dark'} className={cn('i-mingcute-moon-line theme-dark:block', iconClass)} />
     </button>
   )
 }

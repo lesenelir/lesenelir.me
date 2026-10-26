@@ -8,6 +8,11 @@
 @custom-variant photos-row (&:where([data-photos-layout='row'] *));
 @custom-variant photos-grid (&:where([data-photos-layout='grid'] *));
 
+/* The theme picked in the toggle, from <html data-theme-choice> (see src/lib/theme-choice.ts); system is the default */
+@custom-variant theme-system (&:where(:root:not([data-theme-choice='light'], [data-theme-choice='dark']) *));
+@custom-variant theme-light (&:where([data-theme-choice='light'] *));
+@custom-variant theme-dark (&:where([data-theme-choice='dark'] *));
+
 @theme {
   /* font family */
   /* The system font where it exists, else the web font from src/app/layout.tsx */

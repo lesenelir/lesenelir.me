@@ -6,6 +6,7 @@ import type React from 'react'
 import '@/styles/main.css'
 
 import { photosLayoutScript } from '@/lib/photos-layout'
+import { themeChoiceScript } from '@/lib/theme-choice'
 import { cn } from '@/lib/utils'
 
 import { PageTransition } from '@/components/common/page-transition'
@@ -69,6 +70,7 @@ export default function RootLayout({
     <html lang='en' className={cn(ebGaramond.variable, comicNeue.variable)} suppressHydrationWarning>
       <head>
         <script>{photosLayoutScript}</script>
+        <script>{themeChoiceScript}</script>
         {/* Here rather than in metadata.alternates, which a page's own alternates (its canonical URL) replace */}
         <link rel='alternate' type='application/rss+xml' title={siteConfig.name} href={'/feed.xml'} />
       </head>
