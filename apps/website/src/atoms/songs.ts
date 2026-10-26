@@ -106,6 +106,9 @@ export const audioControlsAtom = atom<
   const currentSong = get(currentSongAtom)
 
   const playAudio = () => {
+    // A song that failed to load (e.g. a dropped connection) stays failed: play() only rejects again until the
+    // source is reloaded. A new src already reloads, so this matters when playing the same song again.
+    if (audio.error) audio.load()
     audio
       .play()
       .then(() => set(isPlayingAtom, true))
