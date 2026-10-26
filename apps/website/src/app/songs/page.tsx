@@ -7,9 +7,6 @@ import { SongLists } from '@/components/songs/song-lists'
 import { SongPlayer } from '@/components/songs/song-player'
 import { HydrateSongs } from '@/components/songs/songs-provider'
 
-// Re-list the bucket at most once an hour, so new songs show up without a redeploy
-export const revalidate = 3600
-
 export const metadata: Metadata = {
   title: 'Songs',
   description: "Lesenelir Zhou's personal website - Songs",

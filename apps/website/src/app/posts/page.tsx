@@ -18,7 +18,12 @@ export default function Page() {
 
       <div className={'flex flex-col gap-3 text-md text-text-primary/85'}>
         {posts.map(post => (
-          <Link key={post.id} href={`/posts/${post.id}`} className={'group flex items-start justify-between gap-4'}>
+          <Link
+            key={post.id}
+            href={`/posts/${post.id}`}
+            prefetch
+            className={'group flex items-start justify-between gap-4'}
+          >
             <span
               lang={'zh-CN'}
               className={

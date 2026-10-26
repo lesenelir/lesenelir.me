@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { TPostHeading } from '@/types'
 
@@ -17,15 +17,18 @@ interface TableOfContentsProps {
 // The post's sections, with the one being read marked as it scrolls by
 export function TableOfContents({ headings, className }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
+  const navRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    // The headings of this post: a post left behind stays in the document, hidden, and may share their ids
+    const article = navRef.current?.closest('article')
     let frame = 0
     const update = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
         let current: string | null = null
         for (const heading of headings) {
-          const el = document.getElementById(heading.id)
+          const el = article?.querySelector(`#${CSS.escape(heading.id)}`)
           if (el && el.getBoundingClientRect().top <= ACTIVE_OFFSET) current = heading.id
         }
         setActiveId(current)
@@ -41,7 +44,7 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
   }, [headings])
 
   return (
-    <nav aria-label={'Table of contents'} className={className}>
+    <nav ref={navRef} aria-label={'Table of contents'} className={className}>
       <ul lang={'zh-CN'} className={'space-y-2 text-sm'}>
         {headings.map(heading => (
           <li key={heading.id} className={cn(heading.level === 3 && 'pl-3')}>

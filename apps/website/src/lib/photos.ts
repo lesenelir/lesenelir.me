@@ -1,4 +1,5 @@
 import { imageSize } from 'image-size'
+import { cacheLife } from 'next/cache'
 
 import type { TPhoto } from '@/types'
 
@@ -31,7 +32,11 @@ const getPhotoDimensions = async (key: string) => {
   return FALLBACK_DIMENSIONS
 }
 
+// Listed again at most once an hour, so new photos show up without a redeploy
 export const getPhotos = async (): Promise<TPhoto[]> => {
+  'use cache'
+  cacheLife('bucket')
+
   const s3Objects = await listPhotos()
 
   const photos: TPhoto[] = await Promise.all(

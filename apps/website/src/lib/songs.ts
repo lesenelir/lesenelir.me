@@ -1,8 +1,14 @@
+import { cacheLife } from 'next/cache'
+
 import type { TSong } from '@/types'
 
 import { getPublicUrl, listSongs } from '@/lib/s3'
 
+// Listed again at most once an hour, so new songs show up without a redeploy
 export const getSongs = async (): Promise<TSong[]> => {
+  'use cache'
+  cacheLife('bucket')
+
   const s3Objects = await listSongs()
 
   return s3Objects.flatMap(obj => {

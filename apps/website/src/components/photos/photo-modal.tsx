@@ -3,7 +3,7 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import Image from 'next/image'
 import type { PointerEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useHotkeys } from 'react-hotkeys-hook'
 
@@ -38,6 +38,10 @@ export function PhotoModal() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Leaving the page (the back button works while the modal is open) hides it rather than unmounting it, so close the
+  // modal, or it is still open on the way back
+  useLayoutEffect(() => closeModal, [closeModal])
 
   // Fetch the neighbors of the open photo, so the arrow keys show them without waiting
   useEffect(() => {

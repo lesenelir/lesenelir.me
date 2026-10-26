@@ -2,9 +2,6 @@ import { getAllPosts, getPostDescription } from '@/lib/mdx'
 
 import { siteConfig } from '@/constants'
 
-// Built once with the site; posts only change with a deploy
-export const dynamic = 'force-static'
-
 const escapeXml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 

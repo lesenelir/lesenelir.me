@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 
 import { getAllPosts, getPostComponent, getPostDescription, getPostHeadings, getPostMetadata } from '@/lib/mdx'
 
+import { PostArticle } from '@/components/posts/post-article'
 import { TableOfContents } from '@/components/posts/table-of-contents'
 
 import { siteConfig } from '@/constants'
@@ -15,9 +17,7 @@ type TProps = {
   params: Promise<{ id: string }>
 }
 
-// Every post is prerendered at build time; any other id is a 404
-export const dynamicParams = false
-
+// Every post is prerendered at build time; any other id renders on request, as a 404
 export function generateStaticParams() {
   return getAllPosts().map(post => ({ id: post.id }))
 }
@@ -53,7 +53,27 @@ export async function generateMetadata({ params }: TProps): Promise<Metadata> {
   }
 }
 
-export default async function Page({ params }: TProps) {
+// A link prefetches the shell every post shares, which holds the fallback; the post itself comes with links that
+// prefetch it (the posts list, previous and next), and in full with the HTML of a direct visit
+export default function Page({ params }: TProps) {
+  return (
+    <Suspense fallback={<PostSkeleton />}>
+      <Post params={params} />
+    </Suspense>
+  )
+}
+
+// The title and date lines, shown when a post is opened before its link has prefetched it
+function PostSkeleton() {
+  return (
+    <div aria-hidden={'true'} className={'mb-8 space-y-4 motion-safe:animate-pulse'}>
+      <div className={'h-8 w-2/3 bg-text-primary/10'} />
+      <div className={'h-5 w-40 bg-text-primary/10'} />
+    </div>
+  )
+}
+
+async function Post({ params }: TProps) {
   const { id } = await params
   const metadata = getPostMetadata(id)
   const PostComponent = await getPostComponent(id)
@@ -85,7 +105,7 @@ export default async function Page({ params }: TProps) {
   const older = posts[index + 1]
 
   return (
-    <article className={'text-text-primary/85'}>
+    <PostArticle className={'text-text-primary/85'}>
       {/* < is escaped so a title can never close the script element */}
       <script type={'application/ld+json'}>{JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
 
@@ -133,7 +153,7 @@ export default async function Page({ params }: TProps) {
           className={'mt-16 flex justify-between gap-8 border-t border-dividing pt-8 text-sm'}
         >
           {older ? (
-            <Link href={`/posts/${older.id}`} className={'group min-w-0'}>
+            <Link href={`/posts/${older.id}`} prefetch className={'group min-w-0'}>
               <span className={'block text-text-foreground'}>← Previous</span>
               <span lang={'zh-CN'} className={'block text-text-primary/85 group-hover:text-text-primary'}>
                 {older.metadata.title}
@@ -143,7 +163,7 @@ export default async function Page({ params }: TProps) {
             <span />
           )}
           {newer && (
-            <Link href={`/posts/${newer.id}`} className={'group min-w-0 text-right'}>
+            <Link href={`/posts/${newer.id}`} prefetch className={'group min-w-0 text-right'}>
               <span className={'block text-text-foreground'}>Next →</span>
               <span lang={'zh-CN'} className={'block text-text-primary/85 group-hover:text-text-primary'}>
                 {newer.metadata.title}
@@ -152,6 +172,6 @@ export default async function Page({ params }: TProps) {
           )}
         </nav>
       )}
-    </article>
+    </PostArticle>
   )
 }

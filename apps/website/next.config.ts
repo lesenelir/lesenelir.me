@@ -2,6 +2,15 @@ import createMDX from '@next/mdx'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Nothing is cached unless marked with 'use cache', and a link prefetches one shell per route, shared by every link
+  // to it, rather than each linked page
+  cacheComponents: true,
+  partialPrefetching: true,
+  cacheLife: {
+    // The photos and songs listed from the bucket: listed again at most once an hour, while the last listing is still
+    // served, however old it is (the year is Next's default expireTime, as `revalidate = 3600` had)
+    bucket: { stale: 300, revalidate: 3600, expire: 31536000 },
+  },
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
   images: {
     // In dev, let the browser fetch photos straight from the CDN. Proxies in fake-ip mode (e.g. Clash) resolve it

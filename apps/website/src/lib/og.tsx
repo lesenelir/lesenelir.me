@@ -1,3 +1,4 @@
+import { cacheLife } from 'next/cache'
 import { ImageResponse } from 'next/og'
 import type { ReactElement } from 'react'
 
@@ -8,8 +9,11 @@ const colors = { background: '#fcfcfc', primary: '#303030', foreground: '#6a727d
 
 // Satori only draws glyphs from the fonts it is given, and post titles are Chinese, so fetch Noto Sans SC from
 // Google Fonts with just the characters drawn. Images are made at build time; a failed fetch fails the build rather
-// than shipping a preview of empty boxes.
+// than shipping a preview of empty boxes. Cached, or the fetch would make the images on every request instead.
 async function loadFont(text: string, weight: number) {
+  'use cache'
+  cacheLife('max')
+
   const params = new URLSearchParams({ family: `Noto Sans SC:wght@${weight}`, text })
   const css = await fetch(`https://fonts.googleapis.com/css2?${params}`).then(res => res.text())
   const url = css.match(/src: url\((.+?)\) format\('(opentype|truetype)'\)/)?.[1]
