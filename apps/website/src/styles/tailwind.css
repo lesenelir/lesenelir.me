@@ -10,8 +10,9 @@
 
 @theme {
   /* font family */
-  --font-comic: Comic Sans MS;
-  --font-cursive: cursive;
+  /* The system font where it exists, else the web font from src/app/layout.tsx */
+  --font-comic: 'Comic Sans MS', var(--font-comic-neue), sans-serif;
+  --font-cursive: 'Apple Chancery', var(--font-eb-garamond), cursive;
 
   /* font size */
   --text-md: 0.9375rem; /* 15px */

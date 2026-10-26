@@ -1,16 +1,35 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { Comic_Neue, EB_Garamond } from 'next/font/google'
 import type React from 'react'
 
 import '@/styles/main.css'
 
 import { photosLayoutScript } from '@/lib/photos-layout'
+import { cn } from '@/lib/utils'
 
 import { PageTransition } from '@/components/common/page-transition'
 import { Providers } from '@/components/common/providers'
 import { Sidebar } from '@/components/common/sidebar'
 
 import { siteConfig } from '@/constants'
+
+// Stand-ins for Apple Chancery (the sidebar) and Comic Sans MS (page titles) on systems without them: Windows,
+// Android, iPhone. They come after those fonts in --font-cursive and --font-comic (src/styles/tailwind.css), and a
+// browser only downloads a web font it needs, so with preloading off a Mac never fetches them.
+const ebGaramond = EB_Garamond({
+  subsets: ['latin'],
+  style: 'italic',
+  variable: '--font-eb-garamond',
+  preload: false,
+})
+
+const comicNeue = Comic_Neue({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-comic-neue',
+  preload: false,
+})
 
 // Pages inherit this, so it holds no canonical URL or og:title: each page sets its own canonical, and without an
 // og:title, link previews use the page's <title>
@@ -46,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang='en' className={cn(ebGaramond.variable, comicNeue.variable)} suppressHydrationWarning>
       <head>
         <script>{photosLayoutScript}</script>
         {/* Here rather than in metadata.alternates, which a page's own alternates (its canonical URL) replace */}
