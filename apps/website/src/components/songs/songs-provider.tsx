@@ -1,9 +1,9 @@
 'use client'
 
-import { createStore, Provider } from 'jotai'
+import { createStore, Provider, useSetAtom } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { TSong } from '@/types'
 
@@ -24,17 +24,6 @@ import {
 
 type Store = ReturnType<typeof createStore>
 
-interface SongsProviderProps {
-  songs: TSong[]
-  children: ReactNode
-}
-
-function HydrateAtoms({ songs, children }: SongsProviderProps) {
-  useHydrateAtoms([[songsAtom, songs]])
-
-  return <>{children}</>
-}
-
 // The system's media controls (lock screen, media keys, headphones) show the song and its position and drive the
 // player, where the browser supports it
 const hasMediaSession = () => typeof navigator !== 'undefined' && 'mediaSession' in navigator
@@ -48,7 +37,7 @@ const updatePositionState = (audio: HTMLAudioElement) => {
   })
 }
 
-// The audio element and its listeners live exactly as long as the page, so nothing piles up across visits
+// The audio element and its listeners live as long as the root layout, so a song keeps playing from page to page
 function AudioEffect({ store }: { store: Store }) {
   useEffect(() => {
     const audio = new Audio()
@@ -149,19 +138,34 @@ function MediaSessionEffect({ store }: { store: Store }) {
   return null
 }
 
-export function SongsProvider({ songs, children }: SongsProviderProps) {
-  // create a page scope store
-  const storeRef = useRef<ReturnType<typeof createStore> | null>(null)
-
-  if (!storeRef.current) {
-    storeRef.current = createStore()
-  }
+// In the root layout, so the player outlives the /songs page. Its own store, which the photos page's Provider
+// doesn't reach: the sidebar and the songs page sit outside it.
+export function SongsProvider({ children }: { children: ReactNode }) {
+  const [store] = useState(createStore)
 
   return (
-    <Provider store={storeRef.current}>
-      <HydrateAtoms songs={songs}>{children}</HydrateAtoms>
-      <AudioEffect store={storeRef.current} />
-      <MediaSessionEffect store={storeRef.current} />
+    <Provider store={store}>
+      {children}
+      <AudioEffect store={store} />
+      <MediaSessionEffect store={store} />
     </Provider>
   )
+}
+
+interface HydrateSongsProps {
+  songs: TSong[]
+  children: ReactNode
+}
+
+// Puts the /songs page's list into the player. useHydrateAtoms fills it while rendering, so the server HTML lists the
+// songs, but only once per store; the effect brings in a newer list (the page is revalidated hourly) on later visits.
+export function HydrateSongs({ songs, children }: HydrateSongsProps) {
+  useHydrateAtoms([[songsAtom, songs]])
+
+  const setSongs = useSetAtom(songsAtom)
+  useEffect(() => {
+    setSongs(songs)
+  }, [songs, setSongs])
+
+  return <>{children}</>
 }

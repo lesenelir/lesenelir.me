@@ -33,6 +33,7 @@
   /* animate */
   --animate-blink: blink 2s infinite;
   --animate-page-in: page-in 0.3s ease-in;
+  --animate-equalizer: equalizer 0.9s ease-in-out infinite;
 
   @keyframes page-in {
     from {
@@ -40,6 +41,16 @@
     }
     to {
       filter: blur(0);
+    }
+  }
+
+  @keyframes equalizer {
+    0%,
+    100% {
+      scale: 1 0.3;
+    }
+    50% {
+      scale: 1 1;
     }
   }
 
