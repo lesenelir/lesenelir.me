@@ -151,11 +151,11 @@ Golang 中是严格区分字符和字符串的，字符用单引号包裹，字�
 Golang 中有 `len()` 方法可以获取字符串的字节长度，而 TypeScript 中有 `length` 属性可以获取字符串的字符长度。
 
 ```go
-// golang
 a := "hello"
 len(a) // 5
+```
 
-// ts
+```typescript
 const a: string = "hello"
 a.length // 5
 ```
@@ -239,14 +239,14 @@ for {
 for range 循环和 TypeScript 中的 for...of 循环类似，可以遍历数组、切片、字典等。
 
 ```go
-// golang
 arr := []int{1, 2, 3, 4, 5}
 
 for index, element := range arr {
   fmt.Println(index, element)
 }
+```
 
-// typescript
+```typescript
 const arr: number[] = [1, 2, 3, 4, 5]
 
 for (const element of arr) {
@@ -262,35 +262,41 @@ Golang 和 TypeScript 在标准库的调用方式上有显著的不同。由于 
 
 这里以字符串方法为例：
 
-```go
+```typescript
 // 1. 检索字符串是否包含子串
-// ts
 const str: string = "hello world"
 const r: boolean = str.includes("hello") // true
+```
 
-// golang
+```go
 str := "hello world"
 r := strings.Contains(str, "hello") // true
+```
 
+```typescript
 // 2. 字符串的分割
-// ts
 const arr: string[] = str.split(" ") // ["hello", "world"]
+```
 
-// golang
+```go
 arr := strings.Split(str, " ") // ["hello", "world"]
+```
 
+```typescript
 // 3. 切片 join 为字符串
-// ts
 const str: string = arr.join(" ") // "hello world"
+```
 
-// golang
+```go
 str := strings.Join(arr, " ") // "hello world"
+```
 
+```typescript
 // 4. 子字符串第一次出现的下标
-// ts
 const index: number = str.indexOf("wo") // 6
+```
 
-// golang
+```go
 index := strings.Index(str, "wo") // 6
 ```
 
@@ -312,7 +318,9 @@ TypeScript 由于只是在编译的时候进行类型检查，编译 Transform �
 ```typescript
 // ts 元祖
 const tuple: [string, number] = ["hello", 10]  // 类型：[string, number]
+```
 
+```go
 // golang 数组
 arr1 := [3]int{1, 2, 3}  // 类型：[3]int
 ```
@@ -620,7 +628,6 @@ Golang 中的函数和 TypeScript 中的函数在概念上来说都是一样的�
 Golang 中的函数可以有多个返回值，而 TypeScript 中的函数只能有一个返回值，如果在 TypeScript 中需要返回多个值，通常用对象来实现。
 
 ```go
-// go
 // var args []int
 func getRes(args ...int) (int, []int) {
   sum := 0
@@ -643,8 +650,9 @@ func getRes(args ...int) (sum int, res []int) {
 }
 
 getRes(0, 1, 2)
+```
 
-// typescript
+```typescript
 function getRes(...args: number[]): Record<string, number | number[]> {
   let sum = 0
 
