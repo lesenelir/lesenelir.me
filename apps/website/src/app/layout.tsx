@@ -6,7 +6,7 @@ import type React from 'react'
 import '@/styles/main.css'
 
 import { photosLayoutScript } from '@/lib/photos-layout'
-import { themeChoiceScript } from '@/lib/theme-choice'
+import { themeChoiceScript, themeColors } from '@/lib/theme-choice'
 import { cn } from '@/lib/utils'
 
 import { PageTransition } from '@/components/common/page-transition'
@@ -56,8 +56,8 @@ export const metadata: Metadata = {
 // The browser UI matches the page background (src/styles/colors.css)
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fcfcfc' },
-    { media: '(prefers-color-scheme: dark)', color: '#131413' },
+    { media: '(prefers-color-scheme: light)', color: themeColors.light },
+    { media: '(prefers-color-scheme: dark)', color: themeColors.dark },
   ],
 }
 
