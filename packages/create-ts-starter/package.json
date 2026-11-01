@@ -1,6 +1,6 @@
 {
   "name": "@lesenelir/create-ts-starter",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Create a TypeScript library from lesenelir's ts-starter",
   "keywords": [
     "create",
