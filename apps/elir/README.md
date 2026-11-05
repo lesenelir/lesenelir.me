@@ -1,5 +1,7 @@
 # Elir
 
+[![Listed on Awesome MyGo](https://awesomemygo.dev/badge.svg)](https://awesomemygo.dev/apps/elir)
+
 A personal toolbox for macOS and Windows: a tray app whose tools share one settings window, built with
 [MyGo](https://mygo.egoist.dev/) native UI. Its tools are voice input and screenshots.
 
